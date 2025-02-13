@@ -1,0 +1,11 @@
+{
+  "LEVEL": "//app-hero-info//div[@class='level__text']",
+  "LEVEL_UP_TO": "",
+  "CONFIRM_BTN_XPATH": "//button[.='Confirm']",
+  "SIGN_BTN_XPATH": "//button[.='Sign' and not(@disabled)]",
+  "HEALTH_XPATH": "//div[contains(@class, 'bar-hp')]",
+  "HERO_NAME_XPATH": "//div[contains(@class, 'color-nickname')]",
+  "QUEST_TITLE_XPATH": "//div[@id='story-name']",
+  "QUEST_TEXT_XPATH": "//div[contains(@class, 'question')]",
+  "QUEST_ANSWER_XPATH": "//div[contains(@class, 'answer__text') and (text() or i)]"
+}

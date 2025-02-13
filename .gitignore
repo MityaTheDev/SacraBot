@@ -1,0 +1,7 @@
+.vscode/
+logs/
+node_modules/
+package-lock.json
+configs/config.json
+configs/game_config.json
+configs/telegram_config.json

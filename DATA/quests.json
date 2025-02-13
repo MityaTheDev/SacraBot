@@ -1,0 +1,346 @@
+{
+  "Family Values": {
+    "You pass by a shabby little house, from which the sounds of an argument and broken dishes can be heard.": {
+      "answerOptions": [
+        "Find out what's the matter.",
+        "Try unsuccessfully to escape this new adventure."
+      ],
+      "correctAnswer": "Find out what's the matter."
+    },
+    "The quarrel ends, a pale man comes out on the porch, fills his pipe with shaking hands and starts smoking.\"Damn,\" he says when he sees you. \"I think my wife is going to kill me!\"": {
+      "answerOptions": [
+        "Piss on his house.",
+        "Ignore him and pass by.",
+        "Ask why."
+      ],
+      "correctAnswer": "Ignore him and pass by."
+    },
+    "The family scene ends with the husband escaping through the window.An angry woman catches up with her husband and starts beating him with a slipper. He falls to the ground and tries to roll into a ball. He's pretty good at self-defense, and soon the slipper breaks.\"You!\" the woman shouts at you. \"Help me beat up this bum!\"": {
+      "answerOptions": [
+        "Watch and experience sexual arousal.",
+        "Help her.",
+        "Try to protect the victim of the beating."
+      ],
+      "correctAnswer": "Help her."
+    },
+    "\"Please don't hurt me!\" the man is begging you. \"My marriage is already full of pain!\"": {
+      "answerOptions": [
+        "Watch and experience sexual arousal.",
+        "Help her.",
+        "Try to protect the victim of the beating."
+      ],
+      "correctAnswer": "Help her."
+    },
+    "": {
+      "answerOptions": ["", ""],
+      "correctAnswer": ""
+    }
+  },
+
+  "Drunk Dispute": {
+    "\"I am Belav!\" An untidy young man appears. \"Are you a mysterious traveler from distant lands?\"": {
+      "answerOptions": ["Be silent.", "Say hi."],
+      "correctAnswer": "Say hi."
+    },
+    "Belav comes up to you, puts his hand on your shoulder and yells in your ear: \"Aah! Have a drink with me if you're not a pig!\"": {
+      "answerOptions": ["Refuse.", "Agree."],
+      "correctAnswer": "Agree."
+    },
+    "\"That's nice!\"Belav sits down nearby and pours some of the urine they call beer here on your feet. He's totally drunk.\"I knew you were a real person, not a f..cking kudja!\"": {
+      "answerOptions": ["Take a drink.", "Keep silent.", "Eject!"],
+      "correctAnswer": "Eject!"
+    }
+  },
+
+  "Tuunbag": {
+    "A short, stern-looking girl approaches you.\"You!\" she says. \"You came from the forest? Have you met a hunter on your way? He’s about as tall as me. Clothing made of skins, a simple bow, an amulet made of bones around his neck.He should have been back by now... They say a bad bear has appeared. Are you going back there again? Can you look for my father?\"": {
+      "answerOptions": ["Yes.", "No.", "\"A bad bear?\""],
+      "correctAnswer": "No."
+    }
+  },
+
+  "You Shall Not Pass": {
+    "\"What does it mean when a cat says \"meow\"?\"": {
+      "answerOptions": [
+        "\"All things. Literally everything. They only have that word.",
+        "\"They are saying you must let me in.\"",
+        "\"Meow.\"",
+        "Don't tell him."
+      ],
+      "correctAnswer": "\"Meow.\""
+    },
+    "\"Tell me the nickname your ex called you.\"": {
+      "answerOptions": [
+        "\"Little fish.\"",
+        "\"Honeybun.\"",
+        "\"Daisy.\"",
+        "Stay silent."
+      ],
+      "correctAnswer": "\"Honeybun.\""
+    },
+    "\"Now such people must pay for their passage.\"": {
+      "answerOptions": ["Refuse.", "Pay him."],
+      "correctAnswer": "Refuse."
+    },
+    "\"You want to ask me if I know who your father is, right? Better find my father and tell him he's an asshole. All fathers are assholes. And their kids are assholes too.\"": {
+      "answerOptions": [
+        "\"My father is the dark lord.\"",
+        "\"I don't know\"",
+        "\"My father is the king of this dung pit.\"",
+        "\"You asshole.\""
+      ],
+      "correctAnswer": "\"My father is the dark lord.\""
+    },
+    "\"How can the size of the penis be increased?\"": {
+      "answerOptions": [
+        "\"You need to rub coarse salt into it every day. Hard.\"",
+        "\"You need to tie an anvil to it and jump.\"",
+        "\"It is necessary to push the penis out further from the other side by shoving the longest stick you can find up your ass.\"",
+        "Don't tell him."
+      ],
+      "correctAnswer": "\"You need to tie an anvil to it and jump.\""
+    },
+    "\"Have you ever been refused passage by the city guard?\"": {
+      "answerOptions": [
+        "\"Once.\"",
+        "\"No.\"",
+        "\"It happens all the time. I don't understand what's going on.\"",
+        "\"Yes.\""
+      ],
+      "correctAnswer": "\"No.\""
+    },
+    "\"Do you want to know why I don't want to let you in? Another guard with a black heart would have refused you without explanation. But I'm not like that. You see, when I was little, my father left us for another woman, and I began to fill the wound it left by eating pastries. I had to start working hard physically very early and that's why I'm so big and handsome. But I have never known my father's love and lessons. That's why I don't trust men and ugly women who look like men.\"": {
+      "answerOptions": [
+        "\"Thank you for your honesty...\"",
+        "\"Okay...\"",
+        "\"You can trust me.\"",
+        "\"Same.\""
+      ],
+      "correctAnswer": "\"You can trust me.\""
+    },
+    "\"Mr. Fluffy is in charge of security today. You can contact him about your passage.\"The guard points to a big, snow-white cat who is washing itself nearby.\"But be careful. He’s not in a good mood today.\"": {
+      "answerOptions": [
+        "Pet the cat.",
+        "Feed the cat.",
+        "Hiss at the cat.",
+        "Refuse."
+      ],
+      "correctAnswer": "Feed the cat."
+    },
+    "\"Is there a meaning to life or is it only a meaningless slog?\"": {
+      "answerOptions": [
+        "\"The meaning of life is to live it.\"",
+        "\"Only meaningless.\"",
+        "Don't tell him.",
+        "\"There's no point to life. Everything is an accident. We need to look for meaning in everything, because that's how our brains work.\""
+      ],
+      "correctAnswer": "\"The meaning of life is to live it.\""
+    },
+    "\"Explain why you believe you would make a great dark lord.\"": {
+      "answerOptions": [
+        "\"We will have the blackest armor in all of Auron.\"",
+        "Do nothing.",
+        "\"The dark force unites all beings, regardless of their faith and origin. Everyone will have a job and a goal.\"",
+        "\"Barbecue every ten days.\""
+      ],
+      "correctAnswer": "\"We will have the blackest armor in all of Auron.\""
+    },
+    "\"Punch yourself in the face.\"": {
+      "answerOptions": [
+        "Hit yourself with all your might and try to knock yourself out.",
+        "Give yourself a slap in the face and look at the guard with enthusiasm.",
+        "Refuse this shit.",
+        "Lightly punch yourself in the nose."
+      ],
+      "correctAnswer": "Give yourself a slap in the face and look at the guard with enthusiasm."
+    },
+    "\"Make it rain.\"": {
+      "answerOptions": [
+        "Get out your flask and shake out the contents at his feet.",
+        "\"I’m dry.\"",
+        "Come closer and start pissing on the guard's feet.",
+        "Look at the sky and ask for rain."
+      ],
+      "correctAnswer": "Get out your flask and shake out the contents at his feet."
+    },
+    "\"Does consciousness define being or does being define consciousness?\"": {
+      "answerOptions": [
+        "\"Reality hits me over the head every day and there's nothing I can do about it.\"",
+        "\"I can't say.\"",
+        "\"A strong consciousness is capable of many things.\""
+      ],
+      "correctAnswer": "\"I can't say.\""
+    },
+    "": {
+      "answerOptions": ["", ""],
+      "correctAnswer": ""
+    }
+  },
+
+  "Fight Club": {
+    "The evening is going pretty well, you're getting drunk in the crowd at the innkeeper's table, and suddenly you feel something trying to penetrate your ass against your will.You turn around and see two preteen boys trying to get to the innkeeper's table to place an order.": {
+      "answerOptions": [
+        "Ignore them, and remain silent.",
+        "Ask them what the f..ck they're doing here and where their parents are."
+      ],
+      "correctAnswer": "Ask them what the f..ck they're doing here and where their parents are."
+    },
+    "\"Uh, what are you talking about, asshole?\" says one of them in a thin voice. \"Do you have something against dwarves?\"": {
+      "answerOptions": ["Nope.", "Yep."],
+      "correctAnswer": "Nope."
+    },
+    "\"Then maybe you'll buy us a drink? We're tired of standing around.\"": {
+      "answerOptions": [
+        "\"No!\"",
+        "\"You can do it yourself if one of you climbs on the other's shoulders.\"",
+        "\"Sure!\""
+      ],
+      "correctAnswer": "\"You can do it yourself if one of you climbs on the other's shoulders.\""
+    },
+    "\"We need to buy beer... for my dad,\" says one of the kids. \"He has a terrible hangover, we have to save him. Will you help us, sir?\"": {
+      "answerOptions": [
+        "\"Sure!\"",
+        "\"It's not nice to lie. You’re too young to buy beer.\"",
+        "Keep staring at them.",
+        "Teach them a lesson and belt them."
+      ],
+      "correctAnswer": "\"Sure!\""
+    },
+    "You're sitting at the bar drinking a beer. One careless movement of your arm and your elbow hits the face of a short, chubby, masculine-looking girl with a cropped haircut.": {
+      "answerOptions": [
+        "Hit her again.",
+        "Send her the f..ck away.",
+        "Turn away and continue drinking your beer.",
+        "Try to apologize."
+      ],
+      "correctAnswer": "Send her the f..ck away."
+    },
+    "Do not underestimate the level of aggression of such dangerous animals as women with short haircuts.A chair smashes into the back of your head.": {
+      "answerOptions": [
+        "Ask her if she's all right in the head.",
+        "Throw the whore out the window.",
+        "Turn away and continue drinking your beer.",
+        "Take her to a dark corner and corrupt her."
+      ],
+      "correctAnswer": "Throw the whore out the window."
+    },
+    "Butch girl spits in your face and says angrily:\"You don't have to apologize to anyone! You're a woman, you're the one everyone should apologize to!\"": {
+      "answerOptions": [
+        "Throw the whore out the window.",
+        "Take her to a dark corner and corrupt her.",
+        "Ask her if she's all right in the head.",
+        "Turn away and continue drinking your beer."
+      ],
+      "correctAnswer": "Throw the whore out the window."
+    },
+    "": {
+      "answerOptions": ["", ""],
+      "correctAnswer": ""
+    }
+  },
+
+  "Rest in Peace": {
+    "The smoke from the funeral pyre is thick and black. Three mourners are standing nearby. One of them cries at the sight of you and says: \"He's gone! He's... gone!\"": {
+      "answerOptions": ["Leave.", "Stay."],
+      "correctAnswer": "Leave."
+    },
+    "You want to leave, but suddenly you notice the mourners have not not very careful with their fire, and the forest around you is already burning out of control. You'll have to wait until the road is clear and this story reaches its end. Or until you all burn alive.": {
+      "answerOptions": [
+        "Wait.",
+        "Go anyway and burn alive.",
+        "Go away without burning."
+      ],
+      "correctAnswer": "Go away without burning."
+    }
+  },
+
+  "Bard Retard": {
+    "The disgusting creature coughs, tension is building, something must be done and urgently!": {
+      "answerOptions": [
+        "Jump out the window.",
+        "Knock him down.",
+        "Try to stop him by throwing a chair.",
+        "Scream in terror."
+      ],
+      "correctAnswer": "Knock him down."
+    },
+    "With feline grace, he swerves away from your move. There's no stopping him!": {
+      "answerOptions": [
+        "Start to panic!",
+        "Try to burn down the tavern before it's too late!",
+        "Try to hit him with a wave of foul air from burping!"
+      ],
+      "correctAnswer": "Try to hit him with a wave of foul air from burping!"
+    },
+    "This monster doesn't care. Some brave man throws his axe, but the bard dodges all attacks. Screams of horror and pleas do not touch the black heart of this bastard. The bard settles himself in the center of the hall, strikes the strings of the lute and begins to howl:\"These farts have long yearned for your tender assTo bind our tongues like the tails of horses'Rend my heart open, cuz love is just stressEspecially when you love the first village whore.\"": {
+      "answerOptions": [
+        "Kick him in the balls!",
+        "Try to sneak to the exit and leave the affected area.",
+        "Throw yourself at his feet and start begging him to stop.",
+        "Try to set him on fire with something."
+      ],
+      "correctAnswer": "Try to sneak to the exit and leave the affected area."
+    },
+    "People are banging on the door, there is a real commotion, but someone has wedged it shut from the outside so the unholy force does not break out! There is no escape!": {
+      "answerOptions": [
+        "Challenge him to a song battle! It’s the only way!",
+        "Kill yourself."
+      ],
+      "correctAnswer": "Challenge him to a song battle! It’s the only way!"
+    },
+    "The embodiment of universal evil looks at you with contempt, but his pride is hurt! He continues to play the melody, but stops singing, giving you the opportunity to join the battle of voices! Strike with all your strength!": {
+      "answerOptions": [
+        "\"I saw thee weep the big bright tearCame o'er that eye of blueAnd then methought it did appearA violet dropping dew\"",
+        "\"A thing of beauty is a joy for ever:Its loveliness increases; it will neverPass into nothingness; but still will keepA bower quiet for us, and a sleep\"",
+        "\"I have been ready at your handto grant whatever you would craveI have both wagered life and landYour love and good will for to have.\"",
+        "Just scream like a rabid coyote being tortured and it will be better than the bard's song."
+      ],
+      "correctAnswer": "Just scream like a rabid coyote being tortured and it will be better than the bard's song."
+    },
+    "The Bard is weakening! It's time to strike the last blow!": {
+      "answerOptions": [
+        "Push him into the fireplace.",
+        "Take a fork from the table and stick it in his face.",
+        "Break a bench over his back in the best tradition of tavern fights.",
+        "Snatch the lute and break it over his head."
+      ],
+      "correctAnswer": "Take a fork from the table and stick it in his face."
+    },
+    "Before you can do anything, a huge northerner rises from his seat, clenches his fists, and brings his full physical might down on the bard's face.\"Not on my watch!\" says the northerner, but his best catchphrase and punch aren't strong enough to finally overpower the monster.The bard rises to his feet again!": {
+      "answerOptions": [
+        "Jump on top of him and smother him with your ass.",
+        "Surrender to the unconquerable evil.",
+        "Jump up and kick him in the chest with both feet. The Crossbow Dropkick!",
+        "Put him on the ground and start pouring booze down his throat! That way, he can't sing!"
+      ],
+      "correctAnswer": "Put him on the ground and start pouring booze down his throat! That way, he can't sing! "
+    }
+  },
+  "Wedding Planner": {
+    "A young girl with a beautiful smile and festive attire stands at the intersection with a wreath of flowers in her hands. When she sees you, she starts to greet you, blocking your way and smiling as she puts the wreath on your head.\"Shambakala!\" she says loudly and starts laughing.Immediately, you are surrounded by festively dressed residents, who begin to dance around you. Oh, no! Now you are a guest at the wedding!": {
+      "answerOptions": [
+        "Try to run away.",
+        "Let them drag you into the gloomy venue of the wedding."
+      ],
+      "correctAnswer": "Try to run away."
+    }
+  },
+  "You are trying to escape from the crazed crowd, but there are too many of them! The death grip of fun only tightens in on you, and you have to start getting drunk.": {
+    "": {
+      "answerOptions": ["Accept.", "Resist!"],
+      "correctAnswer": "Resist!"
+    }
+  },
+  "Postman": {
+    "\"Ah! You're the asshole who refused to deliver the letter... And still not dead. Maybe you'll take this job after all?\"": {
+      "answerOptions": ["Refuse.", "Agree."],
+      "correctAnswer": "Agree."
+    }
+  },
+  "": {
+    "": {
+      "answerOptions": ["", ""],
+      "correctAnswer": ""
+    }
+  }
+}

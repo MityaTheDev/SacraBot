@@ -1,0 +1,11 @@
+{
+  "LOG_LEVEL": 2,
+  "BROWSER_ID": 0,
+  "BASE_URL": "https://sonic.sacra.game/hero/<your_address>/",
+  "IDLE_COUNT_MAX": 10,
+  "MIN_TIME_GAP_BETWEEN_ACTIONS": 2000,
+  "RABBY_WALLET_AUTO_CONFIRM": false,
+  "RABBY_WALLET_NOTIFICATION_URL": "chrome-extension://acmacodkjbdgmoleebolmdjonilkdbch/notification",
+  "SIGN_WAIT_TIME": 10000,
+  "CONFIRM_WAIT_TIME": 2000
+}
