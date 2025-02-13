@@ -1,0 +1,2 @@
+# SacraBot
+Plays sacra game
