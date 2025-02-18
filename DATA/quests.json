@@ -171,6 +171,19 @@
       ],
       "correctAnswer": "\"I can't say.\""
     },
+    "\"What came first? Egg or chicken?\"": {
+      "answerOptions": ["\"Chicken.\"", "\"I can't say.\"", "\"Egg.\""],
+      "correctAnswer": "\"I can't say.\""
+    },
+    "\"Hm. Dance like drunk chicken.\"": {
+      "answerOptions": [
+        "Throw up on the guard's feet and say that you are too drunk. Cluck-cluck, motherf..cker.",
+        "Refuse!",
+        "A little reluctantly, move your elbows and wiggle on the spot.",
+        "Dance with all your might, cackle and jump, so that everyone thinks you are a divine chicken."
+      ],
+      "correctAnswer": "Dance with all your might, cackle and jump, so that everyone thinks you are a divine chicken."
+    },
     "": {
       "answerOptions": ["", ""],
       "correctAnswer": ""

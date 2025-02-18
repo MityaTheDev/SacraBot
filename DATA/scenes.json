@@ -11,9 +11,9 @@
       "description": "Empty screen, hard refresh helps"
     }
   },
-  "errorScreen": {
+  "error": {
     "indicator": {
-      "xpath": "//div[contains(text(), 'Error')]",
+      "xpath": "//app-info-dialog//*[contains(text(), 'Info ') or contains(text(), 'Error')]",
       "description": "Element with 'Error' text"
     }
   },

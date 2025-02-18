@@ -2,7 +2,6 @@ const { styleText } = require("node:util");
 const configLogLevel = resolveConfigLevel(
   require("../configs/config.json").LOG_LEVEL
 );
-console.log("configLogLevel: ", configLogLevel);
 const DateFormat = require("date-format");
 const exp = require("node:constants");
 

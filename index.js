@@ -95,7 +95,7 @@ async function refresh(page) {
 
 async function goToHomePage(hero) {
   await hero.page.goto(hero.homeURL, {
-    waitUntil: "networkidle2",
+    waitUntil: "networkidle0",
   });
 }
 
@@ -148,31 +148,27 @@ async function getBrowser() {
 }
 
 async function getElem(page, xpath, timeout = 1) {
-  return new Promise(async (resolve, reject) => {
-    try {
-      await page.waitForSelector("::-p-xpath(" + xpath + ")", {
-        timeout: timeout,
-      });
-      resolve(page.$("::-p-xpath(" + xpath + ")"));
-    } catch (error) {
-      logger.error(error);
-      resolve(false);
-    }
-  });
+  try {
+    await page.waitForSelector("::-p-xpath(" + xpath + ")", {
+      timeout: timeout,
+    });
+    return await page.$("::-p-xpath(" + xpath + ")");
+  } catch (error) {
+    logger.error(error);
+    return false;
+  }
 }
 
 async function getElems(page, xpath, timeout = 1) {
-  return new Promise(async (resolve, reject) => {
-    try {
-      await page.waitForSelector("::-p-xpath(" + xpath + ")", {
-        timeout: timeout,
-      });
-      resolve(page.$$("::-p-xpath(" + xpath + ")"));
-    } catch (error) {
-      logger.error(error);
-      resolve(false);
-    }
-  });
+  try {
+    await page.waitForSelector("::-p-xpath(" + xpath + ")", {
+      timeout: timeout,
+    });
+    return await page.$$("::-p-xpath(" + xpath + ")");
+  } catch (error) {
+    logger.error(error);
+    resolve(false);
+  }
 }
 
 //todo: add multiple option, return page.$$eval() (find out what it returns)
@@ -186,23 +182,19 @@ async function getText(page, xpath, timeout = 1, option = "innerText") {
     );
   }
 
-  return new Promise(async (resolve, reject) => {
-    try {
-      await page.waitForSelector("::-p-xpath(" + xpath + ")", {
-        timeout: timeout,
-      });
-
-      const text = await page.$eval(
-        "::-p-xpath(" + xpath + ")",
-        (elem) => elem.innerText
-      );
-
-      resolve(text);
-    } catch (error) {
-      logger.error(error);
-      resolve(false);
-    }
-  });
+  try {
+    await page.waitForSelector("::-p-xpath(" + xpath + ")", {
+      timeout: timeout,
+    });
+    const text = await page.$eval(
+      "::-p-xpath(" + xpath + ")",
+      (elem) => elem.innerText
+    );
+    return text;
+  } catch (error) {
+    logger.error(error);
+    return false;
+  }
 }
 
 //The page could change while we iterate through scenes.
@@ -243,7 +235,7 @@ async function getCurrentScene(hero, iterationsLeft = 4) {
       // EVERY scene indicator's xpath '... and not(//*some_specific_element*)'
       // but for the sake of saving time of the author, we just break the loop.
       // Important that this scene is the first in scenes object.
-      if (scene === "transactionProcessing") break;
+      if (scene === "transactionProcessing" || scene === "error") break;
     }
   }
 
@@ -269,14 +261,14 @@ async function getCurrentScene(hero, iterationsLeft = 4) {
     });
     await pause(SECOND * 2);
     result = await getCurrentScene(hero, --iterationsLeft);
+  } else {
+    logger.log(`retrying... iterations left: [${iterationsLeft}]`, {
+      prefix: hero.prefix,
+      importance: 0,
+      messageModifiers: ["yellow"],
+    });
+    return await getCurrentScene(hero, --iterationsLeft);
   }
-
-  logger.log(`retrying... iterations left: [${iterationsLeft}]`, {
-    prefix: hero.prefix,
-    importance: 0,
-    messageModifiers: ["yellow"],
-  });
-  return await getCurrentScene(hero, --iterationsLeft);
 }
 
 async function checkHealth(hero) {
@@ -557,10 +549,8 @@ async function answerQuest(hero) {
 async function action(hero, currentScene) {
   switch (currentScene) {
     case "emptySreen":
+    case "error":
       await refresh(hero.page);
-      return;
-    case "errorScreen":
-      await goToHomePage(hero);
       return;
     case "home":
       logger.log(
@@ -575,6 +565,12 @@ async function action(hero, currentScene) {
         }
       );
       if (!hero.name) hero.name = await getHeroName(hero.page);
+      break;
+    case "adventureCongratulations":
+      if (Date.now() - hero.dungeonCounterTimestamp > 120 * 1000) {
+        hero.dungeonsCompleted++;
+        hero.dungeonCounterTimestamp = Date.now();
+      }
       break;
     case "attacking":
     case "transactionProcessing":
@@ -665,19 +661,39 @@ async function playFirstBiome(heroes) {
         logger.log(`is out of time!`, {
           prefix: hero.prefix,
         });
-        heroes.pop(hero);
-        logger.log(`is removed from the [heroes]`, {
-          prefix: hero.prefix,
-          importance: 0,
-        });
-        if (heroes.length === 0) {
+        if (heroes.length === 1) {
           logger.log(`\n\t~= ALL HEROES ARE OUT OF TIME =~\n`, {
             messageModifiers: ["green", "underline"],
           });
           isPlaying = false;
           break;
+        } else {
+          heroes.pop(hero);
+          logger.log(`is removed from the [heroes]`, {
+            prefix: hero.prefix,
+            importance: 0,
+          });
         }
         continue;
+      }
+
+      if (config.MODE === "daily") {
+        if (hero.dungeonsCompleted >= 3) {
+          if (heroes.length === 1) {
+            logger.log(`\n\t~= ALL HEROES ARE DONE WITH DAILIES =~\n`, {
+              messageModifiers: ["green", "underline"],
+            });
+            isPlaying = false;
+            break;
+          } else {
+            heroes.pop(hero);
+            logger.log(`is removed from the [heroes]`, {
+              prefix: hero.prefix,
+              importance: 0,
+            });
+          }
+          continue;
+        }
       }
 
       let currentScene = await getCurrentScene(hero);
@@ -794,15 +810,39 @@ async function listenToQuest(heroes) {
   // }
 }
 
+//todo: add to xpath.DAILY_CHEST and xpath.WEEKLY_CHEST '... and not (//xpath-to-daily/weakly-reward)]'
+async function getDailyReward(page) {
+  await page.goto("https://sonic.sacra.game/daily-quests", {
+    waitUntil: "networkidle0",
+  });
+
+  //number of daily rewards
+  while ((await getText(page, xpath.DAILY_REWARD_COUNT, 10000))[1] > 0) {
+    await puppeteer.clickByPage(page, xpath.DAILY_CHEST, 5000);
+    await page.waitForNetworkIdle({ idleTime: 5000 });
+    await puppeteer.clickByPage(page, xpath.DAILY_REWARD, 5000);
+    await page.waitForNetworkIdle({ idleTime: 5000 });
+  }
+
+  //number of weekly rewards
+  while ((await getText(page, xpath.WEAKLY_REWARD_COUNT, 10000))[1] > 0) {
+    await puppeteer.clickByPage(page, xpath.WEAKLY_CHEST, 5000);
+    await page.waitForNetworkIdle({ idleTime: 5000 });
+    await puppeteer.clickByPage(page, xpath.WEAKLY_REWARD, 5000);
+    await page.waitForNetworkIdle({ idleTime: 5000 });
+  }
+}
+
 (async () => {
   const browser = await getBrowser();
   if (!browser) {
     logger.error("Failed to initiate browser");
     return;
   }
-  logger.log("\n\n", {
+  logger.log(`\n\nMODE: ${config.MODE}\nLOG_LEVEL: ${config.LOG_LEVEL}`, {
     timestampPresence: false,
     prefixPresence: false,
+    messageModifiers: ["whiteBright", "underline", "bold"],
   });
   // await setListenerForNewPageCreated(browser);
 
@@ -842,12 +882,29 @@ async function listenToQuest(heroes) {
       logger.log(`opened new page for hero |${hero.name}[${hero.ID}]|`);
     }
 
-    //04:42:10 samwise[443] some line of text
+    //04:42:10 samwise[443] some-line-of-text
     hero.prefix = `${hero.name}[${hero.ID}]`;
     heroes.push(hero);
   }
 
-  await playFirstBiome(heroes);
+  switch (config.MODE) {
+    case "level":
+      await playFirstBiome(heroes);
+      break;
+    case "daily":
+      await playFirstBiome(heroes);
+      await getDailyReward(heroes[0].page);
+      break;
+    case "listen":
+      logger.error(
+        `"listen" MODE is not implemented yet. Select "level" or "daily" mode!`
+      );
+      return false;
+    default:
+      logger.error(`unknown mode: ${config.MODE}`);
+      break;
+  }
+  // await playFirstBiome(heroes);
   // await listenToQuest(heroes);
 })();
 
@@ -857,6 +914,8 @@ class Hero {
   prefix;
   homeURL;
   targetLevel;
+  dungeonsCompleted = 0;
+  dungeonCounterTimestamp = 0;
   page;
   sessionStartTime;
   sessionMaxDuration;

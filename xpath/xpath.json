@@ -7,5 +7,11 @@
   "HERO_NAME_XPATH": "//div[contains(@class, 'color-nickname')]",
   "QUEST_TITLE_XPATH": "//div[@id='story-name']",
   "QUEST_TEXT_XPATH": "//div[contains(@class, 'question')]",
-  "QUEST_ANSWER_XPATH": "//div[contains(@class, 'answer__text') and (text() or i)]"
+  "QUEST_ANSWER_XPATH": "//div[contains(@class, 'answer__text') and (text() or i)]",
+  "DAILY_REWARD_COUNT": "(//div[contains(@class, 'rewards__total')])[1]",
+  "WEAKLY_REWARD_COUNT": "(//div[contains(@class, 'rewards__total')])[2]",
+  "DAILY_CHEST": "(//app-animation-chest)[1]",
+  "WEAKLY_CHEST": "(//app-animation-chest)[2]",
+  "DAILY_REWARD": "(//div[contains(@class, 'big-box__item')])[1]",
+  "WEAKLY_REWARD": "(//div[contains(@class, 'big-box__item')])[2]"
 }
