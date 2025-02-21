@@ -2,7 +2,7 @@
   "MODE": "",
   "LOG_LEVEL": 2,
   "BROWSER_ID": 0,
-  "BASE_URL": "https://sonic.sacra.game/hero/<your_address>/",
+  "BASE_URL": "https://sonic.sacra.game/hero/",
   "IDLE_COUNT_MAX": 10,
   "MIN_TIME_GAP_BETWEEN_ACTIONS": 2000,
   "RABBY_WALLET_AUTO_CONFIRM": false,

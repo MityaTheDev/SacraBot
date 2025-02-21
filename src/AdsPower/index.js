@@ -14,7 +14,7 @@ const browserStatusBySN = async (serialNumber) => {
     const response = await axiosRequest(url, requestConfig);
     console.log("axious response: ", response.status, "\n");
     if (response?.data.code === -1) {
-      logger.warn(response?.data);
+      logger.error(response?.data);
       return null;
     }
     if (response?.data?.data) return response.data.data;
@@ -38,7 +38,7 @@ async function browserCloseBySN(serialNumber) {
     const response = await axiosRequest(url, requestConfig);
     logger.log(response.data);
     if (response?.data.code === -1) {
-      logger.warn(response?.data);
+      logger.error(response?.data);
       return null;
     }
     if (response?.data) return response.data;

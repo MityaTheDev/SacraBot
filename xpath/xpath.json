@@ -1,6 +1,8 @@
 {
   "LEVEL": "//app-hero-info//div[@class='level__text']",
   "LEVEL_UP_TO": "",
+  "INPUT_PASSWORD_XPATH": "//input",
+  "SUBMIT_BUTTON_XPATH": "//button[@type='submit']",
   "CONFIRM_BTN_XPATH": "//button[.='Confirm']",
   "SIGN_BTN_XPATH": "//button[.='Sign' and not(@disabled)]",
   "HEALTH_XPATH": "//div[contains(@class, 'bar-hp')]",

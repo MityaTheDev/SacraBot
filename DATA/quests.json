@@ -31,6 +31,26 @@
       ],
       "correctAnswer": "Help her."
     },
+    "The man is very good at self-defense and easily dodges all the blows. His wife gets even more furious. Domestic violence is upsetting to her.": {
+      "answerOptions": [
+        "Try to calm his wife down.",
+        "Leave them to figure it out themselves.",
+        "Try to protect the victim of the beating."
+      ],
+      "correctAnswer": "Leave them to figure it out themselves."
+    },
+    "Suddenly, a city guard appears from around the corner and shouts at you:\"I shouldn't have let you in, you pervert! Come here! Yes, you! Don't make me say it twice!\"": {
+      "answerOptions": ["Stop.", "Run!"],
+      "correctAnswer": "Run!"
+    },
+    "The husband and wife go out on the porch, continuing to swear.\"What do you mean, he's not your son?\" the wife shouts at her husband. \"I haven’t cheated on you!\"": {
+      "answerOptions": [
+        "Watch the swearing and experience sexual arousal from your strange fetish around domestic quarrels.",
+        "Leave.",
+        "Interfere."
+      ],
+      "correctAnswer": "Leave."
+    },
     "": {
       "answerOptions": ["", ""],
       "correctAnswer": ""
@@ -38,6 +58,10 @@
   },
 
   "Drunk Dispute": {
+    "\"I am Belav.\" An untidy young man appears. \"Are you a mysterious traveler from distant lands?\"": {
+      "answerOptions": ["Ignore him.", "Say hi."],
+      "correctAnswer": "Say hi."
+    },
     "\"I am Belav!\" An untidy young man appears. \"Are you a mysterious traveler from distant lands?\"": {
       "answerOptions": ["Be silent.", "Say hi."],
       "correctAnswer": "Say hi."
@@ -184,8 +208,69 @@
       ],
       "correctAnswer": "Dance with all your might, cackle and jump, so that everyone thinks you are a divine chicken."
     },
+    "\"Tell me an aphorism that changed you.\"": {
+      "answerOptions": [
+        "\"Every journey begins with a small step.\"",
+        "\"As long as you remember evil, evil is alive; if you let it die, then your soul will live in peace.\"",
+        "Stay silent.",
+        "\"Water sharpens a stone, wind sharpens a mountain, and life sharpens a person.\""
+      ],
+      "correctAnswer": "\"Every journey begins with a small step.\""
+    },
+    "\"Why do we do what we don't like?\"": {
+      "answerOptions": [
+        "\"Who else will do it, if not us?\"",
+        "Don't tell him.",
+        "\"Who gave us a choice?\"",
+        "\"Because it is necessary for survival.\""
+      ],
+      "correctAnswer": "\"Who gave us a choice?\""
+    },
+    "\"Perform a spell or incantation you learned from a book of magic!\"": {
+      "answerOptions": [
+        "Ignite a flame in your hands with magic.",
+        "Fart.",
+        "Close your eyes and do nothing.",
+        "Make your thumb disappear and then put it back in place."
+      ],
+      "correctAnswer": "Make your thumb disappear and then put it back in place."
+    },
+    "\"Pay me a compliment.\"": {
+      "answerOptions": [
+        "\"You were too smart to be elected mayor of this town and that's why you're here. Boldly guarding us.\"",
+        "\"You are awful.\"",
+        "\"You're breathtaking!\"",
+        "\"You're too handsome to be a guard.\""
+      ],
+      "correctAnswer": "\"You're breathtaking!\""
+    },
+    "\"And it's you again. The cause of all the troubles of this poor city. As soon as you showed up here, the living dead started to reappear in the neighborhood, people began disappearing, bandits are robbing everyone they meet, and these damned demolders have begun to show their noses outside of their stinking swamp! What do you say to that, asshole?\"": {
+      "answerOptions": [
+        "\"You're welcome!\"",
+        "\"I'm sorry...\"",
+        "\"Don't piss me off.\".",
+        "\"Nothing.\""
+      ],
+      "correctAnswer": "\"I'm sorry...\""
+    },
+    "\"Admit to a dark secret you've been keeping from everyone.\"": {
+      "answerOptions": [
+        "\"The meat of a person you like is a little sweeter.\"",
+        "\"I have no secrets.\""
+      ],
+      "correctAnswer": "\"I have no secrets.\""
+    },
+    "\"Show us your best evil laugh.\"": {
+      "answerOptions": [
+        "Give a quiet cackling laugh.",
+        "Laugh out loud.",
+        "Give an ominous \"hee\" and a creepy smile.",
+        "Refuse."
+      ],
+      "correctAnswer": "Give a quiet cackling laugh."
+    },
     "": {
-      "answerOptions": ["", ""],
+      "answerOptions": ["", "", "", ""],
       "correctAnswer": ""
     }
   },
@@ -245,6 +330,37 @@
         "Turn away and continue drinking your beer."
       ],
       "correctAnswer": "Throw the whore out the window."
+    },
+    "For a while, you drink at the bar, but suddenly a drunk bully comes up to you, pushes you with his shoulder and asks: \"What?\"": {
+      "answerOptions": [
+        "\"What did you say?\"",
+        "\"What?\"",
+        "\"A cockerel with a bloody mess instead of a face said what?\""
+      ],
+      "correctAnswer": "\"A cockerel with a bloody mess instead of a face said what?\""
+    },
+    "The f..cker pours a mug over your head and laughs boldly.": {
+      "answerOptions": [
+        "Headbutt him.",
+        "Grab him by the balls and start twisting.",
+        "In one motion, tear off his ear and answer into it."
+      ],
+      "correctAnswer": "Headbutt him."
+    },
+    "It is unclear what this motherf..cker expected, but obviously not a move like that.The blow is strong enough to make his nose explode like an old berry. But the asshole doesn’t calm down. He grabs you by the breasts and drags you outside for a second round!": {
+      "answerOptions": [
+        "Grab him by the balls and start twisting.",
+        "Wait until he pulls you out into the street, pretend you’re going to fight, and then cowardly but quickly run away.",
+        "Let yourself be beaten up without resisting, feeling even more unhappy and useless. Sometimes it's necessary."
+      ],
+      "correctAnswer": "Wait until he pulls you out into the street, pretend you’re going to fight, and then cowardly but quickly run away."
+    },
+    "\"Hmmm... you remind me of someone, fish-face. Didn't you sexually assault my brother's grandfather's great-grandfather's uncle’s sister while she was taking a nap at a late-night picnic in the woods?\"": {
+      "answerOptions": [
+        "\"No, you've got me confused with someone else.\"",
+        "\"Yeah, that was me.\""
+      ],
+      "correctAnswer": "\"No, you've got me confused with someone else.\""
     },
     "": {
       "answerOptions": ["", ""],
@@ -327,8 +443,45 @@
         "Put him on the ground and start pouring booze down his throat! That way, he can't sing!"
       ],
       "correctAnswer": "Put him on the ground and start pouring booze down his throat! That way, he can't sing! "
+    },
+    "As soon as you get close to the bard, a makeup-smeared young girl appears from behind him, hissing at you like a snake and preventing you from reaching the bard.The bard and his retinue of whores look down on you with disdain.\"I'm Hans Dieter, the most famous bard in this hole, and I'm also Myrd's most famous myself penis fracture champion. And who are you?\"": {
+      "answerOptions": [
+        "\"I'm a big fan.\"",
+        "\"I'm the Savage of Mergull, and I've broken a lot of penises.\"",
+        "\"I don't believe you can break a penis at all, there's no bone in it!\"",
+        "\"I'm shutting up!\""
+      ],
+      "correctAnswer": "\"I'm the Savage of Mergull, and I've broken a lot of penises.\""
+    },
+    "\"The second time I broke my dick was five winters later. It happened in the forest, while I was trying to know the love of a forest nymph. Her body, as it turned out, was much closer to wood than a woman's body, and I shouldn't have shoved my cock in there. I had to jump on my horse Mercedes and rush to the healer, writhing in pain for days.\"": {
+      "answerOptions": [
+        "Surrender and listen.",
+        "Try and break through the groupies and shut him up."
+      ],
+      "correctAnswer": "Try and break through the groupies and shut him up."
+    },
+    "\"The third time was while walking through the beautiful forests of Grimlarn, and I was transported to a strange place. A powerful demon forced me to play a quiz game, asking cavernous questions with no right answers and a painful death for the wrong ones. Our incredible minds fought a battle for a long time until I allowed myself to lose and answer incorrectly. As I expected, the demon was impressed with my intelligence, and offered to let me choose my own method of agonizing death. I said I wanted to die from a penis fracture, since I knew for sure I could survive it. So I outplayed the demon, survived, and more importantly, broke my penis for the third time.\"": {
+      "answerOptions": [
+        "Surrender and listen.",
+        "Cry and pray for it to be over soon."
+      ],
+      "correctAnswer": "Cry and pray for it to be over soon."
+    },
+    "The bard yells at you so hard your ears hurt.\"I'm Hans Dieter, the great bard and unrivaled penis fracture champion, and I ask you again. WHO... ARE... YOU?!\"": {
+      "answerOptions": [
+        "\"I don't believe you can break a penis at all, there's no bone in it!\"",
+        "Scatter the groupies to the side and kick him in the groin.",
+        "\"I'm the Savage of Mergull, and I've broken a lot of penises.\"",
+        "\"Compared to you, I'm nothing.\""
+      ],
+      "correctAnswer": "Scatter the groupies to the side and kick him in the groin."
+    },
+    "": {
+      "answerOptions": ["", "", "", ""],
+      "correctAnswer": ""
     }
   },
+
   "Wedding Planner": {
     "A young girl with a beautiful smile and festive attire stands at the intersection with a wreath of flowers in her hands. When she sees you, she starts to greet you, blocking your way and smiling as she puts the wreath on your head.\"Shambakala!\" she says loudly and starts laughing.Immediately, you are surrounded by festively dressed residents, who begin to dance around you. Oh, no! Now you are a guest at the wedding!": {
       "answerOptions": [
@@ -336,21 +489,408 @@
         "Let them drag you into the gloomy venue of the wedding."
       ],
       "correctAnswer": "Try to run away."
-    }
-  },
-  "You are trying to escape from the crazed crowd, but there are too many of them! The death grip of fun only tightens in on you, and you have to start getting drunk.": {
-    "": {
+    },
+    "You are trying to escape from the crazed crowd, but there are too many of them! The death grip of fun only tightens in on you, and you have to start getting drunk.": {
       "answerOptions": ["Accept.", "Resist!"],
       "correctAnswer": "Resist!"
+    },
+    "The crowd drags you to a large house somewhere on the outskirts of the city. Like everything else, it is also decorated with flowers. There are even more people here. A whole delegation is waiting for you. In the front rows, there is an impeccably dressed young man, probably the groom.Seeing that the bride has brought you, the whole delegation throws up their hands and shouts: \"Shambakala!\"": {
+      "answerOptions": ["Run.", "Shambakala!"],
+      "correctAnswer": "Run."
+    },
+    "When the screams and laughter calm down, the groom comes forward and says:\"A traveler with no name!Tell me who my wife is!Happiness or shame?Terrible death or eternal peace?\"": {
+      "answerOptions": [
+        "\"Shame.\"",
+        "\"Death.\"",
+        "\"Peace.\"",
+        "\"Happiness.\""
+      ],
+      "correctAnswer": "\"Happiness.\""
+    },
+    "The party continues, but unfortunately someone's granny notices you. She seizes you in a steel grip, remarks how you have grown, and squeezes your cheeks. Then she sits you down at the table and forces you to eat strange food.": {
+      "answerOptions": [
+        "Try what stinks the most of a corpse. Mergull's sweets!",
+        "The little red peppers will absolutely burn you twice!",
+        "Try the buns. They look fresh and harmless.",
+        "Try to escape."
+      ],
+      "correctAnswer": "Try to escape."
+    },
+    "Grandma insistents you need to eat something!": {
+      "answerOptions": [
+        "The little red peppers will absolutely burn you twice!",
+        "Try what stinks the most of a corpse. Mergull's sweets!",
+        "Try the buns. They look fresh and harmless."
+      ],
+      "correctAnswer": "Try the buns. They look fresh and harmless."
+    },
+    "The bun really in't bad until you get to the goat cheese inside. If you had to come up with a name for this dish, you would suggest \"tramp’s kiss\".": {
+      "answerOptions": ["Try something else.", "Try to escape."],
+      "correctAnswer": "Try to escape."
+    },
+    "The party is going well until you start to smell burning and smoke. You turn around and see that everything is on fire. The house, barn, and fence are blazing with flames to the skies!": {
+      "answerOptions": [
+        "Run away.",
+        "Look at the fire and do nothing.",
+        "Yell at the fire to scare it away.",
+        "Grab an axe and spin on the spot with such force and speed that the rising wind extinguishes the fire."
+      ],
+      "correctAnswer": "Run away."
+    },
+    "": {
+      "answerOptions": ["", ""],
+      "correctAnswer": ""
     }
   },
+
   "Postman": {
     "\"Ah! You're the asshole who refused to deliver the letter... And still not dead. Maybe you'll take this job after all?\"": {
       "answerOptions": ["Refuse.", "Agree."],
       "correctAnswer": "Agree."
+    },
+    "\"You're a traveler, right? I have a letter here, a very important letter that needs to be delivered to my friend who lives in the swamp. A very simple job, for which I will pay handsomely. What do you think?\"": {
+      "answerOptions": ["Refuse.", "Agree."],
+      "correctAnswer": "Agree."
     }
   },
+
+  "Self Treatment": {
+    "You don't feel very well. You need to stop and tend to your injury before it gets worse.": {
+      "answerOptions": ["Ignore it.", "Examine yourself."],
+      "correctAnswer": "Examine yourself."
+    },
+    "After your last meal, you feel terrible. Your journey is constantly interrupted by trips to the toilet, and you do not have the strength to go further. You never thought you had so much shit in you. And you never thought that death would come like this. It looks like you have dysentery.": {
+      "answerOptions": [
+        "Eat something strange to show your stomach who is the boss here.",
+        "Set up camp by a river or stream. Constantly drink water.",
+        "Continue without paying attention to the oozing shit.",
+        "Stop drinking and eating. Wait for ALL the shit to come out of you."
+      ],
+      "correctAnswer": "Set up camp by a river or stream. Constantly drink water."
+    },
+    "": {
+      "answerOptions": [
+        "Find a safe place, sit down, unbutton your clothes, calm your breathing and slow down your movements.",
+        "Give yourself a slap in the face.",
+        "Drink some water and wet your face.",
+        "Keep going until you fall."
+      ],
+      "correctAnswer": "Find a safe place, sit down, unbutton your clothes, calm your breathing and slow down your movements."
+    },
+    "It worked! You've gotten a little better, so it's time to treat the wound before you lose too much blood.": {
+      "answerOptions": [
+        "Apply a clean bandage and apply pressure to the wound until the bleeding stops. Fix the bandage, rest, drink water, and move on.",
+        "Make a fire, heat the knife until it is red-hot, and cauterize the wound.",
+        "Try to sew up the wound with improvised means."
+      ],
+      "correctAnswer": "Apply a clean bandage and apply pressure to the wound until the bleeding stops. Fix the bandage, rest, drink water, and move on."
+    },
+    "It didn't help much. You need to do something about the wound before you pass out.": {
+      "answerOptions": [
+        "Apply a clean bandage and apply pressure to the wound until the bleeding stops. Fix the bandage, rest, drink water, and move on.",
+        "Make a fire, heat the knife until it is red-hot, and cauterize the wound.",
+        "Try to sew up the wound with improvised means."
+      ],
+      "correctAnswer": "Apply a clean bandage and apply pressure to the wound until the bleeding stops. Fix the bandage, rest, drink water, and move on."
+    },
+    "You're too sick to do that.": {
+      "answerOptions": ["Apply a pressure bandage.", "Pass out and rest."],
+      "correctAnswer": "Apply a pressure bandage."
+    }
+  },
+
+  "Find a Way": {
+    "By noon, the sun has already disappeared behind a forest thicket, and you realize the night will be very long and cold. Steam comes out of your mouth, and everything is covered with frost.You need to do something to keep from freezing to death.": {
+      "answerOptions": [
+        "Start making a shelter of branches and leaves.",
+        "Continue walking in search of shelter or warmth.",
+        "Start digging a hole for shelter",
+        "Try to light a fire before it's too late."
+      ],
+      "correctAnswer": "Try to light a fire before it's too late."
+    },
+    "Deafening thunder sounds, the air is filled with the aroma of freshness, and a downpour falls upon the ground.": {
+      "answerOptions": [
+        "Hide under a cliff.",
+        "Get under a low bush.",
+        "Stay wet.",
+        "Hide under a tree."
+      ],
+      "correctAnswer": "Get under a low bush."
+    },
+    "": {
+      "answerOptions": ["", ""],
+      "correctAnswer": ""
+    }
+  },
+
+  "Time to Rest": {
+    "You see a small clearing, completely covered in animal bones, the black charred grass barely visible under all of them. The bones, and the grass, and the trees all around seem to have been twisted into a spiral by some unknown force. The wind here emits a strange low-frequency hum, and you feel a little uncomfortable. A good enough place to rest?": {
+      "answerOptions": ["Keep looking.", "Stay."],
+      "correctAnswer": "Keep looking."
+    },
+    "The night is quiet and warm. The sky is really beautiful. You are in a field full of fragrant flowers. It looks pretty peaceful.": {
+      "answerOptions": [
+        "Go into the woods and try to light a fire.",
+        "Make a bed for the night right in the field under the open sky."
+      ],
+      "correctAnswer": "Go into the woods and try to light a fire."
+    },
+    "It's getting cold. There is a dark and forbidding forest around you. You don't see any landmarks.": {
+      "answerOptions": [
+        "Dig a hole and cover it with spruce branches.",
+        "Build a primitive shelter.",
+        "Do not attract too much attention and go to sleep under a tree.",
+        "Try to make a fire."
+      ],
+      "correctAnswer": "Try to make a fire."
+    },
+    "": {
+      "answerOptions": ["", ""],
+      "correctAnswer": ""
+    }
+  },
+
+  "Shepherd Boy": {
+    "On the road, you come across a distraught boy surrounded by three cows. As you pass by, he turns to you:\"I'm sorry... have you seen any cows? I've lost my herd and I can't find it.\"": {
+      "answerOptions": ["Ignore him.", "Ask him what happened."],
+      "correctAnswer": "Ask him what happened."
+    },
+    "\"Something scared the cows... I've been looking for them all day. But they ran off into the woods... How can I find them before dark?\"": {
+      "answerOptions": [
+        "Ask if there is a place they like to go.",
+        "Offer to split up and look for them.",
+        "Loudly call the cows. Moo!",
+        "Leave him."
+      ],
+      "correctAnswer": "Ask if there is a place they like to go."
+    },
+    "The boy notices something in the distance, and you come out of the forest toward the river bank.\"Wow,\" says the kid, all his attention now absorbed by the naked woman washing her clothes. You pull his arm to lead him away, but he doesn't budge.": {
+      "answerOptions": [
+        "Leave him.",
+        "Grab the boy by the ear and drag him away from there.",
+        "Remind him about the cows.",
+        "Stay to look at boobs."
+      ],
+      "correctAnswer": "Grab the boy by the ear and drag him away from there."
+    },
+    "\"Ouch!\" says the boy as you drag him by the ear away from the woman.": {
+      "answerOptions": [
+        "Loudly call the cows. Moo!",
+        "Leave him.",
+        "Offer to split up.",
+        "Ask if there is a place they like to go."
+      ],
+      "correctAnswer": "Ask if there is a place they like to go."
+    },
+    "The boy's face lights up.\"They love the meadow with flowers near the ravine! We need to look there! Thank you, kind man!\"\"Here! Take this! My grandmother made it!\" The boy hands you a dusty bottle, the contents of which are unclear.": {
+      "answerOptions": [
+        "Ask if there is a place they like to go.",
+        "Go there with the boy.",
+        "Kick the boy in the face and rob him.",
+        "Leave him."
+      ],
+      "correctAnswer": "Kick the boy in the face and rob him."
+    },
+    "": {
+      "answerOptions": ["", ""],
+      "correctAnswer": ""
+    }
+  },
+
+  "On a Bet": {
+    "You walk along the outskirts of the village and see a group of young urchins plotting something in the cemetery.": {
+      "answerOptions": [
+        "Watch what they will do.",
+        "Stop their hooligan actions."
+      ],
+      "correctAnswer": "Watch what they will do."
+    },
+    "": {
+      "answerOptions": ["", ""],
+      "correctAnswer": ""
+    }
+  },
+
+  "I've Seen You Somewhere": {
+    "You hear rustling up ahead, but too late. People in hoods jump out at you. Their intentions are clearly not good.\"Who do we have here?\" asks the lanky leader with a hoarse voice and a heavy gaze. \"It seems like someone with your face already dangled in my ropes a couple of winters ago. And here you are again. How do you explain that, huh?\"": {
+      "answerOptions": [
+        "\"I bet you say that to all the pretty girls. But look, in my case, I can and will be turned on.\"",
+        "Try to escape."
+      ],
+      "correctAnswer": "\"I bet you say that to all the pretty girls. But look, in my case, I can and will be turned on.\""
+    },
+    "\"Wait... what?\"": {
+      "answerOptions": [
+        "\"Are you stupid? Woman, man, rope. Looks like the start of a good party. Are the men here so weak that I need to take the lead?\"",
+        "\"Okay, let's talk, if you insist.\""
+      ],
+      "correctAnswer": "\"Okay, let's talk, if you insist.\""
+    },
+    "\"The question is very simple, redhead. How did you end up in this forest?\"": {
+      "answerOptions": [
+        "\"I'm local. I've been in this forest for as long as I can remember.\"",
+        "\"I just... the local queen. The queen of swords and f..cking. Didn't you recognize me? My name is... Claymora...\"",
+        "\"Maybe if you're a forced f..ck, you can get out of here alive. But I can't promise anything.\"",
+        "\"My ship crashed off the northern shores when I was trying to get out of Mergull.\""
+      ],
+      "correctAnswer": "\"My ship crashed off the northern shores when I was trying to get out of Mergull.\""
+    },
+    "": {
+      "answerOptions": ["", ""],
+      "correctAnswer": ""
+    }
+  },
+
+  "Pain and Pleasure": {
+    "A small house by the road is burning; the locals are trying to extinguish it, but they're as bad at it as you are at finding yourself.": {
+      "answerOptions": [
+        "Help fight the fire!",
+        "Watch the house burn, and maybe secretly jerk off.",
+        "Go into the house, and try to save things from the fire.",
+        "Go into the house, and try to steal something valuable before everything burns down."
+      ],
+      "correctAnswer": "Go into the house, and try to steal something valuable before everything burns down."
+    }
+  },
+
+  "Find Food": {
+    "The feeling of hunger becomes unbearable. You need to find food. Explore the area?": {
+      "answerOptions": ["Search for food.", "Starve."],
+      "correctAnswer": "Search for food."
+    },
+    "It has just rained a little and you can see worms emerging from the soil. Taste them?": {
+      "answerOptions": [
+        "Barbecue time!",
+        "Eat them raw.",
+        "Keep searching.",
+        "Boil them and eat them."
+      ],
+      "correctAnswer": "Eat them raw."
+    },
+    "You see a huge cedar tree. There are cones under its roots. Try to get nuts from them?": {
+      "answerOptions": [
+        "Just eat them. Nuts are the best food.",
+        "Keep searching."
+      ],
+      "correctAnswer": "Just eat them. Nuts are the best food."
+    },
+    "": {
+      "answerOptions": ["", ""],
+      "correctAnswer": ""
+    }
+  },
+
+  "Cow Terror": {
+    "You are calmly walking through the forest, when suddenly the tree closest to you explodes! You fall to the ground, stunned and burned, and try to see where the danger is coming from. A mysterious hooded figure with a staff in his hand falls out of the bushes.": {
+      "answerOptions": ["Run!", "Stay."],
+      "correctAnswer": "Run!"
+    },
+    "": {
+      "answerOptions": ["", ""],
+      "correctAnswer": ""
+    }
+  },
+
+  "Be My Guest": {
+    "A gnarled granny is buzzing around the fire, and an even more ancient old man is snoring on a pile of firewood. They look too harmless for these evil forests. Join their camp?": {
+      "answerOptions": ["Hell, no!", "Yes."],
+      "correctAnswer": "Hell, no!"
+    },
+    "The old lady shudders when she sees you. You don't have a weapon and don't look like you want to cause trouble, so after a minute, she starts smiling at you, mumbles something about grandchildren and offers you soup.": {
+      "answerOptions": ["Taste the soup.", "Politely refuse."],
+      "correctAnswer": "Politely refuse."
+    },
+    "The grandfather continues to snore, and the old lady fusses around you, offering sweets and treats.": {
+      "answerOptions": ["Politely refuse.", "Taste the goodies."],
+      "correctAnswer": "Politely refuse."
+    },
+    "The old lady is upset that you don't want to eat her goodies. She hands you a wineskin she took from her husband, and offers it to you to brighten up the night with wine by the campfire under the night sky.": {
+      "answerOptions": ["Politely refuse and leave.", "Take the wineskin."],
+      "correctAnswer": "Politely refuse and leave."
+    },
+    "The treats were very delicious, but you come to your senses sharply. You are naked, and your hands and feet are firmly tied to a cutting table. A meat cleaver is stuck in the table next to your head. Looks like this cute old couple isn't that cute after all.": {
+      "answerOptions": [
+        "Try to break the ropes.",
+        "Remain calm and try to get on the same vibe as the people who kidnapped you.",
+        "Call for help.",
+        "Piss and and shit yourself to become a less attractive object of sexual exploitation or cannibalism."
+      ],
+      "correctAnswer": "Try to break the ropes."
+    },
+    "Hearing that you have woken up, Grandma returns. Her grin doesn't seem so cute anymore.\"Mmm, little rascal with tender meat, it looks like your journey will end in our cauldron. No need to scream or kick. The meat will spoil,\" she says.": {
+      "answerOptions": [
+        "\"Please, let me go! There’s no need to do this!\"",
+        "Offer something valuable for your life.",
+        "\"Why are you doing this?\"",
+        "\"You should release me immediately!\""
+      ],
+      "correctAnswer": "Offer something valuable for your life."
+    },
+    "": {
+      "answerOptions": ["", ""],
+      "correctAnswer": ""
+    }
+  },
+
+  "Poisoned": {
+    "The poor wretch sitting by the old tree stretches out his hands to you. The bites of a dangerous creature have interrupted his journey, and if he does not find help, then his life will be interrupted too. His eyes are glassy with pain. His voice is barely audible.“Burns... it burns ... I need a cure, I'm begging you. I'm Belav... I live not far from here... Please, help!“": {
+      "answerOptions": ["Leave the poor bastard to die.", "Help him."],
+      "correctAnswer": "Help him."
+    },
+    "\"I've never been bitten like this before... I feel like I'm dying... Maybe you know where there is a healer nearby? Bring him, please. Please!\"": {
+      "answerOptions": [
+        "Try to help.",
+        "Shake head negatively and leave.",
+        "Give him some Berry Compote."
+      ],
+      "correctAnswer": "Give him some Berry Compote."
+    },
+    "The poor man looks at you with gratitude and tears.": {
+      "answerOptions": ["Leave him", "Stay."],
+      "correctAnswer": "Stay."
+    },
+    "\"Seems a little better to me,\" says Belav. \"But I'm too weak to get home on my own. Maybe, friend, you can help me walk home. I live nearby.\"": {
+      "answerOptions": ["Refuse.", "Agree."],
+      "correctAnswer": "Agree."
+    },
+    "Belav is heavy.You start dragging him, and after ten steps, you feel the urge to drop him.": {
+      "answerOptions": ["Leave this bum in the forest!", "Keep dragging him!"],
+      "correctAnswer": "Keep dragging him!"
+    },
+    "": {
+      "answerOptions": ["", ""],
+      "correctAnswer": ""
+    }
+  },
+
+  "Guardian of the Forest": {
+    "Suddenly, you see a pale figure coming toward you from the bushes. She is dressed in rough furs, smells of herbs, and is most likely one of the local forest shamans. She is weak and wounded, blood dripping thickly from her torn arm.\"Something is wrong with this Guardian of the Forest\". she whispers to you. \"Run... Run before it's too late!": {
+      "answerOptions": ["Stay.", "Run!"],
+      "correctAnswer": "Stay."
+    },
+    "You see a funny short mustachioed family man rummaging around on the porch of his house. He is trying to reach under the stairs with a stick to get something out, but he seems to be short on both arms and tools.": {
+      "answerOptions": ["Refuse.", "Help him."],
+      "correctAnswer": "Help him."
+    },
+    "The man notices you, stands up, wrinkles his nose, and holds his aching back.\"It looks like a raccoon or some other animal got in there,\" the man says, pointing the stick under the porch. \"He's been breathing heavily for several nights now. I can't sleep with that sound. The animal is probably hurt and needs help. We need to get it out of there.": {
+      "answerOptions": [
+        "Refuse anyway.",
+        "Only real scum don't help animals. You're not like that."
+      ],
+      "correctAnswer": "Only real scum don't help animals. You're not like that."
+    },
+    "": {
+      "answerOptions": ["", ""],
+      "correctAnswer": ""
+    }
+  },
+
   "": {
+    "": {
+      "answerOptions": ["", ""],
+      "correctAnswer": ""
+    },
     "": {
       "answerOptions": ["", ""],
       "correctAnswer": ""

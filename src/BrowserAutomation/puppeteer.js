@@ -2,9 +2,9 @@ const logger = require("../logger");
 const { pause } = require("./../time");
 /* ========================================================================= */
 async function CreateBrowser(BOT, params) {
-  logger.log(`[PUPPETEER] | CreateBrowser | ${BOT._id}`);
+  // logger.log(`[PUPPETEER] | CreateBrowser | ${BOT._id}`);
   BOT.browser = await connectWs(params);
-  logger.log(BOT.browser);
+  // logger.log(BOT.browser.name);
   // await connectWs(params);
   if (BOT.browser === false) {
     return false;
@@ -21,7 +21,7 @@ async function CreateBrowser(BOT, params) {
 
 /* ========================================================================= */
 async function connectWs(params) {
-  logger.log("[PUPPETEER] | connectWs");
+  // logger.log("[PUPPETEER] | connectWs");
   // logger.log(params);
   try {
     const puppeteer = require("puppeteer-core");
@@ -44,7 +44,7 @@ async function xPathExist(page, xPath) {
     element = await page.$("::-p-xpath(" + xPath + ")");
     return element ? element : false;
   } catch (err) {
-    logger.warn("[PUPPETEER] | xPathExist: " + err.message);
+    logger.error("[PUPPETEER] | xPathExist: " + err.message);
     logger.error(err);
   }
 }

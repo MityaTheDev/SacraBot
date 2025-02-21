@@ -26,7 +26,7 @@
   "attacking": {
     "indicator": {
       "url": "/fight/",
-      "xpath": "//button[@id='btn-attack' and contains(text(), 'Attacking...')]",
+      "xpath": "//button[@id='btn-attack' and contains(text(), 'Attacking...') and not(//div[@class='cdk-overlay-container']/*) and not (//div[text()=' Victory '])]",
       "description": "'Attacking...' button"
     }
   },
@@ -182,18 +182,24 @@
       }
     }
   },
-  "quest": {
-    "indicator": {
-      "urlIndicator": "/story/",
-      "xpath": "//div[@id='story-name' and not(//app-animation-papyrus) and not(//div[contains(@class, 'image-container')]//button[contains(@class, 'btn-exit') and text()=' Continue '])]",
-      "description": "Element with the unique id"
-    }
-  },
   "questWaitingForTransacrion": {
     "indicator": {
       "urlIndicator": "/story/",
       "xpath": "//app-animation-papyrus",
       "description": "Anscestor element of papyrus animation"
+    }
+  },
+  "questLoading": {
+    "indicator": {
+      "xpath": "//div[contains(@class, 'title')]//img[contains(@alt, 'loading') and not(//app-animation-papyrus)]",
+      "description": "Element with for dots and amination to the right of the quest title"
+    }
+  },
+  "quest": {
+    "indicator": {
+      "urlIndicator": "/story/",
+      "xpath": "//div[@id='story-name' and not(//app-animation-papyrus) and not(//img[contains(@alt, 'loading')]) and not(//button[contains(@class, 'btn-exit') and text()=' Continue '])]",
+      "description": "Element with the unique id"
     }
   },
   "questEnd": {
@@ -209,16 +215,10 @@
       }
     }
   },
-  "questLoading": {
-    "indicator": {
-      "xpath": "//div[contains(@class, 'title')]//img[contains(@alt, 'loading') and not(//app-animation-papyrus)]",
-      "description": "Element with for dots and amination to the right of the quest title"
-    }
-  },
   "questContinue": {
     "indicator": {
       "urlIndicator": "/story/",
-      "xpath": "//div[contains(@class, 'image-container')]//button[contains(@class, 'btn-continue') and text()=' Continue ' and (//div[contains(text(), 'Overall results')])]",
+      "xpath": "//div[contains(@class, 'image-container') and not(//app-animation-papyrus)]//button[contains(@class, 'btn-continue') and text()=' Continue ' and (//div[contains(text(), 'Overall results')])]",
       "description": "'Continue' button at the bottom right of the image ('Overall reults' text must be present)"
     },
     "actionTargets": {

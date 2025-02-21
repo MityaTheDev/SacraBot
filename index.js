@@ -3,26 +3,70 @@ const Ads = require("./src/AdsPower/index");
 const puppeteer = require(`./src/BrowserAutomation/puppeteer.js`);
 const { pause, SECOND } = require("./src/time.js");
 const PptrCfg = require("./configs/puppeteer.json");
-const config = require("./configs/config.json");
 const xpath = require("./xpath/xpath.json");
 const telegram = require("./src/telegram.js");
-const gameConfig = require("./configs/game_config.json");
 const scenes = require("./DATA/scenes.json");
-const fs = require("fs/promises");
+const fs = require("fs");
+const path = require("path");
 const DateFormat = require("date-format");
-let quests = require("./DATA/quests.json");
+const { timeStamp } = require("console");
+const configPath = path.join(__dirname, "/configs/config.json");
+const questsPath = path.join(__dirname, "/DATA/quests.json");
+let quests;
+let config;
 
-async function isTimeLeft(hero) {
-  return new Promise((resolve, reject) => {
-    const currentTime = Date.now();
-    const minutesLeft =
-      hero.sessionMaxDuration -
-      (currentTime - hero.sessionStartTime) / (1000 * 60);
-    if (minutesLeft <= 0) {
-      resolve(false);
-    }
-    resolve(true);
+async function writeJson(filePath, data) {
+  const jsonData = JSON.stringify(data, null, 2);
+  await fs.promises.writeFile(filePath, jsonData, "utf8");
+  logger.log(`${filePath.split(`\\`).at(-1)} has been updated`, {
+    messageModifiers: ["yellowBright", "dim"],
+    timeStampModifiers: ["yellowBright", "dim"],
   });
+}
+
+async function readJson(filePath) {
+  const data = await fs.promises.readFile(filePath, "utf8");
+  const json = JSON.parse(data);
+  logger.log(`${filePath.split(`\\`).at(-1)} has been read`, {
+    messageModifiers: ["yellowBright", "dim"],
+    timeStampModifiers: ["yellowBright", "dim"],
+  });
+  return json;
+}
+
+async function watchJsonChanges(jsonsToWatch) {
+  jsonsToWatch.forEach((file) => {
+    fs.watch(file, async (eventType, filename) => {
+      if (eventType === "change") {
+        switch (filename) {
+          case "quests.json":
+            quests = await readJson(questsPath);
+            logger.log(`quests.json has been updated`, {
+              messageModifiers: ["yellowBright"],
+            });
+            break;
+          case "config.json":
+            config = await readJson(configPath);
+            logger.log(`config.json has been updated`, {
+              messageModifiers: ["yellowBright"],
+            });
+            break;
+        }
+      }
+    });
+    console.log(`Watching file: ${file}`);
+  });
+}
+
+async function isOutOfTime(hero) {
+  const currentTime = Date.now();
+  const minutesLeft =
+    hero.sessionMaxDuration -
+    (currentTime - hero.sessionStartTime) / (1000 * 60);
+
+  if (minutesLeft <= 0) return true;
+
+  return false;
 }
 
 async function setListenerForNewPageCreated(browser) {
@@ -104,6 +148,22 @@ function getTimestamp() {
   return DateFormat.asString("dd-MM_hh.mm", new Date());
 }
 
+async function logInRabbyWallet(browser) {
+  const page = await browser.newPage();
+  await page.goto(config.RABBY_WALLET_LOGIN_URL, {
+    waitUntil: "domcontentloaded",
+  });
+  const inputElem = await getElem(page, xpath.INPUT_PASSWORD_XPATH, 10000);
+  const buttonElem = await getElem(page, xpath.SUBMIT_BUTTON_XPATH, 10000);
+  await puppeteer.fillInInputWithoutCheck(
+    inputElem,
+    config.RABBY_WALLET_PASSWORD
+  );
+  await puppeteer.clickElementByConsole(page, buttonElem);
+  await pause(700);
+  await page.close();
+}
+
 async function saveFile(data, path) {
   try {
     await fs.writeFile(path, data);
@@ -123,28 +183,44 @@ async function saveBodyOfPage(page, fileName) {
   }
 }
 
-async function getBrowser() {
-  let browserStatusBySN = await Ads.browserStatusBySN(config.BROWSER_ID);
-  let isBroswerActive =
-    browserStatusBySN && browserStatusBySN.status === "Active" ? true : false;
-  await pause(SECOND * 3);
-  while (!isBroswerActive) {
-    logger.error("Browser is not active");
-    logger.error("BrowserStatusBySN: " + browserStatusBySN);
-    if (browserStatusBySN)
-      logger.error("BrowserStatusBySN.status: " + browserStatusBySN.status);
-    await Ads.browserOpenBySN(config.BROWSER_ID);
-    browserStatusBySN = await Ads.browserStatusBySN(config.BROWSER_ID);
-    isBroswerActive =
+async function getIDs() {
+  let IDs = new Set();
+  for (let hero in config.HEROES) {
+    if (config.HEROES[hero].active) IDs.add(config.HEROES[hero].browser_id);
+  }
+  return IDs;
+}
+
+async function getBrowsers(IDs) {
+  let browsers = [];
+  for (let id of IDs) {
+    let browserStatusBySN = await Ads.browserStatusBySN(id);
+    let isBroswerActive =
       browserStatusBySN && browserStatusBySN.status === "Active" ? true : false;
     await pause(SECOND * 3);
-  }
+    while (!isBroswerActive) {
+      logger.error("Browser is not active");
+      logger.error("BrowserStatusBySN: " + browserStatusBySN);
+      if (browserStatusBySN)
+        logger.error("BrowserStatusBySN.status: " + browserStatusBySN.status);
+      await Ads.browserOpenBySN(id);
+      browserStatusBySN = await Ads.browserStatusBySN(id);
+      isBroswerActive =
+        browserStatusBySN && browserStatusBySN.status === "Active"
+          ? true
+          : false;
+      await pause(SECOND * 3);
+    }
 
-  const BOT = {};
-  BOT._id = config.BROWSER_ID;
-  PptrCfg.browserWSEndpoint = browserStatusBySN.ws.puppeteer;
-  await puppeteer.CreateBrowser(BOT, PptrCfg);
-  return await BOT.browser;
+    const BOT = {};
+    BOT._id = id;
+    PptrCfg.browserWSEndpoint = browserStatusBySN.ws.puppeteer;
+    await puppeteer.CreateBrowser(BOT, PptrCfg);
+    let browser = await BOT.browser;
+
+    browsers.push(browser);
+  }
+  return browsers;
 }
 
 async function getElem(page, xpath, timeout = 1) {
@@ -235,7 +311,14 @@ async function getCurrentScene(hero, iterationsLeft = 4) {
       // EVERY scene indicator's xpath '... and not(//*some_specific_element*)'
       // but for the sake of saving time of the author, we just break the loop.
       // Important that this scene is the first in scenes object.
-      if (scene === "transactionProcessing" || scene === "error") break;
+      if (
+        scene === "transactionProcessing" ||
+        scene === "error" ||
+        scene === "loading" ||
+        scene === "questWaitingForTransacrion" ||
+        scene === "questLoading"
+      )
+        break;
     }
   }
 
@@ -406,7 +489,7 @@ async function clickAnswerButton(hero, text) {
   if (text[0] === '"' && text[text.length - 1] === '"') {
     xpathToButton = `//*[text()=concat('"', ${text}, '"')]/ancestor::div[contains(@class, "answer ")]/button`;
   }
-  let buttonCorrectAnswer = await getElem(hero.page, xpathToButton, 1000);
+  let buttonCorrectAnswer = await getElem(hero.page, xpathToButton, 5000);
   if (buttonCorrectAnswer) {
     await puppeteer.clickByPage(hero.page, xpathToButton);
   } else {
@@ -455,14 +538,14 @@ async function answerQuest(hero) {
       const currentStory = storedQuests[storyText];
       if (!currentStory) {
         await telegram.sendMessage(
-          `${hero.prefix}: no story found in quests.json for quest title: ${questTitle}\nquest text: ${storyText}`
+          `${hero.prefix}: no story found in quests.json for \nquest title: ${questTitle}\nquest text: ${storyText}`
         );
         logger.error(
           `no story found in quests.json for quest title: [${questTitle}], story text: [${storyText}]`,
           { prefix: hero.prefix }
         );
-        await pause(SECOND * 60 * 2);
-        quests = require("./DATA/quests.json");
+        await pause(SECOND * 60 * 3);
+        quests = await readJson(questsPath);
         return;
       }
       let storedAnswerOptions = currentStory.answerOptions;
@@ -490,12 +573,13 @@ async function answerQuest(hero) {
             )}...]\`\n*_storedAnswerOptions_*: [${storedAnswerOptions}]\n*_currentAnswerOptions_*: [${currentAnswerOptions}]`
           );
           logger.error(
-            `answer options are not equal! sent telegram message, pausing for 2 minutes...`,
+            `answer options are not equal! sent telegram message, pausing for 3 minutes...`,
             {
               prefix: hero.prefix,
             }
           );
-          await pause(SECOND * 60 * 2);
+          await pause(SECOND * 60 * 3);
+          quests = await readJson(questsPath);
           return;
         }
       } else {
@@ -511,10 +595,10 @@ async function answerQuest(hero) {
           `no stored answer options for quest!\n\t\tQUEST [${questTitle}]\n\t\tSTORY [${storyText.substring(
             0,
             25
-          )}...]\ntelegram message sent, pausing for 2 minutes...`,
+          )}...]\ntelegram message sent, pausing for 3 minutes...`,
           { prefix: hero.prefix }
         );
-        await pause(SECOND * 60 * 2);
+        await pause(SECOND * 60 * 3);
         return;
       }
     } else {
@@ -522,10 +606,11 @@ async function answerQuest(hero) {
         `${hero.prefix}: no story found for quest: ${questTitle}`
       );
       logger.error(
-        `no story found for QUEST [${questTitle}], pausing for 2 minutes...`,
+        `no story found for QUEST [${questTitle}], pausing for 3 minutes...`,
         { prefix: hero.prefix }
       );
-      await pause(SECOND * 60 * 2);
+      await pause(SECOND * 60 * 3);
+      quests = await readJson(questsPath);
       return;
     }
   } else {
@@ -533,20 +618,22 @@ async function answerQuest(hero) {
       `${hero.ID}: failed to find quest element or title!`
     );
     logger.error(
-      `failed to find quest element or title! saving page as '${hero.prefix}_NoQuestTitle', pausing for 2 minutes...`,
+      `failed to find quest element or title! saving page as '${hero.prefix}_NoQuestTitle', pausing for 3 minutes...`,
       {
         prefix: hero.prefix,
       }
     );
     await saveBodyOfPage(hero.page, `${hero.prefix}_NoQuestTitle`);
-    await pause(SECOND * 60 * 2);
+    await pause(SECOND * 60 * 3);
     return;
   }
 }
 
 //if JSON object of scene have 'actionTargets' key, then find target and click it,
 //else wait for second.
-async function action(hero, currentScene) {
+async function takeAction(hero, currentScene) {
+  if (!currentScene) return;
+
   switch (currentScene) {
     case "emptySreen":
     case "error":
@@ -567,9 +654,14 @@ async function action(hero, currentScene) {
       if (!hero.name) hero.name = await getHeroName(hero.page);
       break;
     case "adventureCongratulations":
-      if (Date.now() - hero.dungeonCounterTimestamp > 120 * 1000) {
-        hero.dungeonsCompleted++;
-        hero.dungeonCounterTimestamp = Date.now();
+      if (
+        Date.now() - config.HEROES[hero.ID].lastCompletedDungeonTimestamp >
+        120 * 1000
+      ) {
+        logger.log(`adventure is finished`);
+        config.HEROES[hero.ID].dungeonsCompleted++;
+        config.HEROES[hero.ID].lastCompletedDungeonTimestamp = Date.now();
+        await writeJson(configPath, config);
       }
       break;
     case "attacking":
@@ -586,8 +678,9 @@ async function action(hero, currentScene) {
       return;
   }
 
-  let targets = false;
-  if (currentScene) targets = scenes[currentScene].actionTargets;
+  let targets = scenes[currentScene].actionTargets
+    ? scenes[currentScene].actionTargets
+    : false;
 
   if (targets) {
     logger.log(`found ${targets.length} targets`, {
@@ -650,48 +743,45 @@ async function action(hero, currentScene) {
   }
 }
 
-async function playFirstBiome(heroes) {
+async function playFirstBiome(currentHeroes) {
   //todo: check if heroes are not at target level
   let isPlaying = true;
 
   while (isPlaying) {
-    for (let hero of heroes) {
+    for await (let hero of currentHeroes) {
+      if (currentHeroes.length === 0) {
+        logger.log(`\n\t~= ALL HEROES ARE DONE =~\n`, {
+          messageModifiers: ["green", "underline"],
+        });
+        isPlaying = false;
+        break;
+      }
+
       //if hero is out of time, remove it from the array
-      if (!(await isTimeLeft(hero))) {
+      if (await isOutOfTime(hero)) {
         logger.log(`is out of time!`, {
           prefix: hero.prefix,
         });
-        if (heroes.length === 1) {
-          logger.log(`\n\t~= ALL HEROES ARE OUT OF TIME =~\n`, {
-            messageModifiers: ["green", "underline"],
-          });
-          isPlaying = false;
-          break;
-        } else {
-          heroes.pop(hero);
-          logger.log(`is removed from the [heroes]`, {
-            prefix: hero.prefix,
-            importance: 0,
-          });
-        }
+
+        currentHeroes.pop(hero);
+
+        logger.log(`is removed from the [currentHeroes]`, {
+          prefix: hero.prefix,
+          importance: 0,
+        });
+
         continue;
       }
 
       if (config.MODE === "daily") {
-        if (hero.dungeonsCompleted >= 3) {
-          if (heroes.length === 1) {
-            logger.log(`\n\t~= ALL HEROES ARE DONE WITH DAILIES =~\n`, {
-              messageModifiers: ["green", "underline"],
-            });
-            isPlaying = false;
-            break;
-          } else {
-            heroes.pop(hero);
-            logger.log(`is removed from the [heroes]`, {
-              prefix: hero.prefix,
-              importance: 0,
-            });
-          }
+        if (config.HEROES[hero.ID].dungeonsCompleted >= 3) {
+          logger.log(`is done with dungeons!`, {
+            messageModifiers: ["green"],
+            prefix: hero.prefix,
+          });
+
+          let rewardClaimed = await getDailyReward(hero);
+          if (rewardClaimed) currentHeroes.pop(hero);
           continue;
         }
       }
@@ -700,8 +790,7 @@ async function playFirstBiome(heroes) {
       logger.log(`current scene: ${currentScene}`, {
         prefix: hero.prefix,
       });
-      await action(hero, currentScene);
-      await pause(SECOND * 1);
+      await takeAction(hero, currentScene);
     }
   }
 }
@@ -811,51 +900,113 @@ async function listenToQuest(heroes) {
 }
 
 //todo: add to xpath.DAILY_CHEST and xpath.WEEKLY_CHEST '... and not (//xpath-to-daily/weakly-reward)]'
-async function getDailyReward(page) {
-  await page.goto("https://sonic.sacra.game/daily-quests", {
+async function getDailyReward(hero) {
+  logger.log(`getting daily reward...`, {
+    prefix: hero.prefix,
+    importance: 0,
+  });
+  await hero.page.goto("https://sonic.sacra.game/daily-quests", {
     waitUntil: "networkidle0",
   });
 
+  // //div[contains(@class, "quest__count")]
+  let completedQuestsText = await getText(
+    hero.page,
+    '//div[contains(@class, "quest__count")]',
+    10000
+  );
+  let requiredCompletedDungeons = completedQuestsText.split("/")[1];
+  let completedDungeons = completedQuestsText.split("/")[0];
+
+  if (completedDungeons < requiredCompletedDungeons) {
+    logger.log(
+      `completed dungeons: ${completedDungeons} < required: ${requiredCompletedDungeons}`,
+      {
+        prefix: hero.prefix,
+        messageModifiers: ["yellowBright"],
+        prefixModifiers: ["yellowBright"],
+      }
+    );
+    config.HEROES[hero.ID].dungeonsCompleted = completedDungeons;
+    await writeJson(configPath, config);
+    config = await readJson(configPath);
+    return false;
+  }
+
   //number of daily rewards
-  while ((await getText(page, xpath.DAILY_REWARD_COUNT, 10000))[1] > 0) {
-    await puppeteer.clickByPage(page, xpath.DAILY_CHEST, 5000);
-    await page.waitForNetworkIdle({ idleTime: 5000 });
-    await puppeteer.clickByPage(page, xpath.DAILY_REWARD, 5000);
-    await page.waitForNetworkIdle({ idleTime: 5000 });
+  while ((await getText(hero.page, xpath.DAILY_REWARD_COUNT, 10000))[1] > 0) {
+    await puppeteer.clickByPage(hero.page, xpath.DAILY_CHEST, 5000);
+    await hero.page.waitForNetworkIdle({ idleTime: 5000 });
+    await puppeteer.clickByPage(hero.page, xpath.DAILY_REWARD, 5000);
+    await hero.page.waitForNetworkIdle({ idleTime: 5000 });
+    logger.log(`daily reward received`, {
+      prefix: hero.prefix,
+      importance: 1,
+      messageModifiers: ["whiteBright"],
+    });
   }
 
   //number of weekly rewards
-  while ((await getText(page, xpath.WEAKLY_REWARD_COUNT, 10000))[1] > 0) {
-    await puppeteer.clickByPage(page, xpath.WEAKLY_CHEST, 5000);
-    await page.waitForNetworkIdle({ idleTime: 5000 });
-    await puppeteer.clickByPage(page, xpath.WEAKLY_REWARD, 5000);
-    await page.waitForNetworkIdle({ idleTime: 5000 });
+  while ((await getText(hero.page, xpath.WEAKLY_REWARD_COUNT, 10000))[1] > 0) {
+    await puppeteer.clickByPage(hero.page, xpath.WEAKLY_CHEST, 5000);
+    await hero.page.waitForNetworkIdle({ idleTime: 5000 });
+    await puppeteer.clickByPage(hero.page, xpath.WEAKLY_REWARD, 5000);
+    await hero.page.waitForNetworkIdle({ idleTime: 5000 });
+    logger.log(`weakly reward received`, {
+      prefix: hero.prefix,
+      importance: 1,
+      messageModifiers: ["yellowBright"],
+    });
   }
+
+  logger.log(`done with rewards`, {
+    prefix: hero.prefix,
+    importance: 1,
+    messageModifiers: ["greenBright", "underline", "bold"],
+  });
+
+  return true;
 }
 
 (async () => {
-  const browser = await getBrowser();
-  if (!browser) {
-    logger.error("Failed to initiate browser");
-    return;
-  }
+  quests = await readJson(questsPath);
+  config = await readJson(configPath);
+  let heroes = config.HEROES;
+
+  // const jsonsToWatch = [questsPath, configPath];
+  // await watchJsonChanges(jsonsToWatch);
+
   logger.log(`\n\nMODE: ${config.MODE}\nLOG_LEVEL: ${config.LOG_LEVEL}`, {
     timestampPresence: false,
     prefixPresence: false,
     messageModifiers: ["whiteBright", "underline", "bold"],
   });
-  // await setListenerForNewPageCreated(browser);
 
-  const openPages = await browser.pages();
+  const browsers = await getBrowsers(await getIDs());
+  let currentHeroes = [];
+  let openPages = [];
+  for (const browser of browsers) {
+    if (!browser) {
+      logger.error("Failed to initiate browser");
+      return;
+    }
 
-  let heroes = [];
-  const heroesCount = gameConfig.length;
-  for (let i = 0; i < heroesCount; i++) {
+    // await logInRabbyWallet(browser);
+
+    // await setListenerForNewPageCreated(browser);
+
+    openPages.push(...(await browser.pages()));
+  }
+
+  for (let heroIndex in heroes) {
+    if (!heroes[heroIndex].active) continue;
+
     const hero = new Hero(
-      gameConfig[i].heroID,
-      config.BASE_URL + gameConfig[i].heroID,
-      gameConfig[i].targetLevel,
-      gameConfig[i].sessionMaxDurationInMinutes
+      heroes[heroIndex].heroID,
+      heroes[heroIndex].heroName,
+      `${config.BASE_URL}${heroes[heroIndex].classContractAddress}/${heroes[heroIndex].heroID}`,
+      heroes[heroIndex].targetLevel,
+      heroes[heroIndex].sessionMaxDurationInMinutes
     );
 
     //check if one of the pages contains ID of the hero
@@ -873,7 +1024,7 @@ async function getDailyReward(page) {
       }
     }
 
-    //create new page for hero
+    // create new page for hero
     if (!hero.page) {
       page = await browser.newPage();
       await goToHomePage(hero);
@@ -884,16 +1035,15 @@ async function getDailyReward(page) {
 
     //04:42:10 samwise[443] some-line-of-text
     hero.prefix = `${hero.name}[${hero.ID}]`;
-    heroes.push(hero);
+    currentHeroes.push(hero);
   }
 
   switch (config.MODE) {
     case "level":
-      await playFirstBiome(heroes);
+      await playFirstBiome(currentHeroes);
       break;
     case "daily":
-      await playFirstBiome(heroes);
-      await getDailyReward(heroes[0].page);
+      await playFirstBiome(currentHeroes);
       break;
     case "listen":
       logger.error(
@@ -904,8 +1054,6 @@ async function getDailyReward(page) {
       logger.error(`unknown mode: ${config.MODE}`);
       break;
   }
-  // await playFirstBiome(heroes);
-  // await listenToQuest(heroes);
 })();
 
 class Hero {
@@ -921,8 +1069,9 @@ class Hero {
   sessionMaxDuration;
   idleCount = 0;
   lastActionTime = 0;
-  constructor(ID, homeURL, targetLevel, sessionMaxDuration) {
+  constructor(ID, name, homeURL, targetLevel, sessionMaxDuration) {
     this.ID = ID;
+    this.name = name;
     this.homeURL = homeURL;
     this.targetLevel = targetLevel;
     this.sessionMaxDuration = sessionMaxDuration;
