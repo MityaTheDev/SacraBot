@@ -15,6 +15,11 @@ const questsPath = path.join(__dirname, "/DATA/quests.json");
 let quests;
 let config;
 
+async function updateJson(filePath, data) {
+  await writeJson(filePath, data);
+  return await readJson(filePath);
+}
+
 async function writeJson(filePath, data) {
   const jsonData = JSON.stringify(data, null, 2);
   await fs.promises.writeFile(filePath, jsonData, "utf8");
@@ -414,10 +419,14 @@ async function getCurrentAnswerOptions(hero) {
         "\n",
         ""
       );
-      answerOptions.push(text);
+      answerOptions.push({ text: text, element: element });
     }
     logger.log(
-      `${answerOptionsElems.length} answer options found on screen: [${answerOptions}]`,
+      `${
+        answerOptionsElems.length
+      } answer options found on screen: [${answerOptions.map(
+        (answer) => answer.text
+      )}]`,
       {
         prefix: hero.prefix,
         importance: 0,
@@ -482,6 +491,7 @@ async function compareAnswers(array1, array2) {
 async function clickAnswerButton(hero, text) {
   //DOUBLE QUOTES AROUND ${text} ARE NEEDED HERE!
   //THERE ARE SINGLE QUOTES IN SOME ANSWER TEXT!
+  text = text.replaceAll("(", "\\(").replaceAll(")", "\\)");
   let xpathToButton = `//*[text()="${text}"]/ancestor::div[contains(@class, "answer ")]/button`;
   //if text contains double quotes as first and last charecter concat is needed
   //because of the way page.waitForSelector parses xpath (id add's escape
@@ -489,12 +499,15 @@ async function clickAnswerButton(hero, text) {
   if (text[0] === '"' && text[text.length - 1] === '"') {
     xpathToButton = `//*[text()=concat('"', ${text}, '"')]/ancestor::div[contains(@class, "answer ")]/button`;
   }
-  let buttonCorrectAnswer = await getElem(hero.page, xpathToButton, 5000);
-  if (buttonCorrectAnswer) {
-    await puppeteer.clickByPage(hero.page, xpathToButton);
-  } else {
-    throw new Error(`${hero.ID}: correct answer button not found!`);
-  }
+  // let buttonCorrectAnswer = await element.$(
+  //   `::-p-xpath(//ancestor::div[contains(@class, "answer ")]/button)`
+  // );
+  // if (buttonCorrectAnswer) {
+  // await puppeteer.clickElementByConsole(buttonCorrectAnswer);
+  await puppeteer.clickByPage(hero.page, xpathToButton);
+  // } else {
+  //   throw new Error(`${hero.ID}: correct answer button not found!`);
+  // }
 }
 
 async function answerQuest(hero) {
@@ -507,7 +520,7 @@ async function answerQuest(hero) {
       prefix: hero.prefix,
       importance: 0,
     });
-    await clickAnswerButton(hero, currentAnswerOptions[0]);
+    await clickAnswerButton(hero, currentAnswerOptions[0].text);
     return;
   }
 
@@ -552,7 +565,7 @@ async function answerQuest(hero) {
       if (storedAnswerOptions) {
         const areAnswersEqual = await compareAnswers(
           storedAnswerOptions,
-          currentAnswerOptions
+          currentAnswerOptions.map((obj) => obj.text)
         );
         if (areAnswersEqual) {
           logger.log(
@@ -562,7 +575,11 @@ async function answerQuest(hero) {
               importance: 0,
             }
           );
-          await clickAnswerButton(hero, currentStory.correctAnswer);
+          for (let option of currentAnswerOptions) {
+            if (option.text === currentStory.correctAnswer) {
+              await clickAnswerButton(hero, option.text);
+            }
+          }
         } else {
           await telegram.sendMessage(
             `*__${
@@ -661,7 +678,7 @@ async function takeAction(hero, currentScene) {
         logger.log(`adventure is finished`);
         config.HEROES[hero.ID].dungeonsCompleted++;
         config.HEROES[hero.ID].lastCompletedDungeonTimestamp = Date.now();
-        await writeJson(configPath, config);
+        config = await updateJson(configPath, config);
       }
       break;
     case "attacking":
@@ -773,17 +790,24 @@ async function playFirstBiome(currentHeroes) {
         continue;
       }
 
-      if (config.MODE === "daily") {
-        if (config.HEROES[hero.ID].dungeonsCompleted >= 3) {
-          logger.log(`is done with dungeons!`, {
-            messageModifiers: ["green"],
-            prefix: hero.prefix,
-          });
+      if (
+        config.MODE === "daily" &&
+        config.HEROES[hero.ID].dungeonsCompleted >= 3
+      ) {
+        logger.log(`is done with dungeons!`, {
+          messageModifiers: ["green"],
+          prefix: hero.prefix,
+        });
 
-          let rewardClaimed = await getDailyReward(hero);
-          if (rewardClaimed) currentHeroes.pop(hero);
-          continue;
-        }
+        // let rewardClaimed = await getDailyReward(hero);
+        // if (rewardClaimed) currentHeroes.pop(hero);
+
+        config.HEROES[hero.ID].active = false;
+        config = await updateJson(configPath, config);
+
+        currentHeroes.pop(hero);
+
+        continue;
       }
 
       let currentScene = await getCurrentScene(hero);
@@ -928,8 +952,7 @@ async function getDailyReward(hero) {
       }
     );
     config.HEROES[hero.ID].dungeonsCompleted = completedDungeons;
-    await writeJson(configPath, config);
-    config = await readJson(configPath);
+    config = await updateJson(configPath, config);
     return false;
   }
 
