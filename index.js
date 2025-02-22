@@ -660,6 +660,16 @@ async function takeAction(hero, currentScene) {
       config.HEROES[hero.ID].currentLevel = await getCurrentLevel(hero.page);
       config = await updateJson(configPath, config);
 
+      if (config.ALLOW_LEVEL_UP && (await isNextLevel(hero))) {
+        await levelUp(hero);
+        // temp stop at level 7
+        // todo: add logic to distribute stats according to build
+        if (config.ALLOW_LEVEL_UP && config.currentLevel > 7) {
+          config.ALLOW_LEVEL_UP = false;
+          config = await updateJson(configPath, config);
+        }
+      }
+
       logger.log(
         `${
           hero.sessionMaxDuration -
@@ -793,14 +803,6 @@ async function playFirstBiome(currentHeroes) {
         });
 
         continue;
-      }
-
-      if (config.ALLOW_LEVEL_UP && (await isNextLevel(hero))) {
-        await levelUp(hero);
-        if (config.ALLOW_LEVEL_UP && config.currentLevel > 7) {
-          config.ALLOW_LEVEL_UP = false;
-          config = await updateJson(configPath, config);
-        }
       }
 
       if (
@@ -1023,11 +1025,18 @@ async function levelUp(hero) {
     importance: 0,
   });
 
-  await puppeteer.clickByPage(hero.page, xpath.LEVEL_UP);
-  await pause(SECOND * 2);
+  //temp, todo: add logic for selecting correct attribute
+  let xpathAttr;
+  if (config.HEROES[hero.ID].currentLevel < 3) {
+    xpathAttr = xpath.LEVEL_UP_PLUS_VIT;
+  } else {
+    xpathAttr = xpath.LEVEL_UP_PLUS_DEX;
+  }
+  await puppeteer.clickByPage(hero.page, xpath.LEVEL_UP_BUTTON);
+  await hero.page.waitForNetworkIdle({ idleTime: 2000 });
   while ((await getText(hero.page, xpath.LEVEL_UP_AVAILABLE_STATS)) > 0) {
-    await puppeteer.clickByPage(hero.page, xpath.LEVEL_UP_PLUS_DEX);
-    await pause(SECOND / 3);
+    await puppeteer.clickByPage(hero.page, xpathAttr);
+    await pause(SECOND / 5);
   }
   await puppeteer.clickByPage(hero.page, xpath.LEVEL_UP_BUTTON_CONFIRM);
   await pause(SECOND);
@@ -1035,8 +1044,9 @@ async function levelUp(hero) {
 
 async function isNextLevel(hero) {
   if (
-    (await getElem(hero.page, xpath.LEVEL_UP_NOTIFICATION_ICON)) ||
-    (await getElem(hero.page, xpath.LEVEL_UP_TO))
+    ((await getElem(hero.page, xpath.LEVEL_UP_NOTIFICATION_ICON)) ||
+      (await getElem(hero.page, xpath.LEVEL_UP_TO))) &&
+    !(await getElem(hero.page, xpath.CONTINUE_ADVENTURE_BUTTON))
   ) {
     logger.log(`is ready to level up`, {
       prefix: hero.prefix,

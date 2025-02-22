@@ -9,6 +9,7 @@
   "LEVEL_UP_PLUS_ENERGY": "(//app-buttons-level-up//button[2])[4]",
   "LEVEL_UP_AVAILABLE_STATS": "//div[@class='available']/span[@class='available__value']",
   "LEVEL_UP_BUTTON_CONFIRM": "//app-hero-level-up//div[contains(@class, 'actions')]//button[.=' Level Up ']",
+  "CONTINUE_ADVENTURE_BUTTON": "//button[@id='continue-button' and .=' Continue ']",
   "INPUT_PASSWORD_XPATH": "//input",
   "SUBMIT_BUTTON_XPATH": "//button[@type='submit']",
   "CONFIRM_BTN_XPATH": "//button[.='Confirm']",
