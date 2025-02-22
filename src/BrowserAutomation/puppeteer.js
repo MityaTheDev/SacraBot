@@ -103,7 +103,7 @@ async function elementScrollIntoViewConsole(page, element, range) {
 // Maybe it is harder to spot automated activity because
 // the mouse is clicking with random offsets
 // of the center of the element
-async function clickByPage(page, xPath, timeout = 1000) {
+async function clickByPage(page, xPath, timeout = 10000) {
   const x = Math.random() - 0.5;
   const y = Math.random() - 0.5;
   try {

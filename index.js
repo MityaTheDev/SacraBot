@@ -158,8 +158,8 @@ async function logInRabbyWallet(browser) {
   await page.goto(config.RABBY_WALLET_LOGIN_URL, {
     waitUntil: "domcontentloaded",
   });
-  const inputElem = await getElem(page, xpath.INPUT_PASSWORD_XPATH, 10000);
-  const buttonElem = await getElem(page, xpath.SUBMIT_BUTTON_XPATH, 10000);
+  const inputElem = await getElem(page, xpath.INPUT_PASSWORD_XPATH);
+  const buttonElem = await getElem(page, xpath.SUBMIT_BUTTON_XPATH);
   await puppeteer.fillInInputWithoutCheck(
     inputElem,
     config.RABBY_WALLET_PASSWORD
@@ -228,7 +228,7 @@ async function getBrowsers(IDs) {
   return browsers;
 }
 
-async function getElem(page, xpath, timeout = 1) {
+async function getElem(page, xpath, timeout = 10000) {
   try {
     await page.waitForSelector("::-p-xpath(" + xpath + ")", {
       timeout: timeout,
@@ -240,7 +240,7 @@ async function getElem(page, xpath, timeout = 1) {
   }
 }
 
-async function getElems(page, xpath, timeout = 1) {
+async function getElems(page, xpath, timeout = 10000) {
   try {
     await page.waitForSelector("::-p-xpath(" + xpath + ")", {
       timeout: timeout,
@@ -256,7 +256,7 @@ async function getElems(page, xpath, timeout = 1) {
 /**
  * @param {'innerText' | 'textContent'} option
  */
-async function getText(page, xpath, timeout = 1, option = "innerText") {
+async function getText(page, xpath, timeout = 1000, option = "innerText") {
   if (option !== "innerText" && option !== "textContent") {
     throw new Error(
       `'option' parameter in getText() must be 'innerText' or 'textContent' (innerText is default); currently it's '${option}'`
@@ -273,7 +273,8 @@ async function getText(page, xpath, timeout = 1, option = "innerText") {
     );
     return text;
   } catch (error) {
-    logger.error(error);
+    logger.log(error.message, { importance: 0, messageModifiers: ["red"] });
+    // logger.error(error);
     return false;
   }
 }
@@ -362,7 +363,7 @@ async function getCurrentScene(hero, iterationsLeft = 4) {
 async function checkHealth(hero) {
   logger.log(`checking health...`, { prefix: hero.prefix });
   try {
-    let healthElem = await getElem(hero.page, xpath.HEALTH_XPATH, 10000);
+    let healthElem = await getElem(hero.page, xpath.HEALTH_XPATH);
     let healthText = await puppeteer.elementInnerText(hero.page, healthElem);
     healthText = healthText.replaceAll(" ", "");
     const currentHealth = healthText.split("/")[0];
@@ -409,8 +410,7 @@ async function getCurrentAnswerOptions(hero) {
 
   const answerOptionsElems = await getElems(
     hero.page,
-    xpath.QUEST_ANSWER_XPATH,
-    3000
+    xpath.QUEST_ANSWER_XPATH
   );
   if (answerOptionsElems) {
     let answerOptions = [];
@@ -657,18 +657,23 @@ async function takeAction(hero, currentScene) {
       await refresh(hero.page);
       return;
     case "home":
+      config.HEROES[hero.ID].currentLevel = await getCurrentLevel(hero.page);
+      config = await updateJson(configPath, config);
+
       logger.log(
         `${
           hero.sessionMaxDuration -
           (Date.now() - hero.sessionStartTime) / (1000 * 60)
-        } minutes left`,
+        } minutes left, level: ${config.HEROES[hero.ID].currentLevel}/${
+          config.HEROES[hero.ID].targetLevel
+        }`,
         {
           prefix: hero.prefix,
           importance: 0,
           messageModifiers: ["italic", "magentaBright"],
         }
       );
-      if (!hero.name) hero.name = await getHeroName(hero.page);
+
       break;
     case "adventureCongratulations":
       if (
@@ -790,6 +795,31 @@ async function playFirstBiome(currentHeroes) {
         continue;
       }
 
+      if (config.ALLOW_LEVEL_UP && (await isNextLevel(hero))) {
+        await levelUp(hero);
+        if (config.ALLOW_LEVEL_UP && config.currentLevel > 7) {
+          config.ALLOW_LEVEL_UP = false;
+          config = await updateJson(configPath, config);
+        }
+      }
+
+      if (
+        config.MODE === "level" &&
+        config.HEROES[hero.ID].currentLevel >=
+          config.HEROES[hero.ID].targetLevel
+      ) {
+        config.HEROES[hero.ID].active = false;
+        config = await updateJson(configPath, config);
+
+        logger.log(`is done with leveling!`, {
+          messageModifiers: ["green"],
+          prefix: hero.prefix,
+        });
+
+        currentHeroes.pop(hero);
+        continue;
+      }
+
       if (
         config.MODE === "daily" &&
         config.HEROES[hero.ID].dungeonsCompleted >= 3
@@ -820,10 +850,7 @@ async function playFirstBiome(currentHeroes) {
 }
 
 async function getHeroName(hero) {
-  return new Promise(async (resolve, reject) => {
-    const heroName = await getText(hero.page, xpath.HERO_NAME_XPATH, 5000);
-    resolve(heroName);
-  });
+  return await getText(hero.page, xpath.HERO_NAME_XPATH);
 }
 
 // todo: make it work...
@@ -936,8 +963,7 @@ async function getDailyReward(hero) {
   // //div[contains(@class, "quest__count")]
   let completedQuestsText = await getText(
     hero.page,
-    '//div[contains(@class, "quest__count")]',
-    10000
+    '//div[contains(@class, "quest__count")]'
   );
   let requiredCompletedDungeons = completedQuestsText.split("/")[1];
   let completedDungeons = completedQuestsText.split("/")[0];
@@ -957,7 +983,7 @@ async function getDailyReward(hero) {
   }
 
   //number of daily rewards
-  while ((await getText(hero.page, xpath.DAILY_REWARD_COUNT, 10000))[1] > 0) {
+  while ((await getText(hero.page, xpath.DAILY_REWARD_COUNT))[1] > 0) {
     await puppeteer.clickByPage(hero.page, xpath.DAILY_CHEST, 5000);
     await hero.page.waitForNetworkIdle({ idleTime: 5000 });
     await puppeteer.clickByPage(hero.page, xpath.DAILY_REWARD, 5000);
@@ -970,7 +996,7 @@ async function getDailyReward(hero) {
   }
 
   //number of weekly rewards
-  while ((await getText(hero.page, xpath.WEAKLY_REWARD_COUNT, 10000))[1] > 0) {
+  while ((await getText(hero.page, xpath.WEAKLY_REWARD_COUNT))[1] > 0) {
     await puppeteer.clickByPage(hero.page, xpath.WEAKLY_CHEST, 5000);
     await hero.page.waitForNetworkIdle({ idleTime: 5000 });
     await puppeteer.clickByPage(hero.page, xpath.WEAKLY_REWARD, 5000);
@@ -989,6 +1015,46 @@ async function getDailyReward(hero) {
   });
 
   return true;
+}
+
+async function levelUp(hero) {
+  logger.log(`leveling up...`, {
+    prefix: hero.prefix,
+    importance: 0,
+  });
+
+  await puppeteer.clickByPage(hero.page, xpath.LEVEL_UP);
+  await pause(SECOND * 2);
+  while ((await getText(hero.page, xpath.LEVEL_UP_AVAILABLE_STATS)) > 0) {
+    await puppeteer.clickByPage(hero.page, xpath.LEVEL_UP_PLUS_DEX);
+    await pause(SECOND / 3);
+  }
+  await puppeteer.clickByPage(hero.page, xpath.LEVEL_UP_BUTTON_CONFIRM);
+  await pause(SECOND);
+}
+
+async function isNextLevel(hero) {
+  if (
+    (await getElem(hero.page, xpath.LEVEL_UP_NOTIFICATION_ICON)) ||
+    (await getElem(hero.page, xpath.LEVEL_UP_TO))
+  ) {
+    logger.log(`is ready to level up`, {
+      prefix: hero.prefix,
+    });
+    return true;
+  }
+  return false;
+}
+
+async function getCurrentLevel(hero) {
+  //selects all digits in string
+  const regex = RegExp("\\d+", "g");
+  const levelUpToText = await getText(hero.page, xpath.LEVEL_UP_TO);
+  const digit = regex.exec(levelUpToText);
+  if (digit) {
+    return digit[0];
+  }
+  return await getText(hero.page, xpath.LEVEL);
 }
 
 (async () => {
@@ -1015,7 +1081,6 @@ async function getDailyReward(hero) {
     }
 
     // await logInRabbyWallet(browser);
-
     // await setListenerForNewPageCreated(browser);
 
     openPages.push(...(await browser.pages()));
@@ -1028,7 +1093,6 @@ async function getDailyReward(hero) {
       heroes[heroIndex].heroID,
       heroes[heroIndex].heroName,
       `${config.BASE_URL}${heroes[heroIndex].classContractAddress}/${heroes[heroIndex].heroID}`,
-      heroes[heroIndex].targetLevel,
       heroes[heroIndex].sessionMaxDurationInMinutes
     );
 
@@ -1084,7 +1148,6 @@ class Hero {
   name;
   prefix;
   homeURL;
-  targetLevel;
   dungeonsCompleted = 0;
   dungeonCounterTimestamp = 0;
   page;
@@ -1092,11 +1155,10 @@ class Hero {
   sessionMaxDuration;
   idleCount = 0;
   lastActionTime = 0;
-  constructor(ID, name, homeURL, targetLevel, sessionMaxDuration) {
+  constructor(ID, name, homeURL, sessionMaxDuration) {
     this.ID = ID;
     this.name = name;
     this.homeURL = homeURL;
-    this.targetLevel = targetLevel;
     this.sessionMaxDuration = sessionMaxDuration;
     this.sessionStartTime = Date.now();
   }
