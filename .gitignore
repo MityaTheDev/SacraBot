@@ -3,4 +3,6 @@ logs/
 node_modules/
 package-lock.json
 configs/config.json
+configs/1.json
+configs/2.json
 configs/telegram_config.json

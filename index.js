@@ -10,7 +10,10 @@ const fs = require("fs");
 const path = require("path");
 const DateFormat = require("date-format");
 const { timeStamp } = require("console");
-const configPath = path.join(__dirname, "/configs/config.json");
+const { timeout } = require("puppeteer");
+const INSTANCE = process.argv[2];
+const configPath = path.join(__dirname, `/configs/${INSTANCE}.json`);
+// const configPath = path.join(__dirname, "/configs/config.json");
 // const questsPath = "\\\\DESKTOP-MAIN\\Shared\\quests.json";
 const questsPath = path.join(__dirname, "/DATA/quests.json");
 let quests;
@@ -253,7 +256,6 @@ async function getElems(page, xpath, timeout = 10000) {
   }
 }
 
-//todo: add multiple option, return page.$$eval() (find out what it returns)
 /**
  * @param {'innerText' | 'textContent'} option
  */
@@ -278,15 +280,23 @@ async function getText(
       timeout: timeout,
     });
     if (multiple) {
-      const texts = await page.$$eval("::-p-xpath(" + xpath + ")", (elems) =>
-        elems.map((elem) =>
-          option === "innerText" ? elem.innerText : elem.textContent
-        )
+      const texts = await page.$$eval(
+        "::-p-xpath(" + xpath + ")",
+        (elems, option) => {
+          elems.map((elem, option) => {
+            option === "innerText" ? elem.innerText : elem.textContent;
+          }, option);
+        },
+        option
       );
       return texts;
     } else {
-      const text = await page.$eval("::-p-xpath(" + xpath + ")", (elem) =>
-        option === "innerText" ? elem.innerText : elem.textContent
+      const text = await page.$eval(
+        "::-p-xpath(" + xpath + ")",
+        (elem, option) => {
+          option === "innerText" ? elem.innerText : elem.textContent;
+        },
+        option
       );
       return text;
     }
