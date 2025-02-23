@@ -260,9 +260,12 @@ async function getElems(page, xpath, timeout = 10000) {
 async function getText(
   page,
   xpath,
-  timeout = 10000,
-  option = "innerText",
-  logError = true
+  {
+    timeout = 10000,
+    option = "innerText",
+    logError = true,
+    multiple = false,
+  } = {}
 ) {
   if (option !== "innerText" && option !== "textContent") {
     throw new Error(
@@ -274,11 +277,19 @@ async function getText(
     await page.waitForSelector("::-p-xpath(" + xpath + ")", {
       timeout: timeout,
     });
-    const text = await page.$eval(
-      "::-p-xpath(" + xpath + ")",
-      (elem) => elem.innerText
-    );
-    return text;
+    if (multiple) {
+      const texts = await page.$$eval("::-p-xpath(" + xpath + ")", (elems) =>
+        elems.map((elem) =>
+          option === "innerText" ? elem.innerText : elem.textContent
+        )
+      );
+      return texts;
+    } else {
+      const text = await page.$eval("::-p-xpath(" + xpath + ")", (elem) =>
+        option === "innerText" ? elem.innerText : elem.textContent
+      );
+      return text;
+    }
   } catch (error) {
     if (logError) logger.error(error);
     return false;
@@ -369,8 +380,7 @@ async function getCurrentScene(hero, iterationsLeft = 4) {
 async function checkHealth(hero) {
   logger.log(`checking health...`, { prefix: hero.prefix });
   try {
-    let healthElem = await getElem(hero.page, xpath.HEALTH_XPATH);
-    let healthText = await puppeteer.elementInnerText(hero.page, healthElem);
+    let healthText = await getText(hero.page, xpath.HEALTH_XPATH);
     healthText = healthText.replaceAll(" ", "");
     const currentHealth = healthText.split("/")[0];
     const maxHealth = healthText.split("/")[1];
@@ -519,10 +529,8 @@ async function clickAnswerButton(hero, text) {
 async function answerQuest(hero) {
   logger.log(`answering quest...`, { prefix: hero.prefix, importance: 0 });
 
-  //todo: change to getText();
-  const questElem = await getElem(hero.page, xpath.QUEST_TITLE_XPATH, 1000);
-  const questTitle = await puppeteer.elementInnerText(hero.page, questElem);
-  if (!questElem || !questTitle) {
+  const questTitle = await getText(hero.page, xpath.QUEST_TITLE_XPATH);
+  if (!questTitle) {
     await saveBodyOfPage(hero.page, `${hero.prefix}_NoQuestTitle`);
     await throwQuestsError("noQuestTitleOrElement", hero);
     return;
@@ -584,37 +592,26 @@ async function answerQuest(hero) {
     storedAnswerOptions,
     currentAnswerOptions.map((obj) => obj.text)
   );
-  //todo: finish this
   if (!areAnswerOptionsEqual) {
-  }
-  if (areAnswerOptionsEqual) {
-    logger.log(`answering with correct answer [${storedStory.correctAnswer}]`, {
-      prefix: hero.prefix,
-      importance: 0,
-    });
-    for (let option of currentAnswerOptions) {
-      if (option.text === storedStory.correctAnswer) {
-        await clickAnswerButton(hero, option.text);
-      }
-    }
-  } else {
-    await telegram.sendMessage(
-      `*__${
-        hero.prefix
-      }: Answer options are not equal__*\n\`[${questTitle}] -> [${storyText.substring(
-        0,
-        25
-      )}...]\`\n*_storedAnswerOptions_*: [${storedAnswerOptions}]\n*_currentAnswerOptions_*: [${currentAnswerOptions}]`
+    await throwQuestsError(
+      hero,
+      "noStoredAnswerOptions",
+      questTitle,
+      storyText,
+      storedAnswerOptions,
+      currentAnswerOptions.map((obj) => obj.text)
     );
-    logger.error(
-      `answer options are not equal! sent telegram message, pausing for 3 minutes...`,
-      {
-        prefix: hero.prefix,
-      }
-    );
-    await pause(SECOND * 60 * 3);
-    quests = await readJson(questsPath);
     return;
+  }
+
+  logger.log(`answering with correct answer [${storedStory.correctAnswer}]`, {
+    prefix: hero.prefix,
+    importance: 0,
+  });
+  for (let option of currentAnswerOptions) {
+    if (option.text === storedStory.correctAnswer) {
+      await clickAnswerButton(hero, option.text);
+    }
   }
 }
 
@@ -623,11 +620,13 @@ async function throwQuestsError(
   hero,
   questTitle = "",
   storyText = "",
-  answerOptions = []
+  storedAnswerOptions = [],
+  currentAnswerOptions = []
 ) {
   const pauseTime = SECOND * 60;
   let errorMessage = "";
   let telegramMessage = "";
+  let partOfStoryText = "";
 
   switch (type) {
     case "noQuestTitleOrElement":
@@ -643,13 +642,17 @@ async function throwQuestsError(
       errorMessage = `story not found in quests.json for quest title: [${questTitle}], story text: [${storyText}]`;
       break;
     case "noStoredAnswerOptions":
-      const partOfStoryText = `${storyText.substring(0, 25)}...`;
+      partOfStoryText = `${storyText.substring(0, 25)}...`;
       telegramMessage = `${hero.prefix}\nno stored answer options for\nquest: [${questTitle}]\nstory: [${partOfStoryText}]`;
       errorMessage = `no stored answer options for quest!\n\t\tQUEST [${questTitle}]\n\t\tSTORY [${partOfStoryText}]`;
       break;
     case "answerOptionsNotEqual":
+      partOfStoryText = `${storyText.substring(0, 25)}...`;
+      telegramMessage = `*__${hero.prefix}: Answer options are not equal__*\n\`[${questTitle}] -> [${partOfStoryText}]\`\n*_storedAnswerOptions_*: [${storedAnswerOptions}]\n*_currentAnswerOptions_*: [${currentAnswerOptions}]`;
+      errorMessage = `answer options are not equal!`;
       break;
   }
+
   await telegram.sendMessage(telegramMessage);
   logger.error(errorMessage, { prefix: hero.prefix });
   logger.error(`pausing for ${pauseTime / 1000} seconds...`, {
@@ -1112,13 +1115,9 @@ async function isNextLevel(hero) {
 async function getCurrentLevel(hero) {
   //selects all digits in string
   const regex = RegExp("\\d+", "g");
-  const levelUpToText = await getText(
-    hero.page,
-    xpath.LEVEL_UP_TO,
-    10000,
-    "innerText",
-    false
-  );
+  const levelUpToText = await getText(hero.page, xpath.LEVEL_UP_TO, {
+    logError: false,
+  });
   const digit = regex.exec(levelUpToText);
   if (digit) {
     return parseInt(digit[0]);
