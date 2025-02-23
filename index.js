@@ -441,10 +441,9 @@ async function getCurrentAnswerOptions(hero) {
   if (answerOptionsElems) {
     let answerOptions = [];
     for (let element of answerOptionsElems) {
-      const text = (await puppeteer.elementInnerText(element)).replaceAll(
-        "\nChoose",
-        ""
-      );
+      const text = (await puppeteer.elementInnerText(element))
+        .replaceAll("\nChoose", "")
+        .replaceAll("\nApprove", "");
       const buttonElement = await element.$('::-p-xpath("\\button")');
       answerOptions.push({ text: text, buttonElement: buttonElement });
     }
