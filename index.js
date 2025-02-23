@@ -545,6 +545,16 @@ async function answerQuest(hero) {
     await throwQuestsError("noQuestTitleOrElement", hero);
     return;
   }
+  const storyText = (
+    await getText(hero.page, xpath.QUEST_TEXT_XPATH)
+  ).replaceAll("\n", "");
+  logger.log(
+    `quest title: ${questTitle}, quest text: ${storyText.substring(0, 25)}...`,
+    {
+      prefix: hero.prefix,
+      importance: 0,
+    }
+  );
 
   const currentAnswerOptions = await getCurrentAnswerOptions(hero);
 
@@ -558,40 +568,24 @@ async function answerQuest(hero) {
     return;
   }
 
-  // const questTextElem = await getElem(hero.page, xpath.QUEST_TEXT_XPATH);
-  // const storyText = (
-  //   await puppeteer.elementInnerText(hero.page, questTextElem)
-  // ).replaceAll("\n", "");
-  const storyText = await getText(hero.page, xpath.QUEST_TEXT_XPATH).replaceAll(
-    "\n",
-    ""
-  );
-  logger.log(
-    `quest title: ${questTitle}, quest text: ${storyText.substring(0, 25)}...`,
-    {
-      prefix: hero.prefix,
-      importance: 0,
-    }
-  );
-
   //search quests.json for quest title and for quest text
   const storedQuest = quests[questTitle];
   if (!storedQuest) {
-    await throwQuestsError(hero, "noStoredQuest", questTitle, storyText);
+    await throwQuestsError("noStoredQuest", hero, questTitle, storyText);
     return;
   }
 
   const storedStory = storedQuest[storyText];
   if (!storedStory) {
-    await throwQuestsError(hero, "noStoredStory", questTitle, storyText);
+    await throwQuestsError("noStoredStory", hero, questTitle, storyText);
     return;
   }
 
   const storedAnswerOptions = storedStory.answerOptions;
   if (!storedAnswerOptions) {
     await throwQuestsError(
-      hero,
       "noStoredAnswerOptions",
+      hero,
       questTitle,
       storyText
     );
@@ -604,8 +598,8 @@ async function answerQuest(hero) {
   );
   if (!areAnswerOptionsEqual) {
     await throwQuestsError(
+      "answerOptionsNotEqual",
       hero,
-      "noStoredAnswerOptions",
       questTitle,
       storyText,
       storedAnswerOptions,
@@ -749,7 +743,7 @@ async function takeAction(hero, currentScene) {
     : false;
 
   if (targets) {
-    logger.log(`found ${targets.length} targets`, {
+    logger.log(`found ${Object.keys(targets).length} targets for action`, {
       prefix: hero.prefix,
       importance: 0,
     });
@@ -847,7 +841,7 @@ async function playFirstBiome(currentHeroes) {
         config.HEROES[hero.ID].active = false;
         config = await updateJson(configPath, config);
 
-        logger.log(`is done with leveling!`, {
+        logger.log(`is done with levelling!`, {
           messageModifiers: ["green"],
           prefix: hero.prefix,
         });
@@ -1054,7 +1048,7 @@ async function getDailyReward(hero) {
 }
 
 async function levelUp(hero) {
-  logger.log(`leveling up...`, {
+  logger.log(`levelling up to ${config.HEROES[hero.ID].currentLevel}...`, {
     prefix: hero.prefix,
     importance: 0,
   });
@@ -1093,11 +1087,7 @@ async function levelUp(hero) {
       );
       return;
   }
-  if (config.HEROES[hero.ID].currentLevel < 3) {
-    xpathAttr = xpath.LEVEL_UP_PLUS_VIT;
-  } else {
-    xpathAttr = xpath.LEVEL_UP_PLUS_DEX;
-  }
+
   await puppeteer.clickByPage(hero.page, xpath.LEVEL_UP_BUTTON);
   await hero.page.waitForNetworkIdle({ idleTime: 2000 });
   while ((await getText(hero.page, xpath.LEVEL_UP_AVAILABLE_STATS)) > 0) {

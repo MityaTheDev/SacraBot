@@ -27,6 +27,9 @@ async function sendMessage(message) {
       prefixModifiers: ["grey"],
       messageModifiers: ["grey"],
     });
+    if (data.ok === false) {
+      logger.error(JSON.stringify(data, null, 2));
+    }
   } catch (error) {
     logger.error("Error sending message:", error);
   }
