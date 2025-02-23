@@ -569,6 +569,12 @@ async function answerQuest(hero) {
     return;
   }
 
+  //temp; todo: at lvl 7 put on closthes, if don't have a weapon, go and buy one
+  if (questTitle === "Guardian of the Forest") {
+    await telegram.sendMessage(`${hero.prefix} is at Guardian of the Forest`);
+    return;
+  }
+
   //search quests.json for quest title and for quest text
   const storedQuest = quests[questTitle];
   if (!storedQuest) {
@@ -697,6 +703,12 @@ async function takeAction(hero, currentScene) {
           config.ALLOW_LEVEL_UP = false;
           config = await updateJson(configPath, config);
         }
+      }
+
+      //temp; todo: put on items, if don't have a weapon, go and buy one
+      if (config.HEROES[hero.ID].currentLevel === 7) {
+        await telegram.sendMessage(`${hero.prefix} is ready for boss fight!`);
+        return;
       }
 
       logger.log(
