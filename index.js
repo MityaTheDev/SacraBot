@@ -11,6 +11,7 @@ const path = require("path");
 const DateFormat = require("date-format");
 const { timeStamp } = require("console");
 const configPath = path.join(__dirname, "/configs/config.json");
+// const questsPath = "\\\\DESKTOP-MAIN\\Shared\\quests.json";
 const questsPath = path.join(__dirname, "/DATA/quests.json");
 let quests;
 let config;
@@ -235,7 +236,7 @@ async function getElem(page, xpath, timeout = 10000) {
     });
     return await page.$("::-p-xpath(" + xpath + ")");
   } catch (error) {
-    logger.error(error);
+    // logger.error(error);
     return false;
   }
 }
@@ -256,7 +257,13 @@ async function getElems(page, xpath, timeout = 10000) {
 /**
  * @param {'innerText' | 'textContent'} option
  */
-async function getText(page, xpath, timeout = 1000, option = "innerText") {
+async function getText(
+  page,
+  xpath,
+  timeout = 10000,
+  option = "innerText",
+  logError = true
+) {
   if (option !== "innerText" && option !== "textContent") {
     throw new Error(
       `'option' parameter in getText() must be 'innerText' or 'textContent' (innerText is default); currently it's '${option}'`
@@ -273,8 +280,7 @@ async function getText(page, xpath, timeout = 1000, option = "innerText") {
     );
     return text;
   } catch (error) {
-    logger.log(error.message, { importance: 0, messageModifiers: ["red"] });
-    // logger.error(error);
+    if (logError) logger.error(error);
     return false;
   }
 }
@@ -512,6 +518,16 @@ async function clickAnswerButton(hero, text) {
 
 async function answerQuest(hero) {
   logger.log(`answering quest...`, { prefix: hero.prefix, importance: 0 });
+
+  //todo: change to getText();
+  const questElem = await getElem(hero.page, xpath.QUEST_TITLE_XPATH, 1000);
+  const questTitle = await puppeteer.elementInnerText(hero.page, questElem);
+  if (!questElem || !questTitle) {
+    await saveBodyOfPage(hero.page, `${hero.prefix}_NoQuestTitle`);
+    await throwQuestsError("noQuestTitleOrElement", hero);
+    return;
+  }
+
   const currentAnswerOptions = await getCurrentAnswerOptions(hero);
 
   //if only one answer option found, answer with it
@@ -524,126 +540,124 @@ async function answerQuest(hero) {
     return;
   }
 
-  const questElem = await getElem(hero.page, xpath.QUEST_TITLE_XPATH, 1000);
-  const questTitle = await puppeteer.elementInnerText(hero.page, questElem);
-  if (questElem && questTitle) {
-    const questTextElem = await getElem(
-      hero.page,
-      xpath.QUEST_TEXT_XPATH,
-      1000
+  // const questTextElem = await getElem(hero.page, xpath.QUEST_TEXT_XPATH);
+  // const storyText = (
+  //   await puppeteer.elementInnerText(hero.page, questTextElem)
+  // ).replaceAll("\n", "");
+  const storyText = await getText(hero.page, xpath.QUEST_TEXT_XPATH).replaceAll(
+    "\n",
+    ""
+  );
+  logger.log(
+    `quest title: ${questTitle}, quest text: ${storyText.substring(0, 25)}...`,
+    {
+      prefix: hero.prefix,
+      importance: 0,
+    }
+  );
+
+  //search quests.json for quest title and for quest text
+  const storedQuest = quests[questTitle];
+  if (!storedQuest) {
+    await throwQuestsError(hero, "noStoredQuest", questTitle, storyText);
+    return;
+  }
+
+  const storedStory = storedQuest[storyText];
+  if (!storedStory) {
+    await throwQuestsError(hero, "noStoredStory", questTitle, storyText);
+    return;
+  }
+
+  const storedAnswerOptions = storedStory.answerOptions;
+  if (!storedAnswerOptions) {
+    await throwQuestsError(
+      hero,
+      "noStoredAnswerOptions",
+      questTitle,
+      storyText
     );
-    const storyText = (
-      await puppeteer.elementInnerText(hero.page, questTextElem)
-    ).replaceAll("\n", "");
-    logger.log(
-      `quest title: ${questTitle}, quest text: ${storyText.substring(
-        0,
-        25
-      )}...`,
-      {
-        prefix: hero.prefix,
-        importance: 0,
+    return;
+  }
+
+  const areAnswerOptionsEqual = await compareAnswers(
+    storedAnswerOptions,
+    currentAnswerOptions.map((obj) => obj.text)
+  );
+  //todo: finish this
+  if (!areAnswerOptionsEqual) {
+  }
+  if (areAnswerOptionsEqual) {
+    logger.log(`answering with correct answer [${storedStory.correctAnswer}]`, {
+      prefix: hero.prefix,
+      importance: 0,
+    });
+    for (let option of currentAnswerOptions) {
+      if (option.text === storedStory.correctAnswer) {
+        await clickAnswerButton(hero, option.text);
       }
-    );
-    //search quests.json for quest title and for quest text
-    const storedQuests = quests[questTitle];
-    if (storedQuests) {
-      const currentStory = storedQuests[storyText];
-      if (!currentStory) {
-        await telegram.sendMessage(
-          `${hero.prefix}: no story found in quests.json for \nquest title: ${questTitle}\nquest text: ${storyText}`
-        );
-        logger.error(
-          `no story found in quests.json for quest title: [${questTitle}], story text: [${storyText}]`,
-          { prefix: hero.prefix }
-        );
-        await pause(SECOND * 60 * 3);
-        quests = await readJson(questsPath);
-        return;
-      }
-      let storedAnswerOptions = currentStory.answerOptions;
-      if (storedAnswerOptions) {
-        const areAnswersEqual = await compareAnswers(
-          storedAnswerOptions,
-          currentAnswerOptions.map((obj) => obj.text)
-        );
-        if (areAnswersEqual) {
-          logger.log(
-            `answering with correct answer [${currentStory.correctAnswer}]`,
-            {
-              prefix: hero.prefix,
-              importance: 0,
-            }
-          );
-          for (let option of currentAnswerOptions) {
-            if (option.text === currentStory.correctAnswer) {
-              await clickAnswerButton(hero, option.text);
-            }
-          }
-        } else {
-          await telegram.sendMessage(
-            `*__${
-              hero.prefix
-            }: Answer options are not equal__*\n\`[${questTitle}] -> [${storyText.substring(
-              0,
-              25
-            )}...]\`\n*_storedAnswerOptions_*: [${storedAnswerOptions}]\n*_currentAnswerOptions_*: [${currentAnswerOptions}]`
-          );
-          logger.error(
-            `answer options are not equal! sent telegram message, pausing for 3 minutes...`,
-            {
-              prefix: hero.prefix,
-            }
-          );
-          await pause(SECOND * 60 * 3);
-          quests = await readJson(questsPath);
-          return;
-        }
-      } else {
-        await telegram.sendMessage(
-          `${
-            hero.prefix
-          }: no stored answer options for quest [${questTitle}]\nstory [${storyText.substring(
-            0,
-            25
-          )}...]`
-        );
-        logger.error(
-          `no stored answer options for quest!\n\t\tQUEST [${questTitle}]\n\t\tSTORY [${storyText.substring(
-            0,
-            25
-          )}...]\ntelegram message sent, pausing for 3 minutes...`,
-          { prefix: hero.prefix }
-        );
-        await pause(SECOND * 60 * 3);
-        return;
-      }
-    } else {
-      await telegram.sendMessage(
-        `${hero.prefix}: no story found for quest: ${questTitle}`
-      );
-      logger.error(
-        `no story found for QUEST [${questTitle}], pausing for 3 minutes...`,
-        { prefix: hero.prefix }
-      );
-      await pause(SECOND * 60 * 3);
-      quests = await readJson(questsPath);
-      return;
     }
   } else {
     await telegram.sendMessage(
-      `${hero.ID}: failed to find quest element or title!`
+      `*__${
+        hero.prefix
+      }: Answer options are not equal__*\n\`[${questTitle}] -> [${storyText.substring(
+        0,
+        25
+      )}...]\`\n*_storedAnswerOptions_*: [${storedAnswerOptions}]\n*_currentAnswerOptions_*: [${currentAnswerOptions}]`
     );
     logger.error(
-      `failed to find quest element or title! saving page as '${hero.prefix}_NoQuestTitle', pausing for 3 minutes...`,
+      `answer options are not equal! sent telegram message, pausing for 3 minutes...`,
       {
         prefix: hero.prefix,
       }
     );
-    await saveBodyOfPage(hero.page, `${hero.prefix}_NoQuestTitle`);
     await pause(SECOND * 60 * 3);
+    quests = await readJson(questsPath);
     return;
   }
+}
+
+async function throwQuestsError(
+  type,
+  hero,
+  questTitle = "",
+  storyText = "",
+  answerOptions = []
+) {
+  const pauseTime = SECOND * 60;
+  let errorMessage = "";
+  let telegramMessage = "";
+
+  switch (type) {
+    case "noQuestTitleOrElement":
+      telegramMessage = `${hero.ID}\nfailed to find quest element or title on page!`;
+      errorMessage = `failed to find quest element or title on page! saving page as '${hero.prefix}_NoQuestTitle'`;
+      break;
+    case "noStoredQuest":
+      telegramMessage = `${hero.prefix}\nquest not found - [${questTitle}]`;
+      errorMessage = `quest not found - [${questTitle}]`;
+      break;
+    case "noStoredStory":
+      telegramMessage = `${hero.prefix}\nstory not found in quests.json for \nquest title: ${questTitle}\nstory text: ${storyText}`;
+      errorMessage = `story not found in quests.json for quest title: [${questTitle}], story text: [${storyText}]`;
+      break;
+    case "noStoredAnswerOptions":
+      const partOfStoryText = `${storyText.substring(0, 25)}...`;
+      telegramMessage = `${hero.prefix}\nno stored answer options for\nquest: [${questTitle}]\nstory: [${partOfStoryText}]`;
+      errorMessage = `no stored answer options for quest!\n\t\tQUEST [${questTitle}]\n\t\tSTORY [${partOfStoryText}]`;
+      break;
+    case "answerOptionsNotEqual":
+      break;
+  }
+  await telegram.sendMessage(telegramMessage);
+  logger.error(errorMessage, { prefix: hero.prefix });
+  logger.error(`pausing for ${pauseTime / 1000} seconds...`, {
+    prefix: hero.prefix,
+  });
+  await pause(pauseTime);
+  quests = await readJson(questsPath);
+  return;
 }
 
 //if JSON object of scene have 'actionTargets' key, then find target and click it,
@@ -657,14 +671,21 @@ async function takeAction(hero, currentScene) {
       await refresh(hero.page);
       return;
     case "home":
-      config.HEROES[hero.ID].currentLevel = await getCurrentLevel(hero.page);
+      config.HEROES[hero.ID].currentLevel = await getCurrentLevel(hero);
       config = await updateJson(configPath, config);
 
       if (config.ALLOW_LEVEL_UP && (await isNextLevel(hero))) {
-        await levelUp(hero);
-        // temp stop at level 7
+        // temp stop at level 4, go virtual till 7
+        if (
+          config.HEROES[hero.ID].currentLevel <= 4 ||
+          (config.HEROES[hero.ID].currentLevel >= 7 &&
+            config.HEROES[hero.ID].currentLevel < 12)
+        ) {
+          await levelUp(hero);
+        }
+
         // todo: add logic to distribute stats according to build
-        if (config.ALLOW_LEVEL_UP && config.currentLevel > 7) {
+        if (config.ALLOW_LEVEL_UP && config.HEROES[hero.ID].currentLevel > 12) {
           config.ALLOW_LEVEL_UP = false;
           config = await updateJson(configPath, config);
         }
@@ -1027,6 +1048,38 @@ async function levelUp(hero) {
 
   //temp, todo: add logic for selecting correct attribute
   let xpathAttr;
+  switch (config.HEROES[hero.ID].currentLevel) {
+    case 2:
+      xpathAttr = xpath.LEVEL_UP_PLUS_VIT;
+      break;
+    case 3:
+      xpathAttr = xpath.LEVEL_UP_PLUS_DEX;
+      break;
+    case 4:
+      xpathAttr = xpath.LEVEL_UP_PLUS_DEX;
+      break;
+    case 7:
+      xpathAttr = xpath.LEVEL_UP_PLUS_DEX;
+      break;
+    case 8:
+      xpathAttr = xpath.LEVEL_UP_PLUS_STR;
+      break;
+    case 9:
+      xpathAttr = xpath.LEVEL_UP_PLUS_STR;
+      break;
+    case 10:
+      xpathAttr = xpath.LEVEL_UP_PLUS_STR;
+      break;
+    case 11:
+      xpathAttr = xpath.LEVEL_UP_PLUS_VIT;
+      break;
+    default:
+      logger.log(
+        `can't level up on level [${config.HEROES[hero.ID].currentLevel}]!`,
+        { prefix: hero.prefix }
+      );
+      return;
+  }
   if (config.HEROES[hero.ID].currentLevel < 3) {
     xpathAttr = xpath.LEVEL_UP_PLUS_VIT;
   } else {
@@ -1044,9 +1097,9 @@ async function levelUp(hero) {
 
 async function isNextLevel(hero) {
   if (
-    ((await getElem(hero.page, xpath.LEVEL_UP_NOTIFICATION_ICON)) ||
-      (await getElem(hero.page, xpath.LEVEL_UP_TO))) &&
-    !(await getElem(hero.page, xpath.CONTINUE_ADVENTURE_BUTTON))
+    ((await getElem(hero.page, xpath.LEVEL_UP_NOTIFICATION_ICON, 500)) ||
+      (await getElem(hero.page, xpath.LEVEL_UP_TO, 500))) &&
+    !(await getElem(hero.page, xpath.CONTINUE_ADVENTURE_BUTTON, 500))
   ) {
     logger.log(`is ready to level up`, {
       prefix: hero.prefix,
@@ -1059,10 +1112,16 @@ async function isNextLevel(hero) {
 async function getCurrentLevel(hero) {
   //selects all digits in string
   const regex = RegExp("\\d+", "g");
-  const levelUpToText = await getText(hero.page, xpath.LEVEL_UP_TO);
+  const levelUpToText = await getText(
+    hero.page,
+    xpath.LEVEL_UP_TO,
+    10000,
+    "innerText",
+    false
+  );
   const digit = regex.exec(levelUpToText);
   if (digit) {
-    return digit[0];
+    return parseInt(digit[0]);
   }
   return await getText(hero.page, xpath.LEVEL);
 }

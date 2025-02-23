@@ -1,6 +1,6 @@
 {
   "LEVEL": "//app-hero-info//div[@class='level__text']",
-  "LEVEL_UP_TO": "//app-hero-info//*[contains(text(), 'up to')]",
+  "LEVEL_UP_TO": "//app-hero-info//div[contains(text(), 'up to')]",
   "LEVEL_UP_NOTIFICATION_ICON": "//div[contains(@class, 'notifications')]/img",
   "LEVEL_UP_BUTTON": "//div[contains(@class, 'btns-levels')]/button",
   "LEVEL_UP_PLUS_STR": "(//app-buttons-level-up//button[2])[1]",

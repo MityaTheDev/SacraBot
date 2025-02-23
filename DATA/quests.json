@@ -84,6 +84,64 @@
   },
 
   "You Shall Not Pass": {
+    "": {
+      "answerOptions": ["", "", "", ""],
+      "correctAnswer": ""
+    },
+    "\"Uh... and you're not very smart, are you? My bad. Truth or Dare?\"": {
+      "answerOptions": ["\"Dare.\"", "\"Truth.\""],
+      "correctAnswer": "\"Truth.\""
+    },
+    "\"What is reality and what is its nature?\"": {
+      "answerOptions": [
+        "\"Reality is what lies beyond our illusions about it.\"",
+        "\"The totality of all illusions of all beings.\"",
+        "\"I can't say.\"",
+        "\"For us, reality is just our illusions about what we want it to be.\""
+      ],
+      "correctAnswer": "\"The totality of all illusions of all beings.\""
+    },
+    "\"How did the universe begin?\"": {
+      "answerOptions": [
+        "\"It was created by the gods. But someone had to create them first.\"",
+        "\"I can't say.\"",
+        "\"Out of the chaos, something was eventually born that was able to hold its shape.\""
+      ],
+      "correctAnswer": "\"Out of the chaos, something was eventually born that was able to hold its shape.\""
+    },
+    "The guard looks at you and whispers softly: \"Password?\"": {
+      "answerOptions": [
+        "\"You suck.\"",
+        "\"I don't now\".",
+        "\"Password.\"",
+        "\"Savage!\""
+      ],
+      "correctAnswer": "\"Password.\""
+    },
+    "\"Does evil exist outside of our subjective ideas about it?\"": {
+      "answerOptions": [
+        "\"No. Evil is only our concept of evil.\"",
+        "\"Yes, there are definitely evil things. Menstruation, hangovers, modern music.\"",
+        "\"I can't say.\""
+      ],
+      "correctAnswer": "\"No. Evil is only our concept of evil.\""
+    },
+    "\"Today, passage with weapons is prohibited. Please hand over your weapon, and don't ask where it went later.\"": {
+      "answerOptions": [
+        "Refuse.",
+        "Hand over your weapons to the guards and say goodbye to them."
+      ],
+      "correctAnswer": "Refuse."
+    },
+    "\"Show me your breasts!\"": {
+      "answerOptions": [
+        "Don't do it",
+        "Hit him in the groin.",
+        "Show them and shake them a little from side to side so that everyone is happy.",
+        "Show them."
+      ],
+      "correctAnswer": "Show them and shake them a little from side to side so that everyone is happy."
+    },
     "\"What does it mean when a cat says \"meow\"?\"": {
       "answerOptions": [
         "\"All things. Literally everything. They only have that word.",
@@ -268,10 +326,6 @@
         "Refuse."
       ],
       "correctAnswer": "Give a quiet cackling laugh."
-    },
-    "": {
-      "answerOptions": ["", "", "", ""],
-      "correctAnswer": ""
     }
   },
 
@@ -706,6 +760,20 @@
       ],
       "correctAnswer": "Watch what they will do."
     },
+    "From an extremely ancient crypt with a sagging roof, another young tomboy flies out. He screams in horror and runs towards the city, while the other children greet his appearance with laughter.": {
+      "answerOptions": [
+        "Be a weird stranger who harasses children.",
+        "Find out what happened."
+      ],
+      "correctAnswer": "Find out what happened."
+    },
+    "\"It’s a terrible crypt with a dead man in it!\" the children answer. \"We have a competition to see who will spend the most time in there! Join in if you are not a coward!\"": {
+      "answerOptions": [
+        "Stay a cowardly bitch all your life.",
+        "Enter the contest."
+      ],
+      "correctAnswer": "Stay a cowardly bitch all your life."
+    },
     "": {
       "answerOptions": ["", ""],
       "correctAnswer": ""
@@ -858,6 +926,13 @@
       "answerOptions": ["Leave this bum in the forest!", "Keep dragging him!"],
       "correctAnswer": "Keep dragging him!"
     },
+    "The wretch seems even more scared and lost.\"You want... to chop off my leg?\" he asks.": {
+      "answerOptions": [
+        "\"Or I'll just watch you die.\"",
+        "\"Nope. You're the one who wants me to chop off your leg!\""
+      ],
+      "correctAnswer": "\"Nope. You're the one who wants me to chop off your leg!\""
+    },
     "": {
       "answerOptions": ["", ""],
       "correctAnswer": ""
@@ -880,9 +955,78 @@
       ],
       "correctAnswer": "Only real scum don't help animals. You're not like that."
     },
+    "You are snapped out of your thoughts by the desperate barking of a dog.You tense up, thinking you're about to have another encounter with the woolly buggers, but the dog isn't barking at you.It doesn't like something it smells in the thicket.": {
+      "answerOptions": [
+        "Be an irresponsible asshole and walk away.",
+        "\"What's wrong, buddy?\""
+      ],
+      "correctAnswer": "\"What's wrong, buddy?\""
+    },
+    "Suddenly, a frightened woman crashes into you, falls, becomes even more frightened, tries to get to her feet and freezes.\"It's you! It's you!\" she says, looking at you with hopeful eyes. \"You have to help me! Something has taken my baby again, there will only be eighteen of them left if you don't help!\"": {
+      "answerOptions": ["Refuse.", "Help her again."],
+      "correctAnswer": "Help her again."
+    },
+    "Suddenly, a terrified woman runs up to you.\"Please help, something big and evil has dragged my child away!\"": {
+      "answerOptions": ["Refuse.", "Help."],
+      "correctAnswer": "Help."
+    },
     "": {
       "answerOptions": ["", ""],
       "correctAnswer": ""
+    }
+  },
+
+  "Stranger": {
+    "The girl sighs heavily and her leaden eyes glide over you, as if you have already tired her with your presence. She winces and then suddenly bows.\"I am Bruria, and it is my pleasure to welcome you again, Sacred One. Again... again... and again... Ugh...\"\"How tired I am of repeating the same thing... It's almost worth stabbing one of you immediately upon our meeting; maybe it would cheer me up?\"The girl rolls her eyes, sighs again, and squeezes out a smile.\"Let's get this over with quickly. Do you remember the appearance of an Angel? On the last day of your first life.The endless night was interrupted by the long-awaited dawn. The sky turned red.The moon covered the sun and then fell.\"\"The blood rain has given you immortality; you have gained new lives, but you have forgotten the old ones.It's been a long time, but you're here again, the same as you were that day. We call people like you Sacreds.And I'm here to help you.\"\"I don't have all the answers for you, but I know the key is in your blessed blood, Sacra.Look for people like you and collect their blood, and try not to die too often.\"": {
+      "answerOptions": [
+        "\"Stab me! I don't like it here!\" (answers like this can get you killed, don't be an idiot)",
+        "\"Whaaaat?\""
+      ],
+      "correctAnswer": "\"Whaaaat?\""
+    },
+    "\"Damn it! You're annoying me already! And I will REALLY STAB YOU TO DEATH if you do or say anything else ridiculous! Do you want some free advice?\"": {
+      "answerOptions": [
+        "\"Okay, stab me.\" (stupid choice with bad consequences)",
+        "\"Yes!\" (good and safe choice)"
+      ],
+      "correctAnswer": "\"Yes!\" (good and safe choice)"
+    },
+    "Ouch!That mad bitch really stabbed you!\"Are you satisfied, huh? Look what you made me do! You won't live here a day, you imbecile!\" she's yelling at you.": {
+      "answerOptions": [
+        "\"Okay, now I could use some more advice.\"",
+        "Run!",
+        "\"Okay, calm down, let's start over.\"",
+        "\"Stab me again, please.\""
+      ],
+      "correctAnswer": "Run!"
+    },
+    "\"Some people may stab you in the back in return for help.\"": {
+      "answerOptions": [
+        "\"I could use some more advice.\"",
+        "\"Don't stab me.\"",
+        "\"People like you?\""
+      ],
+      "correctAnswer": "\"Don't stab me.\""
+    },
+    "\"Sometimes it's easier to buy the right thing at the bazaar than to search through the local dumpsters.\"": {
+      "answerOptions": [
+        "\"I could use some more advice.\"",
+        "\"Can you lend me some money?\"",
+        "\"Can I buy a whore like you there?\""
+      ],
+      "correctAnswer": "\"Can you lend me some money?\""
+    }
+  },
+
+  "Wild Animal": {
+    "A low growl and two bright eyes in the dark. An old wolf comes out toward you, its teeth bared, saliva dripping from its mouth. It’s getting ready to pounce.": {
+      "answerOptions": [
+        "Fall to the ground and pretend to be dead.",
+        "Run away.",
+        "Freeze and don't move.",
+        "Shout loudly and raise your hands."
+      ],
+      "correctAnswer": "Freeze and don't move."
     }
   },
 
