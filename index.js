@@ -283,8 +283,8 @@ async function getText(
       const texts = await page.$$eval(
         "::-p-xpath(" + xpath + ")",
         (elems, option) => {
-          elems.map((elem, option) => {
-            option === "innerText" ? elem.innerText : elem.textContent;
+          return elems.map((elem, option) => {
+            return option === "innerText" ? elem.innerText : elem.textContent;
           }, option);
         },
         option
@@ -294,7 +294,7 @@ async function getText(
       const text = await page.$eval(
         "::-p-xpath(" + xpath + ")",
         (elem, option) => {
-          option === "innerText" ? elem.innerText : elem.textContent;
+          return option === "innerText" ? elem.innerText : elem.textContent;
         },
         option
       );
