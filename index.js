@@ -14,8 +14,8 @@ const { timeout } = require("puppeteer");
 const INSTANCE = process.argv[2];
 const configPath = path.join(__dirname, `/configs/${INSTANCE}.json`);
 // const configPath = path.join(__dirname, "/configs/config.json");
-// const questsPath = "\\\\DESKTOP-MAIN\\Shared\\quests.json";
-const questsPath = path.join(__dirname, "/DATA/quests.json");
+const questsPath = "\\\\DESKTOP-MAIN\\Shared\\quests.json";
+// const questsPath = path.join(__dirname, "/DATA/quests.json");
 let quests;
 let config;
 
@@ -442,10 +442,11 @@ async function getCurrentAnswerOptions(hero) {
     let answerOptions = [];
     for (let element of answerOptionsElems) {
       const text = (await puppeteer.elementInnerText(element)).replaceAll(
-        "\n",
+        "\nChoose",
         ""
       );
-      answerOptions.push({ text: text, element: element });
+      const buttonElement = await element.$('::-p-xpath("\\button")');
+      answerOptions.push({ text: text, buttonElement: buttonElement });
     }
     logger.log(
       `${
@@ -514,26 +515,27 @@ async function compareAnswers(array1, array2) {
   return true;
 }
 
-async function clickAnswerButton(hero, text) {
-  //DOUBLE QUOTES AROUND ${text} ARE NEEDED HERE!
-  //THERE ARE SINGLE QUOTES IN SOME ANSWER TEXT!
-  text = text.replaceAll("(", "\\(").replaceAll(")", "\\)");
-  let xpathToButton = `//*[text()="${text}"]/ancestor::div[contains(@class, "answer ")]/button`;
+async function clickAnswerButton(hero, answerObj) {
   //if text contains double quotes as first and last charecter concat is needed
   //because of the way page.waitForSelector parses xpath (id add's escape
   //symbols before every double quote, every!)
-  if (text[0] === '"' && text[text.length - 1] === '"') {
+  const text = answerObj.text;
+  const buttonElem = answerObj.buttonElement;
+
+  let xpathToButton = `no xpath specified`;
+  if (!text.includes("'"))
+    xpathToButton = `//*[text()='${text}']/ancestor::div[contains(@class, "answer ")]/button`;
+  else if (text[0] === '"' && text[text.length - 1] === '"')
     xpathToButton = `//*[text()=concat('"', ${text}, '"')]/ancestor::div[contains(@class, "answer ")]/button`;
-  }
-  // let buttonCorrectAnswer = await element.$(
-  //   `::-p-xpath(//ancestor::div[contains(@class, "answer ")]/button)`
-  // );
-  // if (buttonCorrectAnswer) {
-  // await puppeteer.clickElementByConsole(buttonCorrectAnswer);
-  await puppeteer.clickByPage(hero.page, xpathToButton);
-  // } else {
-  //   throw new Error(`${hero.ID}: correct answer button not found!`);
-  // }
+  else
+    xpathToButton = `//*[text()="${text}"]/ancestor::div[contains(@class, "answer ")]/button`;
+  let success = await puppeteer.clickByPage(
+    hero.page,
+    xpathToButton,
+    1000,
+    false
+  );
+  if (!success) await buttonElem.click();
 }
 
 async function answerQuest(hero) {
@@ -564,7 +566,7 @@ async function answerQuest(hero) {
       prefix: hero.prefix,
       importance: 0,
     });
-    await clickAnswerButton(hero, currentAnswerOptions[0].text);
+    await clickAnswerButton(hero, currentAnswerOptions[0]);
     return;
   }
 
@@ -614,7 +616,7 @@ async function answerQuest(hero) {
   });
   for (let option of currentAnswerOptions) {
     if (option.text === storedStory.correctAnswer) {
-      await clickAnswerButton(hero, option.text);
+      await clickAnswerButton(hero, option);
     }
   }
 }

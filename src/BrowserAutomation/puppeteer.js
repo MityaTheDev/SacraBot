@@ -103,7 +103,7 @@ async function elementScrollIntoViewConsole(page, element, range) {
 // Maybe it is harder to spot automated activity because
 // the mouse is clicking with random offsets
 // of the center of the element
-async function clickByPage(page, xPath, timeout = 10000) {
+async function clickByPage(page, xPath, timeout = 10000, logError = true) {
   const x = Math.random() - 0.5;
   const y = Math.random() - 0.5;
   try {
@@ -113,9 +113,11 @@ async function clickByPage(page, xPath, timeout = 10000) {
     await page.click("::-p-xpath(" + xPath + ")", { offset: { x, y } });
     return true;
   } catch (error) {
-    console.log(
-      `error while clicking by page!\nxPath: ${xPath}\n${error.stack}`
-    );
+    if (logError) {
+      console.log(
+        `error while clicking by page!\nxPath: ${xPath}\n${error.stack}`
+      );
+    }
     return false;
   }
 }
