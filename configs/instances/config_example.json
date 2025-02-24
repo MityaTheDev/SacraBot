@@ -1,0 +1,42 @@
+{
+  "MODE": "level",
+  "LOG_LEVEL": 2,
+  "BASE_URL": "https://sonic.sacra.game/hero/",
+  "IDLE_COUNT_MAX": 10,
+  "MIN_TIME_GAP_BETWEEN_ACTIONS": 2000,
+  "RABBY_WALLET_AUTO_CONFIRM": false,
+  "RABBY_WALLET_NOTIFICATION_URL": "chrome-extension://acmacodkjbdgmoleebolmdjonilkdbch/notification",
+  "RABBY_WALLET_LOGIN_URL": "chrome-extension://acmacodkjbdgmoleebolmdjonilkdbch/popup.html#/unlock",
+  "RABBY_WALLET_PASSWORD": "",
+  "SIGN_WAIT_TIME": 10000,
+  "CONFIRM_WAIT_TIME": 2000,
+  "ALLOW_LEVEL_UP": true,
+  "HEROES": {
+    "111": {
+      "active": true,
+      "heroID": 111,
+      "heroName": "HeroName1",
+      "browser_id": 101,
+      "classContractAddress": "0xa56b6cf42b6ef22578d970027e8dc55101fe2bd1",
+      "dungeonsCompleted": 0,
+      "lastCompletedDungeonTimestamp": 0,
+      "lastDailyQuestDate": "",
+      "currentLevel": false,
+      "targetLevel": 12,
+      "sessionMaxDurationInMinutes": 120
+    },
+    "222": {
+      "active": false,
+      "heroID": 222,
+      "heroName": "HeroName2",
+      "browser_id": 102,
+      "classContractAddress": "0xa56b6cf42b6ef22578d970027e8dc55101fe2bd1",
+      "dungeonsCompleted": 0,
+      "lastCompletedDungeonTimestamp": 0,
+      "lastDailyQuestDate": "",
+      "currentLevel": false,
+      "targetLevel": 12,
+      "sessionMaxDurationInMinutes": 120
+    }
+  }
+}
