@@ -12,7 +12,7 @@ const DateFormat = require("date-format");
 const { timeStamp } = require("console");
 const { timeout } = require("puppeteer");
 const INSTANCE = process.argv[2];
-const configPath = path.join(__dirname, `/configs/${INSTANCE}.json`);
+const configPath = path.join(__dirname, `/configs/instances/${INSTANCE}.json`);
 // const configPath = path.join(__dirname, "/configs/config.json");
 const questsPath = "\\\\DESKTOP-MAIN\\Shared\\quests.json";
 // const questsPath = path.join(__dirname, "/DATA/quests.json");
@@ -539,6 +539,7 @@ async function clickAnswerButton(hero, answerObj) {
 
 async function answerQuest(hero) {
   logger.log(`answering quest...`, { prefix: hero.prefix, importance: 0 });
+  quests = await readJson(questsPath);
 
   const questTitle = await getText(hero.page, xpath.QUEST_TITLE_XPATH);
   if (!questTitle) {
@@ -578,13 +579,25 @@ async function answerQuest(hero) {
   //search quests.json for quest title and for quest text
   const storedQuest = quests[questTitle];
   if (!storedQuest) {
-    await throwQuestsError("noStoredQuest", hero, questTitle, storyText);
+    await throwQuestsError(
+      "noStoredQuest",
+      hero,
+      questTitle,
+      storyText,
+      currentAnswerOptions.map((obj) => obj.text)
+    );
     return;
   }
 
   const storedStory = storedQuest[storyText];
   if (!storedStory) {
-    await throwQuestsError("noStoredStory", hero, questTitle, storyText);
+    await throwQuestsError(
+      "noStoredStory",
+      hero,
+      questTitle,
+      storyText,
+      currentAnswerOptions.map((obj) => obj.text)
+    );
     return;
   }
 
@@ -594,7 +607,8 @@ async function answerQuest(hero) {
       "noStoredAnswerOptions",
       hero,
       questTitle,
-      storyText
+      storyText,
+      currentAnswerOptions.map((obj) => obj.text)
     );
     return;
   }
@@ -609,18 +623,31 @@ async function answerQuest(hero) {
       hero,
       questTitle,
       storyText,
-      storedAnswerOptions,
-      currentAnswerOptions.map((obj) => obj.text)
+      currentAnswerOptions.map((obj) => obj.text),
+      storedAnswerOptions
     );
     return;
   }
 
-  logger.log(`answering with correct answer [${storedStory.correctAnswer}]`, {
+  const correctAnswer = storedStory.correctAnswer;
+  if (!correctAnswer) {
+    await throwQuestsError(
+      "noCorrectAnswer",
+      hero,
+      questTitle,
+      storyText,
+      currentAnswerOptions.map((obj) => obj.text),
+      storedAnswerOptions
+    );
+    return;
+  }
+
+  logger.log(`answering with correct answer [${correctAnswer}]`, {
     prefix: hero.prefix,
     importance: 0,
   });
   for (let option of currentAnswerOptions) {
-    if (option.text === storedStory.correctAnswer) {
+    if (option.text === correctAnswer) {
       await clickAnswerButton(hero, option);
     }
   }
@@ -631,8 +658,8 @@ async function throwQuestsError(
   hero,
   questTitle = "",
   storyText = "",
-  storedAnswerOptions = [],
-  currentAnswerOptions = []
+  currentAnswerOptions = [],
+  storedAnswerOptions = []
 ) {
   const pauseTime = SECOND * 60;
   let errorMessage = "";
@@ -641,26 +668,45 @@ async function throwQuestsError(
 
   switch (type) {
     case "noQuestTitleOrElement":
-      telegramMessage = `${hero.ID}\nfailed to find quest element or title on page!`;
+      telegramMessage = `*__${hero.prefix}: Failed to find quest element or title on page!__*`;
       errorMessage = `failed to find quest element or title on page! saving page as '${hero.prefix}_NoQuestTitle'`;
       break;
     case "noStoredQuest":
-      telegramMessage = `${hero.prefix}\nquest not found - [${questTitle}]`;
+      telegramMessage = `*__${hero.prefix}: Quest not found__*\n\`[${questTitle}]\``;
       errorMessage = `quest not found - [${questTitle}]`;
+      quests[questTitle] = {
+        [storyText]: { answerOptions: currentAnswerOptions, correctAnswer: "" },
+      };
+      await writeJson(questsPath, quests);
       break;
     case "noStoredStory":
-      telegramMessage = `${hero.prefix}\nstory not found in quests.json for \nquest title: ${questTitle}\nstory text: ${storyText}`;
+      telegramMessage = `*__${hero.prefix}: Story not found in quests.json for__*\n\`[${questTitle} -> ${storyText}]\``;
       errorMessage = `story not found in quests.json for quest title: [${questTitle}], story text: [${storyText}]`;
+      quests[questTitle][storyText] = {
+        answerOptions: currentAnswerOptions,
+        correctAnswer: "",
+      };
+      await writeJson(questsPath, quests);
       break;
     case "noStoredAnswerOptions":
       partOfStoryText = `${storyText.substring(0, 25)}...`;
-      telegramMessage = `${hero.prefix}\nno stored answer options for\nquest: [${questTitle}]\nstory: [${partOfStoryText}]`;
+      telegramMessage = `*__${hero.prefix}: No stored answer options for__*\n\`[${questTitle}] -> [${partOfStoryText}]\``;
       errorMessage = `no stored answer options for quest!\n\t\tQUEST [${questTitle}]\n\t\tSTORY [${partOfStoryText}]`;
+      quests[questTitle][storyText] = {
+        answerOptions: currentAnswerOptions,
+        correctAnswer: "",
+      };
+      await writeJson(questsPath, quests);
       break;
     case "answerOptionsNotEqual":
       partOfStoryText = `${storyText.substring(0, 25)}...`;
       telegramMessage = `*__${hero.prefix}: Answer options are not equal__*\n\`[${questTitle}] -> [${partOfStoryText}]\`\n*_storedAnswerOptions_*: [${storedAnswerOptions}]\n*_currentAnswerOptions_*: [${currentAnswerOptions}]`;
       errorMessage = `answer options are not equal!`;
+      break;
+    case "noCorrectAnswer":
+      partOfStoryText = `${storyText.substring(0, 25)}...`;
+      telegramMessage = `*__${hero.prefix}: No correct answer for__*\n\`[${questTitle}] -> [${partOfStoryText}]\``;
+      errorMessage = `No correct answer for quest title: [${questTitle}]\nstory text: [${storyText}] `;
       break;
   }
 
@@ -670,7 +716,6 @@ async function throwQuestsError(
     prefix: hero.prefix,
   });
   await pause(pauseTime);
-  quests = await readJson(questsPath);
   return;
 }
 
