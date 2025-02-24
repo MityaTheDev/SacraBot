@@ -1,5 +1,13 @@
 {
   "Family Values": {
+    "": {
+      "answerOptions": ["", ""],
+      "correctAnswer": ""
+    },
+    "Suddenly, a city guard appears from around the corner and shouts at you:\"Stop right there, you liberal scum!\"": {
+      "answerOptions": ["Stop.", "Run!"],
+      "correctAnswer": "Run!"
+    },
     "You pass by a shabby little house, from which the sounds of an argument and broken dishes can be heard.": {
       "answerOptions": [
         "Find out what's the matter.",
@@ -50,14 +58,14 @@
         "Interfere."
       ],
       "correctAnswer": "Leave."
-    },
-    "": {
-      "answerOptions": ["", ""],
-      "correctAnswer": ""
     }
   },
 
   "Drunk Dispute": {
+    "": {
+      "answerOptions": ["", ""],
+      "correctAnswer": ""
+    },
     "\"I am Belav.\" An untidy young man appears. \"Are you a mysterious traveler from distant lands?\"": {
       "answerOptions": ["Ignore him.", "Say hi."],
       "correctAnswer": "Say hi."
@@ -87,6 +95,33 @@
     "": {
       "answerOptions": ["", "", "", ""],
       "correctAnswer": ""
+    },
+    "\"Tell a story about a time when you faced a real-life monster and how you defeated it.\"": {
+      "answerOptions": [
+        "\"One night, I was calmly going about my business and a huge dead woman attacked me! She almost caught me, but I miraculously managed to climb a tree and stayed there for a long time until she left.\"",
+        "\"One day, I came face to face with a huge troll. I told him he had the smallest dick I'd ever seen. And while he was frozen in surprise, I stabbed him in the stomach with a spear.\"",
+        "Don't speak.",
+        "\"I once hunted down and killed a man-eating bear. With my bare hands. I had to fight it for a very, very long time. And I almost died myself.\""
+      ],
+      "correctAnswer": "\"I once hunted down and killed a man-eating bear. With my bare hands. I had to fight it for a very, very long time. And I almost died myself.\""
+    },
+    "\"Why are we afraid of death if it is the only thing in our life that is really inevitable?\"": {
+      "answerOptions": [
+        "\"Because life is one and the other will not be.\"",
+        "\"Because if we weren’t, everyone would have drunk themselves to death right away.\"",
+        "\"Because we're stupid.\"",
+        "Close your eyes, and don't look at him."
+      ],
+      "correctAnswer": "\"Because if we weren’t, everyone would have drunk themselves to death right away.\""
+    },
+    "\"Tell me something vulgar.\"": {
+      "answerOptions": [
+        "\"All people are beautiful, regardless of their skin color and sexual preferences.\"",
+        "\"Modern music is not so bad.\"",
+        "\"Vagina.\"",
+        "\"F..ck you.\""
+      ],
+      "correctAnswer": "\"Modern music is not so bad.\""
     },
     "\"Uh... and you're not very smart, are you? My bad. Truth or Dare?\"": {
       "answerOptions": ["\"Dare.\"", "\"Truth.\""],
@@ -537,6 +572,27 @@
   },
 
   "Wedding Planner": {
+    "": {
+      "answerOptions": ["", "", "", ""],
+      "correctAnswer": ""
+    },
+    "\"That's what I thought!\" a guy shouts and hits you in the face!": {
+      "answerOptions": [
+        "Try to escape!",
+        "Try to crack his skull with one drunken punch.",
+        "Strike back!"
+      ],
+      "correctAnswer": "Try to escape!"
+    },
+    "For some time, you drink and eat, and no one bothers you, apart from occasionally shouting the word \"Shambakala!\"But for some time, an unpleasant-looking guy on the other side stares at you. Finally, he gathers his courage, comes up to you, clenches his fists and asks: \"Remember me?\"": {
+      "answerOptions": [
+        "\"Nope.\"",
+        "\"Weeny man!\"",
+        "Try to crack his skull with one drunken punch.",
+        "\"Yes.\""
+      ],
+      "correctAnswer": "\"Nope.\""
+    },
     "A young girl with a beautiful smile and festive attire stands at the intersection with a wreath of flowers in her hands. When she sees you, she starts to greet you, blocking your way and smiling as she puts the wreath on your head.\"Shambakala!\" she says loudly and starts laughing.Immediately, you are surrounded by festively dressed residents, who begin to dance around you. Oh, no! Now you are a guest at the wedding!": {
       "answerOptions": [
         "Try to run away.",
@@ -590,10 +646,6 @@
         "Grab an axe and spin on the spot with such force and speed that the rising wind extinguishes the fire."
       ],
       "correctAnswer": "Run away."
-    },
-    "": {
-      "answerOptions": ["", ""],
-      "correctAnswer": ""
     }
   },
 
@@ -650,6 +702,19 @@
     "You're too sick to do that.": {
       "answerOptions": ["Apply a pressure bandage.", "Pass out and rest."],
       "correctAnswer": "Apply a pressure bandage."
+    },
+    "The wound that you almost forgot about is making itself felt again. Fresh blood, a colorless liquid, and some foul-smelling pus have soaked through the bandage. It doesn't look very good and has started to get infected again.": {
+      "answerOptions": [
+        "Cauterize it.",
+        "Sterilize your knife with fire, carefully open the edges of the wound, remove the pus and dead tissue, sew it up again, and apply a clean bandage.",
+        "Attach a plant.",
+        "Do nothing. It will heal itself."
+      ],
+      "correctAnswer": "Sterilize your knife with fire, carefully open the edges of the wound, remove the pus and dead tissue, sew it up again, and apply a clean bandage."
+    },
+    "": {
+      "answerOptions": ["", "", "", ""],
+      "correctAnswer": ""
     }
   },
 
@@ -811,6 +876,23 @@
   },
 
   "Pain and Pleasure": {
+    "": {
+      "answerOptions": ["", ""],
+      "correctAnswer": ""
+    },
+    "The rich man is clearly unhappy with your attitude toward him.He overtakes you and blocks your way.\"How dare you ignore me, serf?\"": {
+      "answerOptions": [
+        "\"I'm a free woman, leave me alone.\"",
+        "\"F..ck you, scum.\"",
+        "Punch him in the face.",
+        "\"You don't seem to be very educated, bumpkin. Not all people with unusual looks for this area are slaves.\""
+      ],
+      "correctAnswer": "Punch him in the face."
+    },
+    "You see a richly dressed man standing in a field of wheat near the road.The rich man is theatrically brandishing a sword and cutting down tall wheat sprouts and weeds nearby.When he sees you, he is a little embarrassed, but then he waves for you to come over to him.": {
+      "answerOptions": ["Ignore him, and walk past.", "Approach him."],
+      "correctAnswer": "Ignore him, and walk past."
+    },
     "A small house by the road is burning; the locals are trying to extinguish it, but they're as bad at it as you are at finding yourself.": {
       "answerOptions": [
         "Help fight the fire!",
@@ -970,13 +1052,57 @@
       "answerOptions": ["Refuse.", "Help."],
       "correctAnswer": "Help."
     },
+    "You see a disturbing plume of black smoke in the distance and smell a choking odor.You come closer and see that it is not a fire, but just a huge burning compost heap, with a few drunken men standing by and watching the flames.": {
+      "answerOptions": [
+        "Be responsible and educate them about the dangers of open fires in urban and forest areas.",
+        "Be an irresponsible asshole and walk away."
+      ],
+      "correctAnswer": "Be responsible and educate them about the dangers of open fires in urban and forest areas."
+    },
+    "The men fall silent and look at you questioningly. You can sense that they have an aggressive vibe.": {
+      "answerOptions": [
+        "\"F..ck nature!\"",
+        "\"F..ck you guys!\"",
+        "\"Nature is awesome! No need to pollute it!\"",
+        "Be an irresponsible asshole and walk away."
+      ],
+      "correctAnswer": "\"F..ck nature!\""
+    },
     "": {
-      "answerOptions": ["", ""],
+      "answerOptions": ["", "", "", ""],
       "correctAnswer": ""
     }
   },
 
   "Stranger": {
+    "": {
+      "answerOptions": ["", ""],
+      "correctAnswer": ""
+    },
+    "\"We've lost a lot of time in the middle of nowhere. We need to find a way out of here. Stop walking in circles!\"": {
+      "answerOptions": [
+        "\"Where should I go?\"",
+        "\"I could use some more advice.\"",
+        "\"Stab me in the ass.\""
+      ],
+      "correctAnswer": "\"Where should I go?\""
+    },
+    "\"The bigger the monster, the harder it is to kill. Not all imbeciles like you realize that.\"": {
+      "answerOptions": [
+        "\"I could use some more advice.\"",
+        "\"Kill me.\"",
+        "\"Are there monsters in here?!\""
+      ],
+      "correctAnswer": "\"Are there monsters in here?!\""
+    },
+    "\"If you run into trouble, try calling for help for a change. It is not customary to get help for free, but at least you will live.\"": {
+      "answerOptions": [
+        "\"I could use some more advice.\"",
+        "\"Stupid bitch, say what?\"",
+        "\"I've been here for only a few moments and have been calling for help nonstop!\""
+      ],
+      "correctAnswer": "\"I've been here for only a few moments and have been calling for help nonstop!\""
+    },
     "The girl sighs heavily and her leaden eyes glide over you, as if you have already tired her with your presence. She winces and then suddenly bows.\"I am Bruria, and it is my pleasure to welcome you again, Sacred One. Again... again... and again... Ugh...\"\"How tired I am of repeating the same thing... It's almost worth stabbing one of you immediately upon our meeting; maybe it would cheer me up?\"The girl rolls her eyes, sighs again, and squeezes out a smile.\"Let's get this over with quickly. Do you remember the appearance of an Angel? On the last day of your first life.The endless night was interrupted by the long-awaited dawn. The sky turned red.The moon covered the sun and then fell.\"\"The blood rain has given you immortality; you have gained new lives, but you have forgotten the old ones.It's been a long time, but you're here again, the same as you were that day. We call people like you Sacreds.And I'm here to help you.\"\"I don't have all the answers for you, but I know the key is in your blessed blood, Sacra.Look for people like you and collect their blood, and try not to die too often.\"": {
       "answerOptions": [
         "\"Stab me! I don't like it here!\" (answers like this can get you killed, don't be an idiot)",
@@ -1019,6 +1145,19 @@
   },
 
   "Wild Animal": {
+    "": {
+      "answerOptions": ["", "", "", ""],
+      "correctAnswer": ""
+    },
+    "A barely audible hiss, and you notice a snake at your feet. It shakes its tail and swings its head from side to side, preparing to bite you.": {
+      "answerOptions": [
+        "Shout loudly and raise your hands.",
+        "Run away.",
+        "Fall to the ground and pretend to be dead.",
+        "Freeze and don't move."
+      ],
+      "correctAnswer": "Freeze and don't move."
+    },
     "A low growl and two bright eyes in the dark. An old wolf comes out toward you, its teeth bared, saliva dripping from its mouth. It’s getting ready to pounce.": {
       "answerOptions": [
         "Fall to the ground and pretend to be dead.",
@@ -1027,6 +1166,36 @@
         "Shout loudly and raise your hands."
       ],
       "correctAnswer": "Freeze and don't move."
+    }
+  },
+
+  "Guilt": {
+    "You are walking along a scenic road on the outskirts of Lof-Blaid. The day is hot, your flask is empty, and you have been thirsty for a long time.You can see an old well in the middle of the wasteland. It looks like this is exactly what you were looking for.": {
+      "answerOptions": [
+        "Quench your thirst gracefully.",
+        "Quench your thirst.",
+        "No, thanks!"
+      ],
+      "correctAnswer": "No, thanks!"
+    }
+  },
+
+  "Lionheart": {
+    "": {
+      "answerOptions": ["", ""],
+      "correctAnswer": ""
+    },
+    "You seem to be able to distinguish that several people are shouting the name \"Richard\" or something like that.": {
+      "answerOptions": ["Ignore it, and move on.", "Go towards the shouts."],
+      "correctAnswer": "Ignore it, and move on."
+    },
+    "The shouts subside.": {
+      "answerOptions": ["Ignore it, and move on.", "Go towards the shouts."],
+      "correctAnswer": "Ignore it, and move on."
+    },
+    "The forest silence is suddenly broken by distant shouts.": {
+      "answerOptions": ["Ignore it, and move on.", "Go towards the shouts."],
+      "correctAnswer": "Ignore it, and move on."
     }
   },
 
