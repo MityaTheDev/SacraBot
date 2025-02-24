@@ -1202,7 +1202,7 @@ async function getCurrentLevel(hero) {
     }
 
     //04:42:10 samwise[443] some-line-of-text
-    hero.prefix = `(${hero.browser_id})${hero.name}[${hero.ID}]`;
+    hero.prefix = `(${heroes[hero.ID].browser_id})${hero.name}[${hero.ID}]`;
     currentHeroes.push(hero);
   }
 
