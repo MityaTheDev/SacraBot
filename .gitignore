@@ -2,8 +2,6 @@
 logs/
 node_modules/
 package-lock.json
-configs/config.json
-configs/instances/
-configs/telegram_config.json
-OpenPSasAdmin.ps1
-run.ps1
+configs/*
+!*/exapmle.*.*
+PowershellScripts/ids.txt
