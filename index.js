@@ -384,6 +384,9 @@ async function getCurrentScene(hero, iterationsLeft = 4) {
       break;
   }
 
+  logger.log(`current scene: ${currentScene}`, {
+    prefix: hero.prefix,
+  });
   return result;
 }
 
@@ -800,42 +803,7 @@ async function takeAction(hero, currentScene) {
     ? scenes[currentScene].actionTargets
     : false;
 
-  if (targets) {
-    logger.log(`found ${Object.keys(targets).length} targets for action`, {
-      prefix: hero.prefix,
-      importance: 0,
-    });
-    for (let target in targets) {
-      let targetElement = await puppeteer.xPathExist(
-        hero.page,
-        targets[target].xpath
-      );
-
-      //the time between last action and now
-      let currentTimeGap = Date.now() - hero.lastActionTime;
-      if (targetElement) {
-        if (currentTimeGap > config.MIN_TIME_GAP_BETWEEN_ACTIONS) {
-          logger.log(`clicking on [${target}] target`, {
-            prefix: hero.prefix,
-            importance: 0,
-          });
-          await puppeteer.clickByPage(hero.page, targets[target].xpath);
-          hero.idleCount = 0;
-          hero.lastActionTime = Date.now();
-        } else {
-          logger.log(
-            `Too fast! ${currentTimeGap}/${config.MIN_TIME_GAP_BETWEEN_ACTIONS} ms passed since last action.`,
-            { prefix: hero.prefix, importance: 1 }
-          );
-        }
-      } else {
-        logger.log(`target is not there!`, {
-          prefix: hero.prefix,
-          importance: 0,
-        });
-      }
-    }
-  } else {
+  if (!targets) {
     hero.idleCount++;
     logger.log(
       `no action targets for ${currentScene} scene! idle count: ${hero.idleCount}/${config.IDLE_COUNT_MAX}`,
@@ -855,14 +823,50 @@ async function takeAction(hero, currentScene) {
           prefix: hero.prefix,
         }
       );
-      await pause(SECOND);
+      await pause(SECOND * 120);
     }
-    await pause(SECOND);
+    return;
+  }
+
+  logger.log(`found ${Object.keys(targets).length} targets for action`, {
+    prefix: hero.prefix,
+    importance: 0,
+  });
+  for (let target in targets) {
+    let targetElement = await puppeteer.xPathExist(
+      hero.page,
+      targets[target].xpath
+    );
+
+    if (!targetElement) {
+      logger.log(`target is not there!`, {
+        prefix: hero.prefix,
+        importance: 0,
+      });
+      return;
+    }
+
+    let elapsedTime = Date.now() - hero.lastActionTime;
+    if (elapsedTime < config.MIN_TIME_GAP_BETWEEN_ACTIONS) {
+      logger.log(
+        `Too fast! ${elapsedTime}/${config.MIN_TIME_GAP_BETWEEN_ACTIONS} ms passed since last action, pausing...`,
+        { prefix: hero.prefix, importance: 0 }
+      );
+      await pause(config.MIN_TIME_GAP_BETWEEN_ACTIONS - elapsedTime);
+    }
+
+    logger.log(`clicking on [${target}] target`, {
+      prefix: hero.prefix,
+      importance: 0,
+    });
+    await puppeteer.clickByPage(hero.page, targets[target].xpath);
+    hero.idleCount = 0;
+    hero.lastActionTime = Date.now();
+    break;
   }
 }
 
 async function play(currentHeroes) {
-  //todo: check if heroes are not at target level
   let isPlaying = true;
 
   while (isPlaying) {
@@ -875,66 +879,54 @@ async function play(currentHeroes) {
         break;
       }
 
-      //if hero is out of time, remove it from the array
       if (await isOutOfTime(hero)) {
         logger.log(`is out of time!`, {
           prefix: hero.prefix,
         });
-
         currentHeroes.pop(hero);
-
         logger.log(`is removed from the [currentHeroes]`, {
           prefix: hero.prefix,
           importance: 0,
         });
-
         continue;
       }
 
-      if (
-        config.MODE === "level" &&
-        config.HEROES[hero.ID].currentLevel >=
-          config.HEROES[hero.ID].targetLevel
-      ) {
-        config.HEROES[hero.ID].active = false;
-        config = await updateJson(configPath, config);
-
-        logger.log(`is done with levelling!`, {
-          messageModifiers: ["green"],
-          prefix: hero.prefix,
-        });
-
-        currentHeroes.pop(hero);
-        continue;
-      }
-
-      if (
-        config.MODE === "daily" &&
-        config.HEROES[hero.ID].dungeonsCompleted >= 3
-      ) {
-        logger.log(`is done with dungeons!`, {
-          messageModifiers: ["green"],
-          prefix: hero.prefix,
-        });
-
-        // let rewardClaimed = await getDailyReward(hero);
-        // if (rewardClaimed) currentHeroes.pop(hero);
-
-        config.HEROES[hero.ID].active = false;
-        config = await updateJson(configPath, config);
-
-        currentHeroes.pop(hero);
-
-        continue;
+      switch (config.MODE) {
+        case MODE.DAILY:
+          if (config.HEROES[hero.ID].dungeonsCompleted >= 3) {
+            logger.log(`is done with dungeons!`, {
+              messageModifiers: ["green"],
+              prefix: hero.prefix,
+            });
+            // let rewardClaimed = await getDailyReward(hero);
+            // if (rewardClaimed) currentHeroes.pop(hero);
+            config.HEROES[hero.ID].active = false;
+            config = await updateJson(configPath, config);
+            currentHeroes.pop(hero);
+            continue;
+          }
+        case MODE.LEVEL:
+          if (
+            config.HEROES[hero.ID].currentLevel >=
+            config.HEROES[hero.ID].targetLevel
+          ) {
+            logger.log(`is done with levelling!`, {
+              messageModifiers: ["green"],
+              prefix: hero.prefix,
+            });
+            config.HEROES[hero.ID].active = false;
+            config = await updateJson(configPath, config);
+            currentHeroes.pop(hero);
+            continue;
+          }
       }
 
       let currentScene = await getCurrentScene(hero);
-      logger.log(`current scene: ${currentScene}`, {
-        prefix: hero.prefix,
-      });
+
       //test
       return;
       await takeAction(hero, currentScene);
+      await pause();
     }
   }
 }
