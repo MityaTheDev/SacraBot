@@ -67,7 +67,7 @@ function error(
     prefix = defaultOptions.prefix,
     prefixModifiers = defaultOptions.prefixModifiers.concat("italic"),
     messageModifiers = ["red"],
-    importance = defaultOptions.importance,
+    importance = 1,
   } = {}
 ) {
   log(message, {

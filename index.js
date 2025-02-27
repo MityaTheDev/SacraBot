@@ -19,8 +19,8 @@ const questsPath = "\\\\DESKTOP-MAIN\\Shared\\quests.json";
 let quests;
 let config;
 const MODE = Object.freeze({
-  DAILY: Symbol("daily"),
-  LEVEL: Symbol("level"),
+  DAILY: "daily",
+  LEVEL: "level",
 });
 
 async function updateJson(filePath, data) {
@@ -118,7 +118,7 @@ async function sighAndConfirm(page) {
       await puppeteer.clickElementByConsole(page, signButton);
       logger.log("Sign button clicked", {
         prefix: "RABBY WALLET",
-        importance: 0,
+
         messageModifiers: ["green", "italic"],
         prefixModifiers: ["italic"],
       });
@@ -136,7 +136,7 @@ async function sighAndConfirm(page) {
       await puppeteer.clickElementByConsole(page, confirmButton);
       logger.log("Confirm button clicked", {
         prefix: "RABBY WALLET",
-        importance: 0,
+
         messageModifiers: ["green", "italic"],
         prefixModifiers: ["italic"],
       });
@@ -326,7 +326,6 @@ async function getCurrentScene(hero, iterationsLeft = 4) {
     logger.log(
       `failed to accurately detect scene! telegram message sent, scene saved as '${hero.prefix}_unknownScene'`,
       {
-        prefix: hero.prefix,
         importance: 1,
         messageModifiers: ["magenta", "underline"],
       }
@@ -334,7 +333,7 @@ async function getCurrentScene(hero, iterationsLeft = 4) {
     return false;
   }
 
-  logger.log("getting scene...", { prefix: hero.prefix, importance: 0 });
+  logger.log("getting scene...");
   let result = [];
 
   for (let scene in scenes) {
@@ -360,47 +359,33 @@ async function getCurrentScene(hero, iterationsLeft = 4) {
     case 0:
       logger.log(
         `no scene found, trying again... iterations left: [${iterationsLeft}]`,
-        { prefix: hero.prefix, importance: 0, messageModifiers: ["yellow"] }
+        { messageModifiers: ["yellow"] }
       );
       await pause(SECOND * 2);
-      result = await getCurrentScene(hero, --iterationsLeft);
-      break;
+      return await getCurrentScene(hero, --iterationsLeft);
     case 1:
-      result = result[0];
-      break;
+      logger.log(`current scene: ${result[0]}`);
+      return result[0];
     default:
       logger.log(`${result.length} scenes found! [${result}]`, {
-        prefix: hero.prefix,
-        importance: 0,
         messageModifiers: ["yellow"],
       });
       logger.log(`retrying... iterations left: [${iterationsLeft}]`, {
-        prefix: hero.prefix,
-        importance: 0,
         messageModifiers: ["yellow"],
       });
       await pause(SECOND * 2);
-      result = await getCurrentScene(hero, --iterationsLeft);
-      break;
+      return await getCurrentScene(hero, --iterationsLeft);
   }
-
-  logger.log(`current scene: ${currentScene}`, {
-    prefix: hero.prefix,
-  });
-  return result;
 }
 
 async function checkHealth(hero) {
-  logger.log(`checking health...`, { prefix: hero.prefix });
+  logger.log(`checking health...`);
   try {
     let healthText = await getText(hero.page, xpath.HEALTH_XPATH);
     healthText = healthText.replaceAll(" ", "");
     const currentHealth = healthText.split("/")[0];
     const maxHealth = healthText.split("/")[1];
-    logger.log(`health is [${currentHealth}/${maxHealth}]`, {
-      prefix: hero.prefix,
-      importance: 0,
-    });
+    logger.log(`health is [${currentHealth}/${maxHealth}]`);
 
     if (currentHealth / maxHealth < 0.25) {
       await telegram.sendMessage(
@@ -409,33 +394,24 @@ async function checkHealth(hero) {
       logger.log(
         `health is too low! [${currentHealth}/${maxHealth}], telegram message sent`,
         {
-          prefix: hero.prefix,
           importance: 1,
           messageModifiers: ["yellow"],
         }
       );
       logger.error(
-        `waiting for 1 hour... need to restart the bot \ntodo: make drink health potion function`,
-        {
-          prefix: hero.prefix,
-        }
+        `waiting for 1 hour... need to restart the bot \ntodo: make drink health potion function`
       );
       await pause(SECOND * 3600);
 
       //todo: drink health potion
     }
   } catch (error) {
-    logger.error(`error while checking health!\n${error}`, {
-      prefix: hero.prefix,
-    });
+    logger.error(`error while checking health!\n${error}`);
   }
 }
 
 async function getCurrentAnswerOptions(hero) {
-  logger.log(`getting current answer options...`, {
-    prefix: hero.prefix,
-    importance: 0,
-  });
+  logger.log(`getting current answer options...`);
 
   const answerOptionsElems = await getElems(
     hero.page,
@@ -455,16 +431,11 @@ async function getCurrentAnswerOptions(hero) {
         answerOptionsElems.length
       } answer options found on screen: [${answerOptions.map(
         (answer) => answer.text
-      )}]`,
-      {
-        prefix: hero.prefix,
-        importance: 0,
-      }
+      )}]`
     );
     return answerOptions;
   }
   logger.log(`no answer options found on screen!`, {
-    prefix: hero.prefix,
     importance: 1,
     messageModifiers: ["yellow"],
   });
@@ -477,14 +448,12 @@ async function compareAnswers(array1, array2) {
   if (!array1) {
     logger.log("array1 is empty or null", {
       messageModifiers: ["yellow", "bold"],
-      importance: 0,
     });
     return false;
   }
   if (!array2) {
     logger.log("array2 is empty or null", {
       messageModifiers: ["yellow", "bold"],
-      importance: 0,
     });
     return false;
   }
@@ -493,7 +462,6 @@ async function compareAnswers(array1, array2) {
       `array1's length[${array1.length}] is not equal to array2's length[${array2.length}]`,
       {
         messageModifiers: ["yellow", "bold"],
-        importance: 0,
       }
     );
     return false;
@@ -508,7 +476,6 @@ async function compareAnswers(array1, array2) {
         \n\t[${array1}]\n\t[${array2}]`,
         {
           messageModifiers: ["yellow", "bold"],
-          importance: 0,
         }
       );
       return false;
@@ -541,7 +508,7 @@ async function clickAnswerButton(hero, answerObj) {
 }
 
 async function answerQuest(hero) {
-  logger.log(`answering quest...`, { prefix: hero.prefix, importance: 0 });
+  logger.log(`answering quest...`);
   quests = await readJson(questsPath);
 
   const questTitle = await getText(hero.page, xpath.QUEST_TITLE_XPATH);
@@ -554,21 +521,14 @@ async function answerQuest(hero) {
     await getText(hero.page, xpath.QUEST_TEXT_XPATH)
   ).replaceAll("\n", "");
   logger.log(
-    `quest title: ${questTitle}, quest text: ${storyText.substring(0, 25)}...`,
-    {
-      prefix: hero.prefix,
-      importance: 0,
-    }
+    `quest title: ${questTitle}, quest text: ${storyText.substring(0, 25)}...`
   );
 
   const currentAnswerOptions = await getCurrentAnswerOptions(hero);
 
   //if only one answer option found, answer with it
   if (currentAnswerOptions && currentAnswerOptions.length === 1) {
-    logger.log(`only one answer option found, answering with it`, {
-      prefix: hero.prefix,
-      importance: 0,
-    });
+    logger.log(`only one answer option found, answering with it`);
     await clickAnswerButton(hero, currentAnswerOptions[0]);
     return;
   }
@@ -645,10 +605,7 @@ async function answerQuest(hero) {
     return;
   }
 
-  logger.log(`answering with correct answer [${correctAnswer}]`, {
-    prefix: hero.prefix,
-    importance: 0,
-  });
+  logger.log(`answering with correct answer [${correctAnswer}]`);
   for (let option of currentAnswerOptions) {
     if (option.text === correctAnswer) {
       await clickAnswerButton(hero, option);
@@ -714,10 +671,8 @@ async function throwQuestsError(
   }
 
   await telegram.sendMessage(telegramMessage);
-  logger.error(errorMessage, { prefix: hero.prefix });
-  logger.error(`pausing for ${pauseTime / 1000} seconds...`, {
-    prefix: hero.prefix,
-  });
+  logger.error(errorMessage);
+  logger.error(`pausing for ${pauseTime / 1000} seconds...`);
   await pause(pauseTime);
   return;
 }
@@ -767,8 +722,6 @@ async function takeAction(hero, currentScene) {
           config.HEROES[hero.ID].targetLevel
         }`,
         {
-          prefix: hero.prefix,
-          importance: 0,
           messageModifiers: ["italic", "magentaBright"],
         }
       );
@@ -808,7 +761,6 @@ async function takeAction(hero, currentScene) {
     logger.log(
       `no action targets for ${currentScene} scene! idle count: ${hero.idleCount}/${config.IDLE_COUNT_MAX}`,
       {
-        prefix: hero.prefix,
         importance: 1,
       }
     );
@@ -818,20 +770,14 @@ async function takeAction(hero, currentScene) {
         `${hero.ID} is too idle! Waiting for 2 minutes...`
       );
       logger.error(
-        `is too idle at ${currentScene} scene! telergam message sent, pausing for 2 minutes...`,
-        {
-          prefix: hero.prefix,
-        }
+        `is too idle at ${currentScene} scene! telergam message sent, pausing for 2 minutes...`
       );
       await pause(SECOND * 120);
     }
     return;
   }
 
-  logger.log(`found ${Object.keys(targets).length} targets for action`, {
-    prefix: hero.prefix,
-    importance: 0,
-  });
+  logger.log(`found ${Object.keys(targets).length} targets for action`);
   for (let target in targets) {
     let targetElement = await puppeteer.xPathExist(
       hero.page,
@@ -839,26 +785,19 @@ async function takeAction(hero, currentScene) {
     );
 
     if (!targetElement) {
-      logger.log(`target is not there!`, {
-        prefix: hero.prefix,
-        importance: 0,
-      });
+      logger.log(`target is not there!`);
       return;
     }
 
     let elapsedTime = Date.now() - hero.lastActionTime;
     if (elapsedTime < config.MIN_TIME_GAP_BETWEEN_ACTIONS) {
       logger.log(
-        `Too fast! ${elapsedTime}/${config.MIN_TIME_GAP_BETWEEN_ACTIONS} ms passed since last action, pausing...`,
-        { prefix: hero.prefix, importance: 0 }
+        `Too fast! ${elapsedTime}/${config.MIN_TIME_GAP_BETWEEN_ACTIONS} ms passed since last action, pausing...`
       );
       await pause(config.MIN_TIME_GAP_BETWEEN_ACTIONS - elapsedTime);
     }
 
-    logger.log(`clicking on [${target}] target`, {
-      prefix: hero.prefix,
-      importance: 0,
-    });
+    logger.log(`clicking on [${target}] target`);
     await puppeteer.clickByPage(hero.page, targets[target].xpath);
     hero.idleCount = 0;
     hero.lastActionTime = Date.now();
@@ -871,6 +810,8 @@ async function play(currentHeroes) {
 
   while (isPlaying) {
     for await (let hero of currentHeroes) {
+      logger.setDefaultOptions({ prefix: hero.prefix });
+
       if (currentHeroes.length === 0) {
         logger.log(`\n\t~= ALL HEROES ARE DONE =~\n`, {
           messageModifiers: ["green", "underline"],
@@ -880,14 +821,9 @@ async function play(currentHeroes) {
       }
 
       if (await isOutOfTime(hero)) {
-        logger.log(`is out of time!`, {
-          prefix: hero.prefix,
-        });
+        logger.log(`is out of time!`);
         currentHeroes.pop(hero);
-        logger.log(`is removed from the [currentHeroes]`, {
-          prefix: hero.prefix,
-          importance: 0,
-        });
+        logger.log(`is removed from the [currentHeroes]`);
         continue;
       }
 
@@ -896,7 +832,6 @@ async function play(currentHeroes) {
           if (config.HEROES[hero.ID].dungeonsCompleted >= 3) {
             logger.log(`is done with dungeons!`, {
               messageModifiers: ["green"],
-              prefix: hero.prefix,
             });
             // let rewardClaimed = await getDailyReward(hero);
             // if (rewardClaimed) currentHeroes.pop(hero);
@@ -912,7 +847,6 @@ async function play(currentHeroes) {
           ) {
             logger.log(`is done with levelling!`, {
               messageModifiers: ["green"],
-              prefix: hero.prefix,
             });
             config.HEROES[hero.ID].active = false;
             config = await updateJson(configPath, config);
@@ -937,10 +871,7 @@ async function getHeroName(hero) {
 
 //todo: add to xpath.DAILY_CHEST and xpath.WEEKLY_CHEST '... and not (//xpath-to-daily/weakly-reward)]'
 async function getDailyReward(hero) {
-  logger.log(`getting daily reward...`, {
-    prefix: hero.prefix,
-    importance: 0,
-  });
+  logger.log(`getting daily reward...`);
   await hero.page.goto("https://sonic.sacra.game/daily-quests", {
     waitUntil: "networkidle0",
   });
@@ -957,7 +888,6 @@ async function getDailyReward(hero) {
     logger.log(
       `completed dungeons: ${completedDungeons} < required: ${requiredCompletedDungeons}`,
       {
-        prefix: hero.prefix,
         messageModifiers: ["yellowBright"],
         prefixModifiers: ["yellowBright"],
       }
@@ -974,7 +904,6 @@ async function getDailyReward(hero) {
     await puppeteer.clickByPage(hero.page, xpath.DAILY_REWARD, 5000);
     await hero.page.waitForNetworkIdle({ idleTime: 5000 });
     logger.log(`daily reward received`, {
-      prefix: hero.prefix,
       importance: 1,
       messageModifiers: ["whiteBright"],
     });
@@ -987,14 +916,12 @@ async function getDailyReward(hero) {
     await puppeteer.clickByPage(hero.page, xpath.WEAKLY_REWARD, 5000);
     await hero.page.waitForNetworkIdle({ idleTime: 5000 });
     logger.log(`weakly reward received`, {
-      prefix: hero.prefix,
       importance: 1,
       messageModifiers: ["yellowBright"],
     });
   }
 
   logger.log(`done with rewards`, {
-    prefix: hero.prefix,
     importance: 1,
     messageModifiers: ["greenBright", "underline", "bold"],
   });
@@ -1003,10 +930,7 @@ async function getDailyReward(hero) {
 }
 
 async function levelUp(hero) {
-  logger.log(`levelling up to ${config.HEROES[hero.ID].currentLevel}...`, {
-    prefix: hero.prefix,
-    importance: 0,
-  });
+  logger.log(`levelling up to ${config.HEROES[hero.ID].currentLevel}...`);
 
   //temp, todo: add logic for selecting correct attribute
   let xpathAttr;
@@ -1037,8 +961,7 @@ async function levelUp(hero) {
       break;
     default:
       logger.log(
-        `can't level up on level [${config.HEROES[hero.ID].currentLevel}]!`,
-        { prefix: hero.prefix }
+        `can't level up on level [${config.HEROES[hero.ID].currentLevel}]!`
       );
       return;
   }
@@ -1059,9 +982,7 @@ async function isNextLevel(hero) {
       (await getElem(hero.page, xpath.LEVEL_UP_TO, 500))) &&
     !(await getElem(hero.page, xpath.CONTINUE_ADVENTURE_BUTTON, 500))
   ) {
-    logger.log(`is ready to level up`, {
-      prefix: hero.prefix,
-    });
+    logger.log(`is ready to level up`);
     return true;
   }
   return false;
@@ -1081,6 +1002,7 @@ async function getCurrentLevel(hero) {
 }
 
 async function init() {
+  logger.setDefaultOptions({ importance: 0 });
   quests = await readJson(questsPath);
   config = await readJson(configPath);
   if (specifiedMode) {
@@ -1175,7 +1097,7 @@ class Hero {
       logger.log(`opened new page for hero |${hero.name}[${hero.ID}]|`);
     }
 
-    //04:42:10 samwise[443] some-line-of-text
+    //04:42:10 (101)samwise[443] some-line-of-text
     hero.prefix = `(${heroesToLaunch[hero.ID].browser_id})${hero.name}[${
       hero.ID
     }]`;
