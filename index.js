@@ -11,13 +11,17 @@ const path = require("path");
 const DateFormat = require("date-format");
 const { timeStamp } = require("console");
 const { timeout } = require("puppeteer");
+const specifiedMode = process.argv[3];
 const INSTANCE = process.argv[2];
 const configPath = path.join(__dirname, `/configs/instances/${INSTANCE}.json`);
-// const configPath = path.join(__dirname, "/configs/config.json");
 const questsPath = "\\\\DESKTOP-MAIN\\Shared\\quests.json";
 // const questsPath = path.join(__dirname, "/DATA/quests.json");
 let quests;
 let config;
+const MODE = Object.freeze({
+  DAILY: Symbol("daily"),
+  LEVEL: Symbol("level"),
+});
 
 async function updateJson(filePath, data) {
   await writeJson(filePath, data);
@@ -334,57 +338,53 @@ async function getCurrentScene(hero, iterationsLeft = 4) {
   let result = [];
 
   for (let scene in scenes) {
-    let xpath = scenes[scene].indicator.xpath;
-    let description = scenes[scene].indicator.description;
+    let sceneIndicatorXpath = scenes[scene].indicator.xpath;
+    let IndicatorXpathDescription = scenes[scene].indicator.description;
 
-    if (await puppeteer.xPathExist(hero.page, xpath)) {
+    if (await puppeteer.xPathExist(hero.page, sceneIndicatorXpath)) {
       result.push(scene);
-      //transactionProcessing scene is special. It is detected by xpath that
-      // is an element over the page with some other scene. We could add to almost
-      // EVERY scene indicator's xpath '... and not(//*some_specific_element*)'
-      // but for the sake of saving time of the author, we just break the loop.
-      // Important that this scene is the first in scenes object.
+
       if (
         scene === "transactionProcessing" ||
         scene === "error" ||
         scene === "loading" ||
         scene === "questWaitingForTransacrion" ||
-        scene === "questLoading"
+        scene === "questLoading" ||
+        scene === "delegationPopup"
       )
         break;
     }
   }
 
-  if (result.length === 1) {
-    return result[0];
-  } else if (result.length === 0) {
-    logger.log(
-      `no scene found, trying again... iterations left: [${iterationsLeft}]`,
-      { prefix: hero.prefix, importance: 0, messageModifiers: ["yellow"] }
-    );
-    await pause(SECOND * 2);
-    result = await getCurrentScene(hero, --iterationsLeft);
-  } else if (result.length > 1) {
-    logger.log(`${result.length} scenes found! [${result}]`, {
-      prefix: hero.prefix,
-      importance: 0,
-      messageModifiers: ["yellow"],
-    });
-    logger.log(`retrying... iterations left: [${iterationsLeft}]`, {
-      prefix: hero.prefix,
-      importance: 0,
-      messageModifiers: ["yellow"],
-    });
-    await pause(SECOND * 2);
-    result = await getCurrentScene(hero, --iterationsLeft);
-  } else {
-    logger.log(`retrying... iterations left: [${iterationsLeft}]`, {
-      prefix: hero.prefix,
-      importance: 0,
-      messageModifiers: ["yellow"],
-    });
-    return await getCurrentScene(hero, --iterationsLeft);
+  switch (result.length) {
+    case 0:
+      logger.log(
+        `no scene found, trying again... iterations left: [${iterationsLeft}]`,
+        { prefix: hero.prefix, importance: 0, messageModifiers: ["yellow"] }
+      );
+      await pause(SECOND * 2);
+      result = await getCurrentScene(hero, --iterationsLeft);
+      break;
+    case 1:
+      result = result[0];
+      break;
+    default:
+      logger.log(`${result.length} scenes found! [${result}]`, {
+        prefix: hero.prefix,
+        importance: 0,
+        messageModifiers: ["yellow"],
+      });
+      logger.log(`retrying... iterations left: [${iterationsLeft}]`, {
+        prefix: hero.prefix,
+        importance: 0,
+        messageModifiers: ["yellow"],
+      });
+      await pause(SECOND * 2);
+      result = await getCurrentScene(hero, --iterationsLeft);
+      break;
   }
+
+  return result;
 }
 
 async function checkHealth(hero) {
@@ -861,7 +861,7 @@ async function takeAction(hero, currentScene) {
   }
 }
 
-async function playFirstBiome(currentHeroes) {
+async function play(currentHeroes) {
   //todo: check if heroes are not at target level
   let isPlaying = true;
 
@@ -932,6 +932,8 @@ async function playFirstBiome(currentHeroes) {
       logger.log(`current scene: ${currentScene}`, {
         prefix: hero.prefix,
       });
+      //test
+      return;
       await takeAction(hero, currentScene);
     }
   }
@@ -939,103 +941,6 @@ async function playFirstBiome(currentHeroes) {
 
 async function getHeroName(hero) {
   return await getText(hero.page, xpath.HERO_NAME_XPATH);
-}
-
-// todo: make it work...
-// can't access hero.page from evaluate()
-// nor send it as parameter (comes as undefiened)
-async function listenToQuest(heroes) {
-  let isPlaying = true;
-
-  const iterationLimit = 1000;
-  let i = 0;
-  // while (isPlaying) {
-  for (let hero of heroes) {
-    let correctAnswerFromClick = "";
-    let currentSceneWhileListeningToQuests = await getCurrentScene(hero);
-    const page = hero.page;
-    await hero.page.evaluate(async (page) => {
-      logger.log("Page: " + page);
-      if (false === "quest") {
-        const questElem = await getElem(
-          hero.page,
-          xpath.QUEST_TITLE_XPATH,
-          1000
-        );
-        const questTitle = await puppeteer.elementInnerText(
-          hero.page,
-          questElem
-        );
-        if (questElem && questTitle) {
-          const questTextElem = await getElem(
-            hero.page,
-            xpath.QUEST_TEXT_XPATH,
-            1000
-          );
-          const questText = await puppeteer.elementInnerText(
-            hero.page,
-            questTextElem
-          );
-
-          if (!quests.hasOwnProperty(questTitle)) {
-            quests[questTitle] = new Object();
-            quests[questTitle][questText] = {
-              answerOptions: testAnswerOptions,
-              correctAnswer: correctAnswer,
-            };
-          } else if (!quests[questTitle].hasOwnProperty(questText)) {
-            quests[questTitle][questText] = {
-              answerOptions: testAnswerOptions,
-              correctAnswer: correctAnswer,
-            };
-          } else {
-            logger.log(`quest [${questTitle}] already exists!`, {
-              prefix: hero.prefix,
-              importance: 1,
-            });
-          }
-        }
-
-        document.addEventListener("click", (event) => {
-          const clickedElement = event.target;
-          const parentElement = clickedElement.parentElement;
-          let correctAnswerFromClickElem = parentElement.querySelector(
-            "div[class~='answer__text']"
-          );
-          if (correctAnswerFromClickElem) {
-            let correctAnswerFromClick = correctAnswerFromClickElem.innerText;
-            if (correctAnswerFromClick && !correctAnswerFromClick !== "") {
-              quests[questTitle][questText]["correctAnswer"] =
-                correctAnswerFromClick;
-            }
-          }
-        });
-      }
-    });
-
-    await hero.page.on("console", async (msg) => {
-      if (msg.text().startsWith("object:")) {
-        let recievedObject = msg.text().split(":")[1];
-        logger.log(`recieved object from console: [${recievedObject}]`);
-        const jsonfile = require("jsonfile");
-        const file = "./DATA/quests.json";
-        jsonfile.writeFileSync(file, quests, { flag: "a" });
-        logger.log("quests saved");
-      }
-    });
-
-    await pause(SECOND);
-    return;
-    quests = require("./DATA/quests.json");
-
-    let currentScene = await getCurrentScene(hero);
-    if (currentScene === "quest") {
-      await pause(SECOND * 1);
-    }
-    logger.log(`\t~listening to quests~: ${i}/${iterationLimit}`);
-    if (++i > iterationLimit) return;
-  }
-  // }
 }
 
 //todo: add to xpath.DAILY_CHEST and xpath.WEEKLY_CHEST '... and not (//xpath-to-daily/weakly-reward)]'
@@ -1183,10 +1088,42 @@ async function getCurrentLevel(hero) {
   return await getText(hero.page, xpath.LEVEL);
 }
 
-(async () => {
+async function init() {
   quests = await readJson(questsPath);
   config = await readJson(configPath);
-  let heroes = config.HEROES;
+  if (specifiedMode) {
+    config.MODE = specifiedMode;
+    config = await updateJson(configPath, config);
+  }
+}
+
+class Hero {
+  ID;
+  name;
+  prefix;
+  homeURL;
+  dungeonsCompleted = 0;
+  dungeonCounterTimestamp = 0;
+  page;
+  sessionStartTime;
+  sessionMaxDuration;
+  idleCount = 0;
+  lastActionTime = 0;
+  constructor(ID, name, homeURL, sessionMaxDuration) {
+    this.ID = ID;
+    this.name = name;
+    this.homeURL = homeURL;
+    this.sessionMaxDuration = sessionMaxDuration;
+    this.sessionStartTime = Date.now();
+  }
+}
+
+(async () => {
+  await init();
+
+  quests = await readJson(questsPath);
+  config = await readJson(configPath);
+  let heroesToLaunch = config.HEROES;
 
   // const jsonsToWatch = [questsPath, configPath];
   // await watchJsonChanges(jsonsToWatch);
@@ -1212,14 +1149,14 @@ async function getCurrentLevel(hero) {
     openPages.push(...(await browser.pages()));
   }
 
-  for (let heroIndex in heroes) {
-    if (!heroes[heroIndex].active) continue;
+  for (let heroIndex in heroesToLaunch) {
+    if (!heroesToLaunch[heroIndex].active) continue;
 
     const hero = new Hero(
-      heroes[heroIndex].heroID,
-      heroes[heroIndex].heroName,
-      `${config.BASE_URL}${heroes[heroIndex].classContractAddress}/${heroes[heroIndex].heroID}`,
-      heroes[heroIndex].sessionMaxDurationInMinutes
+      heroesToLaunch[heroIndex].heroID,
+      heroesToLaunch[heroIndex].heroName,
+      `${config.BASE_URL}${heroesToLaunch[heroIndex].classContractAddress}/${heroesToLaunch[heroIndex].heroID}`,
+      heroesToLaunch[heroIndex].sessionMaxDurationInMinutes
     );
 
     //check if one of the pages contains ID of the hero
@@ -1229,7 +1166,7 @@ async function getCurrentLevel(hero) {
         continue;
       }
 
-      if (url.includes(hero.ID)) {
+      if (url.includes(`/${hero.ID}`)) {
         hero.page = page;
         hero.name = await getHeroName(hero);
         logger.log(`found existing page for hero |${hero.name}[${hero.ID}]|`);
@@ -1247,45 +1184,17 @@ async function getCurrentLevel(hero) {
     }
 
     //04:42:10 samwise[443] some-line-of-text
-    hero.prefix = `(${heroes[hero.ID].browser_id})${hero.name}[${hero.ID}]`;
+    hero.prefix = `(${heroesToLaunch[hero.ID].browser_id})${hero.name}[${
+      hero.ID
+    }]`;
     currentHeroes.push(hero);
   }
 
-  switch (config.MODE) {
-    case "level":
-      await playFirstBiome(currentHeroes);
-      break;
-    case "daily":
-      await playFirstBiome(currentHeroes);
-      break;
-    case "listen":
-      logger.error(
-        `"listen" MODE is not implemented yet. Select "level" or "daily" mode!`
-      );
-      return false;
-    default:
-      logger.error(`unknown mode: ${config.MODE}`);
-      break;
+  if (!Object.values(MODE).includes(config.MODE)) {
+    logger.error(`unknown mode: ${config.MODE}`);
+    return;
   }
-})();
 
-class Hero {
-  ID;
-  name;
-  prefix;
-  homeURL;
-  dungeonsCompleted = 0;
-  dungeonCounterTimestamp = 0;
-  page;
-  sessionStartTime;
-  sessionMaxDuration;
-  idleCount = 0;
-  lastActionTime = 0;
-  constructor(ID, name, homeURL, sessionMaxDuration) {
-    this.ID = ID;
-    this.name = name;
-    this.homeURL = homeURL;
-    this.sessionMaxDuration = sessionMaxDuration;
-    this.sessionStartTime = Date.now();
-  }
-}
+  await play(currentHeroes);
+  return;
+})();

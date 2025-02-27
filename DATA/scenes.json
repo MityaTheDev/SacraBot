@@ -30,6 +30,22 @@
       "description": "'Attacking...' button"
     }
   },
+  "delegationPopup": {
+    "indicator": {
+      "xpath": "//app-delegate-dialog[//div[contains(@class, 'title-a') and text() = ' Delegate transactions ']]",
+      "description": "A pop-up window with 'Delegate transactions' text"
+    },
+    "actionTargets": {
+      "activate": {
+        "xpath": "//app-delegate-dialog//button[text() = ' Activate delegation ']",
+        "description": "'Activate delegation' button"
+      },
+      "close": {
+        "xpath": "//app-delegate-dialog//button[contains(@class, 'btn-close')]",
+        "description": "Close button"
+      }
+    }
+  },
   "home": {
     "indicator": {
       "xpath": "//div[contains(@class, 'hero-stat')]/button[@id='show-all-stats']",
