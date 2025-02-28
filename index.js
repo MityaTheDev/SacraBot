@@ -1,7 +1,7 @@
 const logger = require("./src/logger.js");
 const Ads = require("./src/AdsPower/index");
 const puppeteer = require(`./src/BrowserAutomation/puppeteer.js`);
-const { pause, SECOND } = require("./src/time.js");
+const { pause, SECOND, MINUTE } = require("./src/time.js");
 const PptrCfg = require("./configs/puppeteer.json");
 const xpath = require("./xpath/xpath.json");
 const telegram = require("./src/telegram.js");
@@ -9,7 +9,6 @@ const scenes = require("./DATA/scenes.json");
 const fs = require("fs");
 const path = require("path");
 const DateFormat = require("date-format");
-const { timeStamp } = require("console");
 const { timeout } = require("puppeteer");
 const specifiedMode = process.argv[3];
 const INSTANCE = process.argv[2];
@@ -377,7 +376,7 @@ async function checkHealth(hero) {
       logger.error(
         `waiting for 1 hour... need to restart the bot \ntodo: make drink health potion function`
       );
-      await pause(SECOND * 3600);
+      await pause(MINUTE * 60);
 
       //todo: drink health potion
     }
@@ -474,12 +473,10 @@ async function clickAnswerButton(hero, answerObj) {
     xpathToButton = `//*[text()=concat('"', ${text}, '"')]/ancestor::div[contains(@class, "answer ")]/button`;
   else
     xpathToButton = `//*[text()="${text}"]/ancestor::div[contains(@class, "answer ")]/button`;
-  let success = await puppeteer.clickByPage(
-    hero.page,
-    xpathToButton,
-    1000,
-    false
-  );
+  let success = await puppeteer.clickByPage(hero.page, xpathToButton, {
+    timeout: 1000,
+    logError: false,
+  });
   if (!success) await buttonElem.click();
 }
 
@@ -657,6 +654,17 @@ async function throwQuestsError(
 //else wait for second.
 async function takeAction(hero, currentScene) {
   if (!currentScene) return;
+  if (hero.lastScene !== currentScene) {
+    hero.lastSceneChangeTime = Date.now();
+    hero.lastScene = currentScene;
+  } else if (Date.now() - hero.lastSceneChangeTime > MINUTE * 5) {
+    await telegram.sendMessage(
+      `${hero.prefix} is stuck on [${hero.lastScene}] scene! Going home...`
+    );
+    logger.log(`stuck on [${currentScene}]! Going home...`);
+    await goToHomePage(hero);
+    await hero.page.waitForNetworkIdle({ idleTime: 10000 });
+  }
 
   switch (currentScene) {
     case "emptySreen":
@@ -688,7 +696,7 @@ async function takeAction(hero, currentScene) {
         await telegram.sendMessage(
           `${hero.prefix} is ready for the boss fight!`
         );
-        await pause(SECOND * 3600);
+        await pause(MINUTE * 60);
         return;
       }
 
@@ -725,7 +733,7 @@ async function takeAction(hero, currentScene) {
       await telegram.sendMessage(
         `*__${hero.prefix}__* LOW BALANCE ON DELEGATION!`
       );
-      await pause(SECOND * 300);
+      await pause(MINUTE * 5);
       return;
     case "attacking":
     case "transactionProcessing":
@@ -746,27 +754,14 @@ async function takeAction(hero, currentScene) {
     : false;
 
   if (!targets) {
-    hero.idleCount++;
-    logger.log(
-      `no action targets for ${currentScene} scene! idle count: ${hero.idleCount}/${config.IDLE_COUNT_MAX}`,
-      {
-        importance: 1,
-      }
-    );
-    if (hero.idleCount >= config.IDLE_COUNT_MAX) {
-      await saveBodyOfPage(hero.page, `${hero.ID}_idle_${currentScene}`);
-      await telegram.sendMessage(
-        `${hero.ID} is too idle! Waiting for 2 minutes...`
-      );
-      logger.error(
-        `is too idle at ${currentScene} scene! telergam message sent, pausing for 2 minutes...`
-      );
-      await pause(SECOND * 120);
-    }
+    logger.log(`no action targets for ${currentScene} scene!`, {
+      importance: 1,
+    });
+    await pause(MINUTE * 2);
     return;
   }
-
   logger.log(`found ${Object.keys(targets).length} targets for action`);
+
   for (let target in targets) {
     let targetElement = await puppeteer.xPathExist(
       hero.page,
@@ -788,7 +783,6 @@ async function takeAction(hero, currentScene) {
 
     logger.log(`clicking on [${target}] target`);
     await puppeteer.clickByPage(hero.page, targets[target].xpath);
-    hero.idleCount = 0;
     hero.lastActionTime = Date.now();
     break;
   }
@@ -883,9 +877,13 @@ async function getDailyReward(hero) {
 
   //number of daily rewards
   while ((await getText(hero.page, xpath.DAILY_REWARD_COUNT))[1] > 0) {
-    await puppeteer.clickByPage(hero.page, xpath.DAILY_CHEST, 5000);
+    await puppeteer.clickByPage(hero.page, xpath.DAILY_CHEST, {
+      timeout: 5000,
+    });
     await hero.page.waitForNetworkIdle({ idleTime: 5000 });
-    await puppeteer.clickByPage(hero.page, xpath.DAILY_REWARD, 5000);
+    await puppeteer.clickByPage(hero.page, xpath.DAILY_REWARD, {
+      timeout: 5000,
+    });
     await hero.page.waitForNetworkIdle({ idleTime: 5000 });
     logger.log(`daily reward received`, {
       importance: 1,
@@ -895,9 +893,13 @@ async function getDailyReward(hero) {
 
   //number of weekly rewards
   while ((await getText(hero.page, xpath.WEAKLY_REWARD_COUNT))[1] > 0) {
-    await puppeteer.clickByPage(hero.page, xpath.WEAKLY_CHEST, 5000);
+    await puppeteer.clickByPage(hero.page, xpath.WEAKLY_CHEST, {
+      timeout: 5000,
+    });
     await hero.page.waitForNetworkIdle({ idleTime: 5000 });
-    await puppeteer.clickByPage(hero.page, xpath.WEAKLY_REWARD, 5000);
+    await puppeteer.clickByPage(hero.page, xpath.WEAKLY_REWARD, {
+      timeout: 5000,
+    });
     await hero.page.waitForNetworkIdle({ idleTime: 5000 });
     logger.log(`weakly reward received`, {
       importance: 1,
@@ -950,11 +952,24 @@ async function levelUp(hero) {
       return;
   }
 
+  logger.log(`clicking on 'Level Up' button...`);
   await puppeteer.clickByPage(hero.page, xpath.LEVEL_UP_BUTTON);
-  await hero.page.waitForNetworkIdle({ idleTime: 2000 });
+  logger.log(`waiting for Page idle for 5 seconds...`);
+  await hero.page.waitForNetworkIdle({ idleTime: 5000 });
+  logger.log(
+    `available stats: ${await getText(
+      hero.page,
+      xpath.LEVEL_UP_AVAILABLE_STATS
+    )}`
+  );
   while ((await getText(hero.page, xpath.LEVEL_UP_AVAILABLE_STATS)) > 0) {
-    await puppeteer.clickByPage(hero.page, xpathAttr);
-    await pause(SECOND / 5);
+    logger.log(`clicking plus button...`);
+    await puppeteer.clickByPage(hero.page, xpathAttr, {
+      timeoput: 200,
+      offset: 0.1,
+    });
+    logger.log(`waiting for 200 milliseconds...`);
+    await pause(200);
   }
   await puppeteer.clickByPage(hero.page, xpath.LEVEL_UP_BUTTON_CONFIRM);
   await pause(SECOND);
@@ -1007,7 +1022,8 @@ class Hero {
   page;
   sessionStartTime;
   sessionMaxDuration;
-  idleCount = 0;
+  lastScene = "";
+  lastSceneChangeTime = 0;
   lastActionTime = 0;
   constructor(ID, name, homeURL, sessionMaxDuration) {
     this.ID = ID;

@@ -103,9 +103,13 @@ async function elementScrollIntoViewConsole(page, element, range) {
 // Maybe it is harder to spot automated activity because
 // the mouse is clicking with random offsets
 // of the center of the element
-async function clickByPage(page, xPath, timeout = 10000, logError = true) {
-  const x = Math.random() - 0.5;
-  const y = Math.random() - 0.5;
+async function clickByPage(
+  page,
+  xPath,
+  { timeout = 10000, logError = true, offset = 0.35 } = {}
+) {
+  const x = Math.random() - offset;
+  const y = Math.random() - offset;
   try {
     await page.waitForSelector("::-p-xpath(" + xPath + ")", {
       timeout: timeout,

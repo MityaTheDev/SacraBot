@@ -75,7 +75,7 @@
 
   "home": {
     "indicator": {
-      "xpath": "//div[contains(@class, 'hero-stat')]/button[@id='show-all-stats']",
+      "xpath": "//div[contains(@class, 'hero-stat')]/button[@id='show-all-stats' and not(//cdk-dialog-container)]",
       "description": "'Show All Hero Stats' button"
     },
     "actionTargets": {
