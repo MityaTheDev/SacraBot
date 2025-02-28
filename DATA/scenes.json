@@ -5,24 +5,28 @@
       "description": "'Blockchain Transaction Processing' text"
     }
   },
+
   "emptySreen": {
     "indicator": {
       "xpath": "/html/body/app-root[not(*)]",
       "description": "Empty screen, hard refresh helps"
     }
   },
+
   "error": {
     "indicator": {
       "xpath": "//app-info-dialog//*[contains(text(), 'Info ') or contains(text(), 'Error')]",
       "description": "Element with 'Error' text"
     }
   },
+
   "loading": {
     "indicator": {
       "xpath": "/html/body/app-root/div[2]/main/ng-component/app-loading-small/div[contains(text(), 'Loading')]",
       "description": "'Loading' text in the center of the screen"
     }
   },
+
   "attacking": {
     "indicator": {
       "url": "/fight/",
@@ -30,9 +34,18 @@
       "description": "'Attacking...' button"
     }
   },
-  "delegationPopup": {
+
+  "quest": {
     "indicator": {
-      "xpath": "//app-delegate-dialog[//div[contains(@class, 'title-a') and text() = ' Delegate transactions ']]",
+      "urlIndicator": "/story/",
+      "xpath": "//div[@id='story-name' and not(//app-animation-papyrus) and not(//img[contains(@alt, 'loading')]) and not(//button[contains(@class, 'btn-exit') and text()=' Continue '])]",
+      "description": "Element with the unique id"
+    }
+  },
+
+  "delegationPopupActivate": {
+    "indicator": {
+      "xpath": "//app-delegate-dialog[(//div[contains(@class, 'title-a') and text() = ' Delegate transactions ']) and not(//div[text() = 'Delegator balance is low!'])]",
       "description": "A pop-up window with 'Delegate transactions' text"
     },
     "actionTargets": {
@@ -46,6 +59,20 @@
       }
     }
   },
+
+  "delegationPopupLowBalance": {
+    "indicator": {
+      "xpath": "//app-delegate-dialog[(//div[contains(@class, 'title-a') and text() = ' Delegate transactions ']) and (//div[text() = 'Delegator balance is low!'])]",
+      "description": "A pop-up window with 'Delegate transactions' text"
+    },
+    "actionTargets": {
+      "close": {
+        "xpath": "//app-delegate-dialog//button[contains(@class, 'btn-close')]",
+        "description": "Close button"
+      }
+    }
+  },
+
   "home": {
     "indicator": {
       "xpath": "//div[contains(@class, 'hero-stat')]/button[@id='show-all-stats']",
@@ -62,9 +89,10 @@
       }
     }
   },
+
   "biomeEnter": {
     "indicator": {
-      "xpath": "//app-biome-dialog//div[contains(@class, 'title-a') and (contains(text(), 'Grimlarn Passage') or contains(text(), 'Grimlarn') or contains(text(), 'Way of the Drowned') or contains(text(), 'Forbidden Swamp')) and (//button[contains(text(), 'Enter')])]",
+      "xpath": "//app-biome-dialog//div[contains(@class, 'title-a') and text()=' Grimlarn Passage ' and (//button[contains(text(), 'Enter')])]",
       "description": "Header of window with biome name that appears when you click the biome icon and presence of the 'Enter' button"
     },
     "actionTargets": {
@@ -74,30 +102,20 @@
       }
     }
   },
+
   "biomeSelection": {
     "indicator": {
-      "xpath": "/html/body/app-root/div[2]/main/app-map/div[4]/div/app-biome[@id='biome_0' and not(//app-biome-dialog)]",
-      "description": "first biome element full xPath and absence of the 'app-biome-dialog' element which is an ancestor of dialog window"
+      "xpath": "//app-map[//app-biome[@id='biome_0' and not(//app-biome-dialog)]]",
+      "description": "first biome element and absence of the 'app-biome-dialog' element which is an ancestor of dialog window"
     },
     "actionTargets": {
       "1": {
-        "xpath": "//*[@id='biome_0']",
-        "description": "'1 biome' button (image)"
-      },
-      "2": {
-        "xpath": "//*[@id='biome_1']",
-        "description": "'2 biome' button (image)"
-      },
-      "3": {
-        "xpath": "//*[@id='biome_2']",
-        "description": "'3 biome' button (image)"
-      },
-      "4": {
-        "xpath": "//*[@id='biome_3']",
-        "description": "'4 biome' button (image)"
+        "xpath": "//app-map//app-biome[@id='biome_0']",
+        "description": "'1 biome' element"
       }
     }
   },
+
   "adventureSelection": {
     "indicator": {
       "xpath": "//app-title/div/div[contains(text(), 'Adventures') and not(//app-dialog-title)]",
@@ -110,6 +128,7 @@
       }
     }
   },
+
   "adventureMuchExperienceDialog": {
     "indicator": {
       "xpath": "//app-title/div/div[contains(text(), 'Adventures') and (//app-dialog-title//div[contains(text(), 'Much experience')])]",
@@ -122,6 +141,7 @@
       }
     }
   },
+
   "adventureDetails": {
     "indicator": {
       "urlIndicator": "/details/",
@@ -135,6 +155,7 @@
       }
     }
   },
+
   "adventureFinish": {
     "indicator": {
       "xpath": "//button[contains(@class, 'app-btn-red-3') and text()=' Finish this adventure ']",
@@ -147,6 +168,7 @@
       }
     }
   },
+
   "adventureCongratulations": {
     "indicator": {
       "xpath": "//div[contains(@class, 'reward-title') and text()='Biomes rewards progression' and (//img[contains(@class, 'ribbon')])]",
@@ -159,6 +181,7 @@
       }
     }
   },
+
   "fight": {
     "indicator": {
       "urlIndicator": "/fight/",
@@ -172,6 +195,7 @@
       }
     }
   },
+
   "victory_With_PopupWindow": {
     "indicator": {
       "urlIndicator": "/fight/",
@@ -185,6 +209,7 @@
       }
     }
   },
+
   "victory_Without_PopupWindow": {
     "indicator": {
       "urlIndicator": "/fight/",
@@ -198,6 +223,7 @@
       }
     }
   },
+
   "questWaitingForTransacrion": {
     "indicator": {
       "urlIndicator": "/story/",
@@ -205,19 +231,14 @@
       "description": "Anscestor element of papyrus animation"
     }
   },
+
   "questLoading": {
     "indicator": {
       "xpath": "//div[contains(@class, 'title')]//img[contains(@alt, 'loading') and not(//app-animation-papyrus)]",
       "description": "Element with for dots and amination to the right of the quest title"
     }
   },
-  "quest": {
-    "indicator": {
-      "urlIndicator": "/story/",
-      "xpath": "//div[@id='story-name' and not(//app-animation-papyrus) and not(//img[contains(@alt, 'loading')]) and not(//button[contains(@class, 'btn-exit') and text()=' Continue '])]",
-      "description": "Element with the unique id"
-    }
-  },
+
   "questEnd": {
     "indicator": {
       "urlIndicator": "/story/",
@@ -231,6 +252,7 @@
       }
     }
   },
+
   "questContinue": {
     "indicator": {
       "urlIndicator": "/story/",
@@ -244,6 +266,7 @@
       }
     }
   },
+
   "shrine": {
     "indicator": {
       "urlIndicator": "/event/",

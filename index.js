@@ -47,30 +47,6 @@ async function readJson(filePath) {
   return json;
 }
 
-async function watchJsonChanges(jsonsToWatch) {
-  jsonsToWatch.forEach((file) => {
-    fs.watch(file, async (eventType, filename) => {
-      if (eventType === "change") {
-        switch (filename) {
-          case "quests.json":
-            quests = await readJson(questsPath);
-            logger.log(`quests.json has been updated`, {
-              messageModifiers: ["yellowBright"],
-            });
-            break;
-          case "config.json":
-            config = await readJson(configPath);
-            logger.log(`config.json has been updated`, {
-              messageModifiers: ["yellowBright"],
-            });
-            break;
-        }
-      }
-    });
-    console.log(`Watching file: ${file}`);
-  });
-}
-
 async function isOutOfTime(hero) {
   const currentTime = Date.now();
   const minutesLeft =
@@ -701,16 +677,18 @@ async function takeAction(hero, currentScene) {
           await levelUp(hero);
         }
 
-        // todo: add logic to distribute stats according to build
         if (config.ALLOW_LEVEL_UP && config.HEROES[hero.ID].currentLevel > 12) {
           config.ALLOW_LEVEL_UP = false;
           config = await updateJson(configPath, config);
         }
       }
 
-      //temp; todo: put on items, if don't have a weapon, go and buy one
-      if (config.HEROES[hero.ID].currentLevel === 7) {
-        await telegram.sendMessage(`${hero.prefix} is ready for boss fight!`);
+      //todo: put on items, if don't have a weapon, go and buy one
+      if (config.HEROES[hero.ID].currentLevel == 7) {
+        await telegram.sendMessage(
+          `${hero.prefix} is ready for the boss fight!`
+        );
+        await pause(SECOND * 3600);
         return;
       }
 
@@ -725,7 +703,6 @@ async function takeAction(hero, currentScene) {
           messageModifiers: ["italic", "magentaBright"],
         }
       );
-
       break;
     case "adventureCongratulations":
       if (
@@ -738,6 +715,18 @@ async function takeAction(hero, currentScene) {
         config = await updateJson(configPath, config);
       }
       break;
+    case "delegationPopupLowBalance":
+      //todo:
+      // 1. send nofication to manager
+      // 2. auto withdraw from binance - add config for binance API, and flags to
+      // ***.json ("REFRESH_DELEGATION": true, "AMOUNT": 2), create delegators.json
+      // with browser ids and delegator addresses, create func to use binance API
+      // 3. confirm at manager
+      await telegram.sendMessage(
+        `*__${hero.prefix}__* LOW BALANCE ON DELEGATION!`
+      );
+      await pause(SECOND * 300);
+      return;
     case "attacking":
     case "transactionProcessing":
     case "loading":
@@ -786,7 +775,7 @@ async function takeAction(hero, currentScene) {
 
     if (!targetElement) {
       logger.log(`target is not there!`);
-      return;
+      continue;
     }
 
     let elapsedTime = Date.now() - hero.lastActionTime;
@@ -812,6 +801,8 @@ async function play(currentHeroes) {
     for await (let hero of currentHeroes) {
       logger.setDefaultOptions({ prefix: hero.prefix });
 
+      hero.page.waitForNetworkIdle({ idleTime: 750 });
+
       if (currentHeroes.length === 0) {
         logger.log(`\n\t~= ALL HEROES ARE DONE =~\n`, {
           messageModifiers: ["green", "underline"],
@@ -835,8 +826,6 @@ async function play(currentHeroes) {
             });
             // let rewardClaimed = await getDailyReward(hero);
             // if (rewardClaimed) currentHeroes.pop(hero);
-            config.HEROES[hero.ID].active = false;
-            config = await updateJson(configPath, config);
             currentHeroes.pop(hero);
             continue;
           }
@@ -848,19 +837,14 @@ async function play(currentHeroes) {
             logger.log(`is done with levelling!`, {
               messageModifiers: ["green"],
             });
-            config.HEROES[hero.ID].active = false;
-            config = await updateJson(configPath, config);
             currentHeroes.pop(hero);
             continue;
           }
       }
 
       let currentScene = await getCurrentScene(hero);
-
-      //test
-      return;
       await takeAction(hero, currentScene);
-      await pause();
+      await pause(700);
     }
   }
 }
@@ -989,9 +973,11 @@ async function isNextLevel(hero) {
 }
 
 async function getCurrentLevel(hero) {
+  logger.log(`getting current level...`);
   //selects all digits in string
   const regex = RegExp("\\d+", "g");
   const levelUpToText = await getText(hero.page, xpath.LEVEL_UP_TO, {
+    timeout: 1000,
     logError: false,
   });
   const digit = regex.exec(levelUpToText);
@@ -1035,14 +1021,7 @@ class Hero {
 (async () => {
   await init();
 
-  quests = await readJson(questsPath);
-  config = await readJson(configPath);
-  let heroesToLaunch = config.HEROES;
-
-  // const jsonsToWatch = [questsPath, configPath];
-  // await watchJsonChanges(jsonsToWatch);
-
-  logger.log(`\n\nMODE: ${config.MODE}\nLOG_LEVEL: ${config.LOG_LEVEL}`, {
+  logger.log(`MODE: ${config.MODE}\nLOG_LEVEL: ${config.LOG_LEVEL}`, {
     timestampPresence: false,
     prefixPresence: false,
     messageModifiers: ["whiteBright", "underline", "bold"],
@@ -1063,6 +1042,7 @@ class Hero {
     openPages.push(...(await browser.pages()));
   }
 
+  let heroesToLaunch = config.HEROES;
   for (let heroIndex in heroesToLaunch) {
     if (!heroesToLaunch[heroIndex].active) continue;
 

@@ -50,9 +50,11 @@ function log(
       ? styleText(timestampModifiers, getTimestamp(timestampFormat) + " ")
       : "";
 
-    const prefixText = prefixPresence ? styleText(prefixModifiers, prefix) : "";
+    const prefixText = prefixPresence
+      ? styleText(prefixModifiers, prefix + " ")
+      : "";
 
-    message = styleText(messageModifiers, ` ${message}`);
+    message = styleText(messageModifiers, `${message}`);
     console.log(timeStamp + prefixText + message);
   }
 }

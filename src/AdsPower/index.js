@@ -12,7 +12,7 @@ const browserStatusBySN = async (serialNumber) => {
       `${Config.API_ENDPOINT}:${Config.API_PORT}` +
       `/api/v1/browser/active?serial_number=${serialNumber}`;
     const response = await axiosRequest(url, requestConfig);
-    console.log("axious response: ", response.status, "\n");
+    console.log("axious response: ", response.status);
     if (response?.data.code === -1) {
       logger.error(response?.data);
       return null;
