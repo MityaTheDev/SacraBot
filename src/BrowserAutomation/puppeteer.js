@@ -41,7 +41,7 @@ async function connectWs(params) {
 async function xPathExist(
   page,
   xPath,
-  { timeout = 5000, logError = false } = {}
+  { timeout = 10, logError = false } = {}
 ) {
   try {
     await page.waitForSelector("::-p-xpath(" + xPath + ")", {

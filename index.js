@@ -6,7 +6,7 @@ const PptrCfg = require("./configs/puppeteer.json");
 const xpath = require("./xpath/xpath.json");
 const telegram = require("./src/telegram.js");
 const scenes = require("./DATA/scenes.json");
-const RABBY = require("./configs/rabby.json");
+const RABBY = require("./configs/rabby_config.json");
 const fs = require("fs");
 const path = require("path");
 const DateFormat = require("date-format");
@@ -64,7 +64,11 @@ async function setListenerForNewPageCreated(browser) {
       const url = await newPage.url();
       if (!url.includes(RABBY.NOTIFICATION_URL)) return;
 
-      if (await puppeteer.xPathExist(newPage, xpath.RABBY_DELEGATION_TEXT)) {
+      if (
+        await puppeteer.xPathExist(newPage, xpath.RABBY_DELEGATION_TEXT, {
+          timeout: 5000,
+        })
+      ) {
         await sighAndConfirm(newPage);
       }
     }
@@ -1067,6 +1071,6 @@ class Hero {
     return;
   }
 
-  // await play(currentHeroes);
+  await play(currentHeroes);
   // return;
 })();
