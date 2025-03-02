@@ -2,6 +2,8 @@
 logs/
 node_modules/
 package-lock.json
-configs/*
-!*/exapmle.*.*
+configs/*.*
+!*/example.*.*
+configs/instances/*
+!configs/instances/example.*.*
 PowershellScripts/ids.txt

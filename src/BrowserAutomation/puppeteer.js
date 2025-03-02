@@ -38,14 +38,19 @@ async function connectWs(params) {
 }
 
 /* ========================================================================= */
-async function xPathExist(page, xPath) {
+async function xPathExist(
+  page,
+  xPath,
+  { timeout = 5000, logError = false } = {}
+) {
   try {
-    let element = false;
-    element = await page.$("::-p-xpath(" + xPath + ")");
-    return element ? element : false;
+    await page.waitForSelector("::-p-xpath(" + xPath + ")", {
+      timeout: timeout,
+    });
+    return true;
   } catch (err) {
-    logger.error("[PUPPETEER] | xPathExist: " + err.message);
-    logger.error(err);
+    if (logError) logger.error(err);
+    return false;
   }
 }
 
@@ -106,7 +111,7 @@ async function elementScrollIntoViewConsole(page, element, range) {
 async function clickByPage(
   page,
   xPath,
-  { timeout = 10000, logError = true, offset = 0.35 } = {}
+  { timeout = 10000, logError = true, offset = 0 } = {}
 ) {
   const x = Math.random() - offset;
   const y = Math.random() - offset;
@@ -114,7 +119,9 @@ async function clickByPage(
     await page.waitForSelector("::-p-xpath(" + xPath + ")", {
       timeout: timeout,
     });
-    await page.click("::-p-xpath(" + xPath + ")", { offset: { x, y } });
+    offset
+      ? await page.click("::-p-xpath(" + xPath + ")", { offset: { x, y } })
+      : await page.click("::-p-xpath(" + xPath + ")");
     return true;
   } catch (error) {
     if (logError) {

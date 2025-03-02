@@ -1,9 +1,6 @@
 const { styleText } = require("node:util");
-const configLogLevel = resolveConfigLevel(
-  require("../configs/config.json").LOG_LEVEL
-);
 const DateFormat = require("date-format");
-const exp = require("node:constants");
+let configLogLevel = 2;
 
 //prefix: function() { return get hero in for loop }?
 let defaultOptions = {
@@ -16,6 +13,10 @@ let defaultOptions = {
   messageModifiers: ["whiteBright"],
   importance: 1,
 };
+
+function setLogLevel(level) {
+  configLogLevel = level;
+}
 
 function setDefaultOptions(options) {
   for (let key in options) {
@@ -129,3 +130,4 @@ function getTimestamp(format) {
 exports.log = log;
 exports.error = error;
 exports.setDefaultOptions = setDefaultOptions;
+exports.setLogLevel = setLogLevel;

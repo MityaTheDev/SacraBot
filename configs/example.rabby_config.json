@@ -1,0 +1,5 @@
+{
+  "RABBY_WALLET_NOTIFICATION_URL": "chrome-extension://acmacodkjbdgmoleebolmdjonilkdbch/notification",
+  "RABBY_WALLET_LOGIN_URL": "chrome-extension://acmacodkjbdgmoleebolmdjonilkdbch/popup.html#/unlock",
+  "RABBY_WALLET_PASSWORD": ""
+}

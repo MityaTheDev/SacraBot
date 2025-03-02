@@ -6,10 +6,10 @@ const PptrCfg = require("./configs/puppeteer.json");
 const xpath = require("./xpath/xpath.json");
 const telegram = require("./src/telegram.js");
 const scenes = require("./DATA/scenes.json");
+const RABBY = require("./configs/rabby.json");
 const fs = require("fs");
 const path = require("path");
 const DateFormat = require("date-format");
-const { timeout } = require("puppeteer");
 const specifiedMode = process.argv[3];
 const INSTANCE = process.argv[2];
 const configPath = path.join(__dirname, `/configs/instances/${INSTANCE}.json`);
@@ -61,22 +61,11 @@ async function setListenerForNewPageCreated(browser) {
   browser.on("targetcreated", async (target) => {
     const newPage = await target.page();
     if (newPage) {
-      const url = newPage.url();
-      if (url.includes(config.RABBY_WALLET_NOTIFICATION_URL)) {
-        //await getTransactionData();
-        // logger.log(
-        //   "RABBY WALLET",
-        //   "Rabby notification detected, signing and confirming transaction...",
-        //   ["green", "italic"],
-        //   0,
-        //   ["green", "italic"],
-        //   ["green", "italic"]
-        // );
-        await sighAndConfirm(newPage);
+      const url = await newPage.url();
+      if (!url.includes(RABBY.NOTIFICATION_URL)) return;
 
-        // intervalID = setInterval(async () => {
-        //   await checkWindowSizeAndMinimize(newPage);
-        // }, 300);
+      if (await puppeteer.xPathExist(newPage, xpath.RABBY_DELEGATION_TEXT)) {
+        await sighAndConfirm(newPage);
       }
     }
   });
@@ -84,40 +73,14 @@ async function setListenerForNewPageCreated(browser) {
 
 async function sighAndConfirm(page) {
   if (config.RABBY_WALLET_AUTO_CONFIRM) {
-    const signButton = await getElem(
-      page,
-      xpath.SIGN_BTN_XPATH,
-      config.SIGN_WAIT_TIME
-    );
-    if (signButton) {
-      await puppeteer.clickElementByConsole(page, signButton);
-      logger.log("Sign button clicked", {
-        prefix: "RABBY WALLET",
-
-        messageModifiers: ["green", "italic"],
-        prefixModifiers: ["italic"],
-      });
-      await pause(200);
-    } else {
-      logger.error("Sign button not found", { prefix: "RABBY WALLET" });
-    }
-
-    const confirmButton = await getElem(
-      page,
-      xpath.CONFIRM_BTN_XPATH,
-      config.CONFIRM_WAIT_TIME
-    );
-    if (confirmButton) {
-      await puppeteer.clickElementByConsole(page, confirmButton);
-      logger.log("Confirm button clicked", {
-        prefix: "RABBY WALLET",
-
-        messageModifiers: ["green", "italic"],
-        prefixModifiers: ["italic"],
-      });
-    } else {
-      logger.error("Confirm button not found", { prefix: "RABBY WALLET" });
-    }
+    await puppeteer.clickByPage(page, xpath.RABBY_SIGN_BUTTON, {
+      timeout: 5000,
+      logError: false,
+    });
+    await puppeteer.clickByPage(page, xpath.RABBY_CONFIRM_BUTTON, {
+      timeout: 5000,
+      logError: false,
+    });
   }
 }
 
@@ -141,8 +104,8 @@ async function logInRabbyWallet(browser) {
   await page.goto(config.RABBY_WALLET_LOGIN_URL, {
     waitUntil: "domcontentloaded",
   });
-  const inputElem = await getElem(page, xpath.INPUT_PASSWORD_XPATH);
-  const buttonElem = await getElem(page, xpath.SUBMIT_BUTTON_XPATH);
+  const inputElem = await getElem(page, xpath.RABBY_INPUT_PASSWORD);
+  const buttonElem = await getElem(page, xpath.RABBY_SUBMIT_BUTTON);
   await puppeteer.fillInInputWithoutCheck(
     inputElem,
     config.RABBY_WALLET_PASSWORD
@@ -356,7 +319,7 @@ async function getCurrentScene(hero, iterationsLeft = 4) {
 async function checkHealth(hero) {
   logger.log(`checking health...`);
   try {
-    let healthText = await getText(hero.page, xpath.HEALTH_XPATH);
+    let healthText = await getText(hero.page, xpath.HEALTH);
     healthText = healthText.replaceAll(" ", "");
     const currentHealth = healthText.split("/")[0];
     const maxHealth = healthText.split("/")[1];
@@ -388,10 +351,7 @@ async function checkHealth(hero) {
 async function getCurrentAnswerOptions(hero) {
   logger.log(`getting current answer options...`);
 
-  const answerOptionsElems = await getElems(
-    hero.page,
-    xpath.QUEST_ANSWER_XPATH
-  );
+  const answerOptionsElems = await getElems(hero.page, xpath.QUEST_ANSWER);
   if (answerOptionsElems) {
     let answerOptions = [];
     for (let element of answerOptionsElems) {
@@ -484,15 +444,16 @@ async function answerQuest(hero) {
   logger.log(`answering quest...`);
   quests = await readJson(questsPath);
 
-  const questTitle = await getText(hero.page, xpath.QUEST_TITLE_XPATH);
+  const questTitle = await getText(hero.page, xpath.QUEST_TITLE);
   if (!questTitle) {
     await saveBodyOfPage(hero.page, `${hero.prefix}_NoQuestTitle`);
     await throwQuestsError("noQuestTitleOrElement", hero);
     return;
   }
-  const storyText = (
-    await getText(hero.page, xpath.QUEST_TEXT_XPATH)
-  ).replaceAll("\n", "");
+  const storyText = (await getText(hero.page, xpath.QUEST_TEXT)).replaceAll(
+    "\n",
+    ""
+  );
   logger.log(
     `quest title: ${questTitle}, quest text: ${storyText.substring(0, 25)}...`
   );
@@ -844,7 +805,7 @@ async function play(currentHeroes) {
 }
 
 async function getHeroName(hero) {
-  return await getText(hero.page, xpath.HERO_NAME_XPATH);
+  return await getText(hero.page, xpath.HERO_NAME);
 }
 
 //todo: add to xpath.DAILY_CHEST and xpath.WEEKLY_CHEST '... and not (//xpath-to-daily/weakly-reward)]'
@@ -1003,9 +964,10 @@ async function getCurrentLevel(hero) {
 }
 
 async function init() {
-  logger.setDefaultOptions({ importance: 0 });
   quests = await readJson(questsPath);
   config = await readJson(configPath);
+  logger.setDefaultOptions({ importance: 0 });
+  logger.setLogLevel(config.LOG_LEVEL);
   if (specifiedMode) {
     config.MODE = specifiedMode;
     config = await updateJson(configPath, config);
@@ -1053,7 +1015,7 @@ class Hero {
     }
 
     // await logInRabbyWallet(browser);
-    // await setListenerForNewPageCreated(browser);
+    await setListenerForNewPageCreated(browser);
 
     openPages.push(...(await browser.pages()));
   }
@@ -1076,7 +1038,7 @@ class Hero {
         continue;
       }
 
-      if (url.includes(`/${hero.ID}`)) {
+      if (url.includes(`/${hero.ID}`) || url.includes("/delegate")) {
         hero.page = page;
         hero.name = await getHeroName(hero);
         logger.log(`found existing page for hero |${hero.name}[${hero.ID}]|`);
@@ -1105,6 +1067,6 @@ class Hero {
     return;
   }
 
-  await play(currentHeroes);
-  return;
+  // await play(currentHeroes);
+  // return;
 })();
