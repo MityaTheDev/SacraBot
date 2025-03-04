@@ -57,6 +57,11 @@ async function isOutOfTime(hero) {
   return false;
 }
 
+async function checkDelegationBalance(hero) {
+  logger.error("finish 'checkDelegationBalance()' function!");
+  return true;
+}
+
 async function setListenerForNewPageCreated(browser) {
   browser.on("targetcreated", async (target) => {
     const newPage = await target.page();
@@ -216,6 +221,8 @@ async function getText(
     );
   }
 
+  //regex for leading and tailing spaces: '/^\s+|\s+$/g'
+  //example - " what a string!   "
   try {
     if (timeout) {
       await page.waitForSelector("::-p-xpath(" + xpath + ")", {
@@ -226,7 +233,9 @@ async function getText(
       "::-p-xpath(" + xpath + ")",
       (elems, option) => {
         return elems.map((elem, option) => {
-          return option === "innerText" ? elem.innerText : elem.textContent;
+          let text = option === "innerText" ? elem.innerText : elem.textContent;
+          text = text.replace(/^\s+|\s+$/g, "");
+          return text;
         }, option);
       },
       option
@@ -309,7 +318,7 @@ async function getCurrentScene(hero, iterationsLeft = 4) {
 async function checkHealth(hero) {
   logger.log(`checking health...`);
   try {
-    let healthText = await getText(hero.page, xpath.HEALTH);
+    let healthText = (await getText(hero.page, xpath.HEALTH))[0];
     healthText = healthText.replaceAll(" ", "");
     const currentHealth = healthText.split("/")[0];
     const maxHealth = healthText.split("/")[1];
@@ -347,15 +356,21 @@ async function getCurrentAnswerOptions(hero) {
     for (let element of answerOptionsElems) {
       const text = (await puppeteer.elementInnerText(element))
         .replaceAll("\nChoose", "")
-        .replaceAll("\nApprove", "");
+        .replaceAll("\nApprove", "")
+        .replaceAll("\nSkip");
       const buttonElement = await element.$('::-p-xpath("\\button")');
+      if (text.includes("Hey, i know how it ends!")) {
+        logger.log("found skip answer!");
+        answerOptions = [{ text: text, buttonElement: buttonElement }];
+        break;
+      }
       answerOptions.push({ text: text, buttonElement: buttonElement });
     }
     logger.log(
       `${
-        answerOptionsElems.length
-      } answer options found on screen: [${answerOptions.map(
-        (answer) => answer.text
+        answerOptions.length
+      } answer options found on screen: [${answerOptions.map((answer) =>
+        answer.text.replaceAll("\n", "")
       )}]`
     );
     return answerOptions;
@@ -434,7 +449,9 @@ async function answerQuest(hero) {
   logger.log(`answering quest...`);
   quests = await readJson(questsPath);
 
-  const questTitle = await getText(hero.page, xpath.QUEST_TITLE);
+  const questTitle = await getText(hero.page, xpath.QUEST_TITLE, {
+    logError: true,
+  });
   if (!questTitle) {
     await saveBodyOfPage(hero.page, `${hero.prefix}_NoQuestTitle`);
     await throwQuestsError("noQuestTitleOrElement", hero);
@@ -452,16 +469,17 @@ async function answerQuest(hero) {
 
   //if only one answer option found, answer with it
   if (currentAnswerOptions && currentAnswerOptions.length === 1) {
-    logger.log(`only one answer option found, answering with it`);
+    logger.log(`only one possible answer found, answering with it`);
     await clickAnswerButton(hero, currentAnswerOptions[0]);
     return;
   }
 
-  //temp; todo: at lvl 7 put on closthes, if don't have a weapon, go and buy one
-  if (questTitle === "Guardian of the Forest") {
-    await telegram.sendMessage(`${hero.prefix} is at Guardian of the Forest`);
-    return;
-  }
+  if (currentAnswerOptions && currentAnswerOptions)
+    if (questTitle === "Guardian of the Forest") {
+      //temp; todo: at lvl 7 put on closthes, if don't have a weapon, go and buy one
+      await telegram.sendMessage(`${hero.prefix} is at Guardian of the Forest`);
+      return;
+    }
 
   //search quests.json for quest title and for quest text
   const storedQuest = quests[questTitle];
@@ -643,7 +661,10 @@ async function takeAction(hero, currentScene) {
       }
 
       //todo: put on items, if don't have a weapon, go and buy one
-      if (config.HEROES[hero.ID].currentLevel == 7) {
+      if (
+        !config.HEROES[hero.ID].firstBossKilled &&
+        config.HEROES[hero.ID].currentLevel == 7
+      ) {
         await telegram.sendMessage(
           `${hero.prefix} is ready for the boss fight!`
         );
@@ -692,6 +713,10 @@ async function takeAction(hero, currentScene) {
     case "questWaitingForTransacrion":
     case "questLoading":
       return;
+    case "delegation":
+      await checkDelegationBalance();
+      //temp, todo: change 'return' to 'break';
+      break;
     case "fight":
       await checkHealth(hero);
       break;
@@ -748,14 +773,6 @@ async function play(currentHeroes) {
 
       hero.page.waitForNetworkIdle({ idleTime: 750 });
 
-      if (currentHeroes.length === 0) {
-        logger.log(`\n\t~= ALL HEROES ARE DONE =~\n`, {
-          messageModifiers: ["green", "underline"],
-        });
-        isPlaying = false;
-        break;
-      }
-
       if (await isOutOfTime(hero)) {
         logger.log(`is out of time!`);
         currentHeroes.pop(hero);
@@ -790,6 +807,16 @@ async function play(currentHeroes) {
       let currentScene = await getCurrentScene(hero);
       await takeAction(hero, currentScene);
       await pause(700);
+    }
+
+    if (currentHeroes.length === 0) {
+      logger.log(`\n\t~= ALL HEROES ARE DONE =~\n`, {
+        messageModifiers: ["green", "underline"],
+        prefixPresence: false,
+        timestampPresence: false,
+      });
+      isPlaying = false;
+      break;
     }
   }
 }
@@ -1054,5 +1081,10 @@ class Hero {
   }
 
   await play(currentHeroes);
-  // return;
+
+  logger.error("machines will rise", {
+    prefixPresence: false,
+    timestampPresence: false,
+  });
+  return true;
 })();

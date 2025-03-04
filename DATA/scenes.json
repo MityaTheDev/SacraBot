@@ -43,6 +43,23 @@
     }
   },
 
+  "delegation": {
+    "indicator": {
+      "xpath": "//app-delegate//div[text() = 'Delegate transactions' and (//div[contains(text(), 'Session settings')])]",
+      "description": "'Delegate transactions' text and presense of div element with 'Session settings' text"
+    },
+    "actionTargets": {
+      "activateDelegation": {
+        "xpath": "//button[text() = ' Activate delegation ' and not(//img[@alt='loading'])]",
+        "description": "'Activate delegation' button"
+      },
+      "play": {
+        "xpath": "//button[text() = ' Play ' and not(@disabled)]",
+        "description": "'Play' button without 'disabled' attribute"
+      }
+    }
+  },
+
   "delegationPopupActivate": {
     "indicator": {
       "xpath": "//app-delegate-dialog[(//div[contains(@class, 'title-a') and text() = ' Delegate transactions ']) and not(//div[text() = 'Delegator balance is low!'])]",
@@ -109,7 +126,7 @@
       "description": "first biome element and absence of the 'app-biome-dialog' element which is an ancestor of dialog window"
     },
     "actionTargets": {
-      "1": {
+      "firstBiomeButton": {
         "xpath": "//app-map//app-biome[@id='biome_0']",
         "description": "'1 biome' element"
       }
