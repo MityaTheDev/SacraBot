@@ -48,7 +48,7 @@ async function xPathExist(page, xPath, { timeout = 0, logError = false } = {}) {
       if (logError) logger.error(err);
     }
   }
-  return page.$("::-p-xpath(" + xPath + ")") ? true : false;
+  return (await page.$("::-p-xpath(" + xPath + ")")) ? true : false;
 }
 
 /* ========================================================================= */
