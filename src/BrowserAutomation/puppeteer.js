@@ -38,20 +38,17 @@ async function connectWs(params) {
 }
 
 /* ========================================================================= */
-async function xPathExist(
-  page,
-  xPath,
-  { timeout = 10, logError = false } = {}
-) {
-  try {
-    await page.waitForSelector("::-p-xpath(" + xPath + ")", {
-      timeout: timeout,
-    });
-    return true;
-  } catch (err) {
-    if (logError) logger.error(err);
-    return false;
+async function xPathExist(page, xPath, { timeout = 0, logError = false } = {}) {
+  if (timeout) {
+    try {
+      await page.waitForSelector("::-p-xpath(" + xPath + ")", {
+        timeout: timeout,
+      });
+    } catch (err) {
+      if (logError) logger.error(err);
+    }
   }
+  return page.$("::-p-xpath(" + xPath + ")") ? true : false;
 }
 
 /* ========================================================================= */

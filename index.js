@@ -208,12 +208,7 @@ async function getElems(page, xpath, timeout = 10000) {
 async function getText(
   page,
   xpath,
-  {
-    timeout = 10000,
-    option = "innerText",
-    logError = true,
-    multiple = false,
-  } = {}
+  { timeout = 0, option = "innerText", logError = false } = {}
 ) {
   if (option !== "innerText" && option !== "textContent") {
     throw new Error(
@@ -222,30 +217,21 @@ async function getText(
   }
 
   try {
-    await page.waitForSelector("::-p-xpath(" + xpath + ")", {
-      timeout: timeout,
-    });
-    if (multiple) {
-      const texts = await page.$$eval(
-        "::-p-xpath(" + xpath + ")",
-        (elems, option) => {
-          return elems.map((elem, option) => {
-            return option === "innerText" ? elem.innerText : elem.textContent;
-          }, option);
-        },
-        option
-      );
-      return texts;
-    } else {
-      const text = await page.$eval(
-        "::-p-xpath(" + xpath + ")",
-        (elem, option) => {
-          return option === "innerText" ? elem.innerText : elem.textContent;
-        },
-        option
-      );
-      return text;
+    if (timeout) {
+      await page.waitForSelector("::-p-xpath(" + xpath + ")", {
+        timeout: timeout,
+      });
     }
+    const texts = await page.$$eval(
+      "::-p-xpath(" + xpath + ")",
+      (elems, option) => {
+        return elems.map((elem, option) => {
+          return option === "innerText" ? elem.innerText : elem.textContent;
+        }, option);
+      },
+      option
+    );
+    return texts.length > 1 ? texts : texts[0];
   } catch (error) {
     if (logError) logger.error(error);
     return false;
@@ -819,7 +805,6 @@ async function getDailyReward(hero) {
     waitUntil: "networkidle0",
   });
 
-  // //div[contains(@class, "quest__count")]
   let completedQuestsText = await getText(
     hero.page,
     '//div[contains(@class, "quest__count")]'
@@ -958,7 +943,6 @@ async function getCurrentLevel(hero) {
   const regex = RegExp("\\d+", "g");
   const levelUpToText = await getText(hero.page, xpath.LEVEL_UP_TO, {
     timeout: 1000,
-    logError: false,
   });
   const digit = regex.exec(levelUpToText);
   if (digit) {
@@ -1044,7 +1028,6 @@ class Hero {
 
       if (url.includes(`/${hero.ID}`) || url.includes("/delegate")) {
         hero.page = page;
-        hero.name = await getHeroName(hero);
         logger.log(`found existing page for hero |${hero.name}[${hero.ID}]|`);
         break;
       }
@@ -1055,7 +1038,6 @@ class Hero {
       page = await browser.newPage();
       await goToHomePage(hero);
       hero.page = page;
-      hero.name = await getHeroName(hero);
       logger.log(`opened new page for hero |${hero.name}[${hero.ID}]|`);
     }
 
