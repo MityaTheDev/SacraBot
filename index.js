@@ -12,7 +12,10 @@ const path = require("path");
 const DateFormat = require("date-format");
 const specifiedMode = process.argv[3];
 const INSTANCE = process.argv[2];
-const configPath = path.join(__dirname, `/configs/instances/${INSTANCE}.json`);
+const serverMode = !INSTANCE;
+const configPath = INSTANCE
+  ? path.join(__dirname, `/configs/instances/${INSTANCE}.json`)
+  : path.join(__dirname, `/configs/server_config.json`);
 const questsPath = "\\\\DESKTOP-MAIN\\Shared\\quests.json";
 // const questsPath = path.join(__dirname, "/DATA/quests.json");
 let quests;
@@ -978,12 +981,24 @@ async function getCurrentLevel(hero) {
   return await getText(hero.page, xpath.LEVEL);
 }
 
+async function commandBots() {
+  const server = require("./src/Controller/server.js");
+  // const readline = require(`readline`);
+  // while (true) {
+
+  // }
+  return true;
+}
+
 async function init() {
   quests = await readJson(questsPath);
   config = await readJson(configPath);
   logger.setDefaultOptions({ importance: 0 });
   logger.setLogLevel(config.LOG_LEVEL);
-  if (specifiedMode) {
+  if (
+    specifiedMode &&
+    (specifiedMode === "daily" || specifiedMode === "level")
+  ) {
     config.MODE = specifiedMode;
     config = await updateJson(configPath, config);
   }
@@ -993,6 +1008,7 @@ class Hero {
   ID;
   name;
   prefix;
+  browserID;
   homeURL;
   dungeonsCompleted = 0;
   dungeonCounterTimestamp = 0;
@@ -1002,9 +1018,10 @@ class Hero {
   lastScene = "";
   lastSceneChangeTime = 0;
   lastActionTime = 0;
-  constructor(ID, name, homeURL, sessionMaxDuration) {
+  constructor(ID, name, browserID, homeURL, sessionMaxDuration) {
     this.ID = ID;
     this.name = name;
+    this.browserID = this.browserID;
     this.homeURL = homeURL;
     this.sessionMaxDuration = sessionMaxDuration;
     this.sessionStartTime = Date.now();
@@ -1013,6 +1030,16 @@ class Hero {
 
 (async () => {
   await init();
+  if (serverMode) {
+    console.log(`...server mode is enabled...`);
+    logger.log(`...server mode is enabled...`, {
+      messageModifiers: ["magenta"],
+    });
+    await commandBots();
+    return;
+  } else {
+    console.log("failed to enable server mode");
+  }
 
   logger.log(`MODE: ${config.MODE}\nLOG_LEVEL: ${config.LOG_LEVEL}`, {
     timestampPresence: false,
@@ -1042,6 +1069,7 @@ class Hero {
     const hero = new Hero(
       heroesToLaunch[heroIndex].heroID,
       heroesToLaunch[heroIndex].heroName,
+      heroesToLaunch[heroIndex].browser_id,
       `${config.BASE_URL}${heroesToLaunch[heroIndex].classContractAddress}/${heroesToLaunch[heroIndex].heroID}`,
       heroesToLaunch[heroIndex].sessionMaxDurationInMinutes
     );
