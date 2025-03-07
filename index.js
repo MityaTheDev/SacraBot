@@ -10,6 +10,7 @@ const RABBY = require("./configs/rabby_config.json");
 const fs = require("fs");
 const path = require("path");
 const DateFormat = require("date-format");
+// const client = require("./src/Controller/client.js");
 const specifiedMode = process.argv[3];
 const INSTANCE = process.argv[2];
 const serverMode = !INSTANCE;
@@ -1013,6 +1014,7 @@ class Hero {
   dungeonsCompleted = 0;
   dungeonCounterTimestamp = 0;
   page;
+  client;
   sessionStartTime;
   sessionMaxDuration;
   lastScene = "";
@@ -1021,10 +1023,15 @@ class Hero {
   constructor(ID, name, browserID, homeURL, sessionMaxDuration) {
     this.ID = ID;
     this.name = name;
-    this.browserID = this.browserID;
+    this.browserID = browserID;
+    this.prefix = `(${browserID})${name}[${ID}]`;
     this.homeURL = homeURL;
     this.sessionMaxDuration = sessionMaxDuration;
     this.sessionStartTime = Date.now();
+  }
+
+  setClient(client) {
+    this.client = client;
   }
 }
 
@@ -1037,8 +1044,6 @@ class Hero {
     });
     await commandBots();
     return;
-  } else {
-    console.log("failed to enable server mode");
   }
 
   logger.log(`MODE: ${config.MODE}\nLOG_LEVEL: ${config.LOG_LEVEL}`, {
@@ -1096,10 +1101,15 @@ class Hero {
       logger.log(`opened new page for hero |${hero.name}[${hero.ID}]|`);
     }
 
-    //04:42:10 (101)samwise[443] some-line-of-text
-    hero.prefix = `(${heroesToLaunch[hero.ID].browser_id})${hero.name}[${
-      hero.ID
-    }]`;
+    if (config.USE_CONTROLLER) {
+      console.log("bot will be using controller");
+      const client = require("./src/Controller/client.js");
+      hero.setClient(client);
+      await hero.client.init(hero);
+    } else {
+      console.log("controller will not be used");
+    }
+
     currentHeroes.push(hero);
   }
 
