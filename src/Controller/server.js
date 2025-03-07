@@ -26,21 +26,32 @@ wss.on("connection", (ws) => {
   let botId = -1;
 
   // Handle messages from the bot
-  ws.on("message", (message) => {
+  ws.on("message", (messageRaw) => {
+    const message = JSON.parse(messageRaw);
     console.log(
-      `${styleText("yellow", "Received from ")}` +
-        `${styleText("greenBright", message.info.prefix)}` +
-        `${styleText("yellow", "of type ")}` +
-        `${styleText("green", message.type)}`
+      `${styleText("yellow", "Received message from ")}` +
+        `'${styleText("greenBright", message.info.heroPrefix)}'` +
+        `${styleText("yellow", " of type ")}` +
+        `'${styleText("green", message.type)}'`
     );
-    console.log(`${styleText("white", "message.body: " + message.body)}`);
+    console.log(
+      `${styleText("yellow", "message.body:")} ${styleText(
+        "white",
+        message.body
+      )}`
+    );
     //do smth with the message
 
-    if (message.type === "init") {
-      botId = message.info.browserID;
-      bots.set(botId, ws);
+    switch (message.type) {
+      case "init":
+        botId = message.info.browserID;
+        console.log("saving to bots with id:", botId);
+        bots.set(botId, ws);
+        break;
+      case "state":
+        console.log("new state form bot:", message.body);
+        break;
     }
-    console.log("bots:", bots);
   });
 
   // Handle bot disconnection

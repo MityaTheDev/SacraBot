@@ -1021,7 +1021,7 @@ class Hero {
   constructor(ID, name, browserID, homeURL, sessionMaxDuration) {
     this.ID = ID;
     this.name = name;
-    this.browserID = this.browserID;
+    this.browserID = browserID;
     this.homeURL = homeURL;
     this.sessionMaxDuration = sessionMaxDuration;
     this.sessionStartTime = Date.now();
