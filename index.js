@@ -1,4 +1,5 @@
 const logger = require("./src/logger.js");
+const { styleText } = require("node:util");
 const Ads = require("./src/AdsPower/index");
 const puppeteer = require(`./src/BrowserAutomation/puppeteer.js`);
 const { pause, SECOND, MINUTE } = require("./src/time.js");
@@ -12,7 +13,10 @@ const path = require("path");
 const DateFormat = require("date-format");
 const specifiedMode = process.argv[3];
 const INSTANCE = process.argv[2];
-const configPath = path.join(__dirname, `/configs/instances/${INSTANCE}.json`);
+const serverMode = !INSTANCE;
+const configPath = INSTANCE
+  ? path.join(__dirname, `/configs/instances/${INSTANCE}.json`)
+  : path.join(__dirname, `/configs/server_config.json`);
 const questsPath = "\\\\DESKTOP-MAIN\\Shared\\quests.json";
 // const questsPath = path.join(__dirname, "/DATA/quests.json");
 let quests;
@@ -221,6 +225,7 @@ async function getText(
     );
   }
 
+  //or text = text.trim();
   //regex for leading and tailing spaces: '/^\s+|\s+$/g'
   //example - " what a string!   "
   try {
@@ -357,9 +362,9 @@ async function getCurrentAnswerOptions(hero) {
       const text = (await puppeteer.elementInnerText(element))
         .replaceAll("\nChoose", "")
         .replaceAll("\nApprove", "")
-        .replaceAll("\nSkip");
+        .replaceAll("\nSkip", "");
       const buttonElement = await element.$('::-p-xpath("\\button")');
-      if (text.includes("Hey, i know how it ends!")) {
+      if (text.toLowerCase().includes("hey, i know how it ends!")) {
         logger.log("found skip answer!");
         answerOptions = [{ text: text, buttonElement: buttonElement }];
         break;
@@ -631,6 +636,7 @@ async function takeAction(hero, currentScene) {
       `${hero.prefix} is stuck on [${hero.lastScene}] scene! Going home...`
     );
     logger.log(`stuck on [${currentScene}]! Going home...`);
+    if (hero.client) await hero.client.sendState(hero, "stuck on scene");
     await goToHomePage(hero);
     await hero.page.waitForNetworkIdle({ idleTime: 10000 });
   }
@@ -638,11 +644,15 @@ async function takeAction(hero, currentScene) {
   switch (currentScene) {
     case "emptySreen":
     case "error":
+      if (hero.client) await hero.client.sendState(hero, "error");
       await refresh(hero.page);
       return;
     case "home":
       config.HEROES[hero.ID].currentLevel = await getCurrentLevel(hero);
+      config.HEROES[hero.ID].currentLives = await getCurrentLives(hero);
       config = await updateJson(configPath, config);
+      hero.currentLevel = config.HEROES[hero.ID].currentLevel;
+      hero.currentLives = config.HEROES[hero.ID].currentLives;
 
       if (config.ALLOW_LEVEL_UP && (await isNextLevel(hero))) {
         // temp stop at level 4, go virtual till 7
@@ -652,6 +662,18 @@ async function takeAction(hero, currentScene) {
             config.HEROES[hero.ID].currentLevel < 12)
         ) {
           await levelUp(hero);
+        }
+
+        if (config.HEROES[hero.ID].currentLevel >= 12) {
+          if (hero.client)
+            await hero.client.sendState(hero, "ready for 2nd boss");
+          await telegram.sendMessage(
+            `${hero.prefix} is ready for the 2nd boss fight!`
+          );
+          logger.log("ready for 2nd boss!", {
+            messageModifiers: ["greenBright"],
+          });
+          await pause(MINUTE * 60);
         }
 
         if (config.ALLOW_LEVEL_UP && config.HEROES[hero.ID].currentLevel > 12) {
@@ -666,8 +688,13 @@ async function takeAction(hero, currentScene) {
         config.HEROES[hero.ID].currentLevel == 7
       ) {
         await telegram.sendMessage(
-          `${hero.prefix} is ready for the boss fight!`
+          `${hero.prefix} is ready for the 1st boss fight!`
         );
+        logger.log("ready for 1st boss!", {
+          messageModifiers: ["greenBright"],
+        });
+        if (hero.client)
+          await hero.client.sendState(hero, "ready for 1st boss");
         await pause(MINUTE * 60);
         return;
       }
@@ -683,6 +710,7 @@ async function takeAction(hero, currentScene) {
           messageModifiers: ["italic", "magentaBright"],
         }
       );
+      if (hero.client) await hero.client.sendState(hero, "home");
       break;
     case "adventureCongratulations":
       if (
@@ -694,6 +722,7 @@ async function takeAction(hero, currentScene) {
         config.HEROES[hero.ID].lastCompletedDungeonTimestamp = Date.now();
         config = await updateJson(configPath, config);
       }
+      if (hero.client) await hero.client.sendState(hero, "adv is finished");
       break;
     case "delegationPopupLowBalance":
       //todo:
@@ -705,6 +734,7 @@ async function takeAction(hero, currentScene) {
       await telegram.sendMessage(
         `*__${hero.prefix}__* LOW BALANCE ON DELEGATION!`
       );
+      if (hero.client) await hero.client.sendState(hero, "low deleg balance");
       await pause(MINUTE * 5);
       return;
     case "attacking":
@@ -715,12 +745,15 @@ async function takeAction(hero, currentScene) {
       return;
     case "delegation":
       await checkDelegationBalance();
+      if (hero.client) await hero.client.sendState(hero, "checking deleg");
       //temp, todo: change 'return' to 'break';
       break;
     case "fight":
+      if (hero.client) await hero.client.sendState(hero, "fighting");
       await checkHealth(hero);
       break;
     case "quest":
+      if (hero.client) await hero.client.sendState(hero, "questing");
       await answerQuest(hero);
       return;
   }
@@ -964,6 +997,13 @@ async function isNextLevel(hero) {
   return false;
 }
 
+async function getCurrentLives(hero) {
+  const src = await hero.page.$eval("::-p-xpath(" + xpath.LIVES + ")", (el) =>
+    el.getAttribute("src")
+  );
+  return src ? src.slice(-5).substring(0, 1) : false;
+}
+
 async function getCurrentLevel(hero) {
   logger.log(`getting current level...`);
   //selects all digits in string
@@ -978,12 +1018,23 @@ async function getCurrentLevel(hero) {
   return await getText(hero.page, xpath.LEVEL);
 }
 
+async function commandBots() {
+  const server = require("./src/Controller/server.js");
+  await pause(1000);
+  server.listenToInput();
+
+  return true;
+}
+
 async function init() {
   quests = await readJson(questsPath);
   config = await readJson(configPath);
   logger.setDefaultOptions({ importance: 0 });
   logger.setLogLevel(config.LOG_LEVEL);
-  if (specifiedMode) {
+  if (
+    specifiedMode &&
+    (specifiedMode === "daily" || specifiedMode === "level")
+  ) {
     config.MODE = specifiedMode;
     config = await updateJson(configPath, config);
   }
@@ -993,18 +1044,25 @@ class Hero {
   ID;
   name;
   prefix;
+  browserID;
+  currentLevel;
+  currentLives;
   homeURL;
-  dungeonsCompleted = 0;
-  dungeonCounterTimestamp = 0;
+  adventuresCompleted = 0;
+  adventureCounterTimestamp = 0;
   page;
+  client = false;
   sessionStartTime;
   sessionMaxDuration;
   lastScene = "";
   lastSceneChangeTime = 0;
   lastActionTime = 0;
-  constructor(ID, name, homeURL, sessionMaxDuration) {
+  constructor(ID, name, browserID, currentLevel, homeURL, sessionMaxDuration) {
     this.ID = ID;
     this.name = name;
+    this.browserID = browserID;
+    this.currentLevel = currentLevel;
+    this.prefix = `(${browserID})${name}[${ID}]`;
     this.homeURL = homeURL;
     this.sessionMaxDuration = sessionMaxDuration;
     this.sessionStartTime = Date.now();
@@ -1013,6 +1071,13 @@ class Hero {
 
 (async () => {
   await init();
+  if (serverMode) {
+    logger.log(`...server mode is enabled...`, {
+      messageModifiers: ["magenta"],
+    });
+    await commandBots();
+    return;
+  }
 
   logger.log(`MODE: ${config.MODE}\nLOG_LEVEL: ${config.LOG_LEVEL}`, {
     timestampPresence: false,
@@ -1042,6 +1107,8 @@ class Hero {
     const hero = new Hero(
       heroesToLaunch[heroIndex].heroID,
       heroesToLaunch[heroIndex].heroName,
+      heroesToLaunch[heroIndex].browser_id,
+      heroesToLaunch[heroIndex].currentLevel,
       `${config.BASE_URL}${heroesToLaunch[heroIndex].classContractAddress}/${heroesToLaunch[heroIndex].heroID}`,
       heroesToLaunch[heroIndex].sessionMaxDurationInMinutes
     );
@@ -1068,10 +1135,19 @@ class Hero {
       logger.log(`opened new page for hero |${hero.name}[${hero.ID}]|`);
     }
 
-    //04:42:10 (101)samwise[443] some-line-of-text
-    hero.prefix = `(${heroesToLaunch[hero.ID].browser_id})${hero.name}[${
-      hero.ID
-    }]`;
+    if (config.USE_CONTROLLER) {
+      logger.log("BOT WILL BE USING A CONTROLLER", {
+        messageModifiers: ["cyanBright"],
+      });
+      const client = require("./src/Controller/client.js");
+      hero.client = client;
+      await hero.client.init(hero);
+    } else {
+      logger.log("CONTROLLER WILL NOT BE USED", {
+        messageModifiers: ["yellow"],
+      });
+    }
+
     currentHeroes.push(hero);
   }
 

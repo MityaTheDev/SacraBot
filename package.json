@@ -9,10 +9,14 @@
   "author": "Mitya",
   "license": "ISC",
   "dependencies": {
+    "ansi-escapes": "^7.0.0",
     "axios": "^1.7.9",
+    "console-table-printer": "^2.12.1",
     "date-format": "^4.0.14",
+    "express": "^4.21.2",
     "fs": "^0.0.1-security",
     "jsonfile": "^6.1.0",
-    "puppeteer": "^24.1.1"
+    "puppeteer": "^24.1.1",
+    "ws": "^8.18.1"
   }
 }
