@@ -1,3 +1,4 @@
+const { pause } = require("../time.js");
 const express = require("express");
 const WebSocket = require("ws");
 const serverConfig = require("../../configs/server_config.json");
@@ -43,14 +44,6 @@ const oldObjects = {};
 //   console.log(`${color}(dim): ${styleText([color, dim], text)}`);
 // }
 
-setInterval(() => {
-  process.stdout.write(ansiEscapes.cursorHide);
-  process.stdout.write(ansiEscapes.clearScreen);
-  printTable();
-  process.stdout.write(prompt + currentCommand);
-  process.stdout.write(ansiEscapes.cursorShow);
-}, 1000);
-
 // HTTP server for initial setup
 app.use(express.json());
 app.get("/", (req, res) => {
@@ -89,6 +82,27 @@ wss.on("connection", (ws) => {
     bots.delete(botId);
   });
 });
+
+(async () => {
+  while (true) {
+    const startTime = Date.now();
+    process.stdout.write(ansiEscapes.cursorHide);
+    process.stdout.write(ansiEscapes.clearScreen);
+    printTable();
+    process.stdout.write(prompt + currentCommand);
+    process.stdout.write(ansiEscapes.cursorShow);
+    const sleepTime = 1000 - (Date.now() - startTime);
+    await pause(sleepTime);
+  }
+})();
+
+// setInterval(async () => {
+//   process.stdout.write(ansiEscapes.cursorHide);
+//   process.stdout.write(ansiEscapes.clearScreen);
+//   printTable();
+//   process.stdout.write(prompt + currentCommand);
+//   process.stdout.write(ansiEscapes.cursorShow);
+// }, 1500);
 
 // Send commands to a specific bot
 function sendCommand(botId, command) {
