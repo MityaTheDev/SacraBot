@@ -1,4 +1,5 @@
 const logger = require("./src/logger.js");
+const { styleText } = require("node:util");
 const Ads = require("./src/AdsPower/index");
 const puppeteer = require(`./src/BrowserAutomation/puppeteer.js`);
 const { pause, SECOND, MINUTE } = require("./src/time.js");
@@ -225,6 +226,7 @@ async function getText(
     );
   }
 
+  //or text = text.trim();
   //regex for leading and tailing spaces: '/^\s+|\s+$/g'
   //example - " what a string!   "
   try {
@@ -646,6 +648,7 @@ async function takeAction(hero, currentScene) {
       return;
     case "home":
       config.HEROES[hero.ID].currentLevel = await getCurrentLevel(hero);
+      config.HEROES[hero.ID].currentLives = await getCurrentLives(hero);
       config = await updateJson(configPath, config);
 
       if (config.ALLOW_LEVEL_UP && (await isNextLevel(hero))) {
@@ -968,6 +971,13 @@ async function isNextLevel(hero) {
   return false;
 }
 
+async function getCurrentLives(hero) {
+  const src = await hero.page.$eval("::-p-xpath(" + xpath.LIVES + ")", (el) =>
+    el.getAttribute("src")
+  );
+  return src ? src.slice(-5).substring(0, 1) : false;
+}
+
 async function getCurrentLevel(hero) {
   logger.log(`getting current level...`);
   //selects all digits in string
@@ -984,10 +994,9 @@ async function getCurrentLevel(hero) {
 
 async function commandBots() {
   const server = require("./src/Controller/server.js");
-  // const readline = require(`readline`);
-  // while (true) {
+  await pause(1000);
+  server.listenToInput();
 
-  // }
   return true;
 }
 
@@ -1038,7 +1047,6 @@ class Hero {
 (async () => {
   await init();
   if (serverMode) {
-    console.log(`...server mode is enabled...`);
     logger.log(`...server mode is enabled...`, {
       messageModifiers: ["magenta"],
     });

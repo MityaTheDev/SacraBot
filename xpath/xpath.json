@@ -1,4 +1,5 @@
 {
+  "LIVES": "//app-life-chances/img",
   "LEVEL": "//app-hero-info//div[@class='level__text']",
   "LEVEL_UP_TO": "//app-hero-info//div[contains(text(), 'up to')]",
   "LEVEL_UP_NOTIFICATION_ICON": "//div[contains(@class, 'notifications')]/img",

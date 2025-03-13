@@ -17,9 +17,11 @@
       "dungeonsCompleted": 0,
       "lastCompletedDungeonTimestamp": 0,
       "lastDailyQuestDate": "",
+      "currentLives": -1,
       "currentLevel": 1,
       "targetLevel": 12,
-      "sessionMaxDurationInMinutes": 240
+      "sessionMaxDurationInMinutes": 240,
+      "firstBossKilled": true
     }
   }
 }
