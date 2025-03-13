@@ -1,7 +1,8 @@
+const { pause } = require("../time");
 const WebSocket = require("ws");
 const serverConfig = require("../../configs/server_config.json");
 const serverUrl = "ws://" + serverConfig.ip + ":" + serverConfig.port;
-const ws = new WebSocket(serverUrl);
+let ws = new WebSocket(serverUrl);
 const logger = require("../logger");
 logger.setDefaultOptions({
   prefixModifiers: ["magenta"],
@@ -10,23 +11,28 @@ logger.setDefaultOptions({
 });
 const baseMessage = {
   type: "",
-  info: {
-    browserID: "",
-    heroPrefix: "",
-  },
-  body: "",
+  ID: "",
+  Name: "",
+  Level: "",
+  Lives: "",
+  "Last scene": "",
+  State: "",
 };
 
 async function init(hero) {
-  baseMessage.info.browserID = hero.browserID;
-  baseMessage.info.heroPrefix = hero.prefix;
+  baseMessage.ID = hero.browserID;
+  baseMessage.Name = `${hero.name}[${hero.ID}]`;
 
   ws.on("open", () => {
     const message = { ...baseMessage };
     message.type = "init";
-    message.body = "this one is alive";
+    message.State = "initialized";
     ws.send(JSON.stringify(message));
     logger.log(`Connected to server`);
+  });
+
+  ws.on("unexpected-response", () => {
+    console.log("unexpected");
   });
 
   ws.on("message", (messageRaw) => {
@@ -41,17 +47,36 @@ async function init(hero) {
     }
   });
 
-  ws.on("close", () => {
-    console.log("Disconnected from server");
+  ws.on("close", async () => {
+    console.log("Closing connection...");
+    ws.close();
+    // await pause(2000);
+    // console.log("Reconnecting...");
+    // ws = new WebSocket(serverUrl);
+    // await init(hero);
+  });
+
+  ws.on("error", async () => {
+    logger.error("Error occured while connecting to server...");
+    ws.close();
+    await pause(2000);
   });
 }
 
-async function sendState(stateInfo) {
+async function sendState(hero, stateInfo) {
   const message = { ...baseMessage };
   message.type = "state";
-  message.body = stateInfo;
+  message.State = stateInfo;
+  message.Level = hero.currentLevel;
+  message.Lives = Math.floor(Math.random() * 5);
+  message["Last scene"] = hero.lastScene;
   ws.send(JSON.stringify(message));
+}
+
+async function getWs() {
+  return ws;
 }
 
 exports.init = init;
 exports.sendState = sendState;
+exports.getWs = getWs;

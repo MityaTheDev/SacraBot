@@ -11,7 +11,6 @@ const RABBY = require("./configs/rabby_config.json");
 const fs = require("fs");
 const path = require("path");
 const DateFormat = require("date-format");
-// const client = require("./src/Controller/client.js");
 const specifiedMode = process.argv[3];
 const INSTANCE = process.argv[2];
 const serverMode = !INSTANCE;
@@ -1019,6 +1018,7 @@ class Hero {
   name;
   prefix;
   browserID;
+  currentLevel;
   homeURL;
   dungeonsCompleted = 0;
   dungeonCounterTimestamp = 0;
@@ -1029,10 +1029,11 @@ class Hero {
   lastScene = "";
   lastSceneChangeTime = 0;
   lastActionTime = 0;
-  constructor(ID, name, browserID, homeURL, sessionMaxDuration) {
+  constructor(ID, name, browserID, currentLevel, homeURL, sessionMaxDuration) {
     this.ID = ID;
     this.name = name;
     this.browserID = browserID;
+    this.currentLevel = currentLevel;
     this.prefix = `(${browserID})${name}[${ID}]`;
     this.homeURL = homeURL;
     this.sessionMaxDuration = sessionMaxDuration;
@@ -1083,6 +1084,7 @@ class Hero {
       heroesToLaunch[heroIndex].heroID,
       heroesToLaunch[heroIndex].heroName,
       heroesToLaunch[heroIndex].browser_id,
+      heroesToLaunch[heroIndex].currentLevel,
       `${config.BASE_URL}${heroesToLaunch[heroIndex].classContractAddress}/${heroesToLaunch[heroIndex].heroID}`,
       heroesToLaunch[heroIndex].sessionMaxDurationInMinutes
     );
