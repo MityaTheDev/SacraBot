@@ -844,6 +844,12 @@ async function play(currentHeroes) {
 
       let currentScene = await getCurrentScene(hero);
       await takeAction(hero, currentScene);
+      //temp, todo: think of a way to pause until rabby confirm is clicked
+      if (
+        currentScene === "delegationPopupActivate" ||
+        currentScene === "delegationPopupLowBalance"
+      )
+        await pause(SECOND * 30);
     }
 
     if (currentHeroes.length === 0) {
