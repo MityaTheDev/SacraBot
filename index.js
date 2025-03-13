@@ -56,9 +56,7 @@ async function isOutOfTime(hero) {
     hero.sessionMaxDuration -
     (currentTime - hero.sessionStartTime) / (1000 * 60);
 
-  if (minutesLeft <= 0) return true;
-
-  return false;
+  return minutesLeft <= 0;
 }
 
 async function checkDelegationBalance(hero) {
@@ -76,6 +74,7 @@ async function setListenerForNewPageCreated(browser) {
       if (
         await puppeteer.xPathExist(newPage, xpath.RABBY_DELEGATION_TEXT, {
           timeout: 5000,
+          logError: true,
         })
       ) {
         await sighAndConfirm(newPage);
@@ -94,6 +93,8 @@ async function sighAndConfirm(page) {
       timeout: 5000,
       logError: false,
     });
+  } else {
+    logger.error("confirm transaction by hand or change flag in config!");
   }
 }
 
@@ -287,11 +288,13 @@ async function getCurrentScene(hero, iterationsLeft = 4) {
 
       if (
         scene === "transactionProcessing" ||
+        scene === "emptySreen" ||
         scene === "error" ||
         scene === "loading" ||
         scene === "questWaitingForTransacrion" ||
         scene === "questLoading" ||
-        scene === "delegationPopup"
+        scene === "delegationPopupLowBalance" ||
+        scene === "delegationPopupActivate"
       )
         break;
     }
@@ -746,7 +749,6 @@ async function takeAction(hero, currentScene) {
     case "delegation":
       await checkDelegationBalance();
       if (hero.client) await hero.client.sendState(hero, "checking deleg");
-      //temp, todo: change 'return' to 'break';
       break;
     case "fight":
       if (hero.client) await hero.client.sendState(hero, "fighting");
@@ -798,10 +800,13 @@ async function takeAction(hero, currentScene) {
 }
 
 async function play(currentHeroes) {
-  let isPlaying = true;
+  const pauseTime = 700 / currentHeroes.length;
 
-  while (isPlaying) {
+  while (true) {
     for await (let hero of currentHeroes) {
+      await pause(pauseTime);
+      if (!hero.isPlaying) continue;
+
       logger.setDefaultOptions({ prefix: hero.prefix });
 
       hero.page.waitForNetworkIdle({ idleTime: 750 });
@@ -839,7 +844,6 @@ async function play(currentHeroes) {
 
       let currentScene = await getCurrentScene(hero);
       await takeAction(hero, currentScene);
-      await pause(700);
     }
 
     if (currentHeroes.length === 0) {
@@ -848,8 +852,7 @@ async function play(currentHeroes) {
         prefixPresence: false,
         timestampPresence: false,
       });
-      isPlaying = false;
-      break;
+      return;
     }
   }
 }
@@ -1041,6 +1044,7 @@ async function init() {
 }
 
 class Hero {
+  isPlaying = true;
   ID;
   name;
   prefix;

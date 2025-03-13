@@ -27,6 +27,51 @@
     }
   },
 
+  "questWaitingForTransacrion": {
+    "indicator": {
+      "urlIndicator": "/story/",
+      "xpath": "//app-animation-papyrus",
+      "description": "Anscestor element of papyrus animation"
+    }
+  },
+
+  "questLoading": {
+    "indicator": {
+      "xpath": "//div[contains(@class, 'title')]//img[contains(@alt, 'loading') and not(//app-animation-papyrus)]",
+      "description": "Element with for dots and amination to the right of the quest title"
+    }
+  },
+
+  "delegationPopupLowBalance": {
+    "indicator": {
+      "xpath": "//app-delegate-dialog[(//div[contains(@class, 'title-a') and text() = ' Delegate transactions ']) and (//div[text() = 'Delegator balance is low!'])]",
+      "description": "A pop-up window with 'Delegate transactions' text"
+    },
+    "actionTargets": {
+      "close": {
+        "xpath": "//app-delegate-dialog//button[contains(@class, 'btn-close')]",
+        "description": "Close button"
+      }
+    }
+  },
+
+  "delegationPopupActivate": {
+    "indicator": {
+      "xpath": "//app-delegate-dialog[(//div[contains(@class, 'title-a') and text() = ' Delegate transactions ']) and not(//div[text() = 'Delegator balance is low!'])]",
+      "description": "A pop-up window with 'Delegate transactions' text"
+    },
+    "actionTargets": {
+      "activate": {
+        "xpath": "//app-delegate-dialog//button[text() = ' Activate delegation ']",
+        "description": "'Activate delegation' button"
+      },
+      "close": {
+        "xpath": "//app-delegate-dialog//button[contains(@class, 'btn-close')]",
+        "description": "Close button"
+      }
+    }
+  },
+
   "attacking": {
     "indicator": {
       "url": "/fight/",
@@ -56,36 +101,6 @@
       "play": {
         "xpath": "//button[text() = ' Play ' and not(@disabled)]",
         "description": "'Play' button without 'disabled' attribute"
-      }
-    }
-  },
-
-  "delegationPopupActivate": {
-    "indicator": {
-      "xpath": "//app-delegate-dialog[(//div[contains(@class, 'title-a') and text() = ' Delegate transactions ']) and not(//div[text() = 'Delegator balance is low!'])]",
-      "description": "A pop-up window with 'Delegate transactions' text"
-    },
-    "actionTargets": {
-      "activate": {
-        "xpath": "//app-delegate-dialog//button[text() = ' Activate delegation ']",
-        "description": "'Activate delegation' button"
-      },
-      "close": {
-        "xpath": "//app-delegate-dialog//button[contains(@class, 'btn-close')]",
-        "description": "Close button"
-      }
-    }
-  },
-
-  "delegationPopupLowBalance": {
-    "indicator": {
-      "xpath": "//app-delegate-dialog[(//div[contains(@class, 'title-a') and text() = ' Delegate transactions ']) and (//div[text() = 'Delegator balance is low!'])]",
-      "description": "A pop-up window with 'Delegate transactions' text"
-    },
-    "actionTargets": {
-      "close": {
-        "xpath": "//app-delegate-dialog//button[contains(@class, 'btn-close')]",
-        "description": "Close button"
       }
     }
   },
@@ -238,21 +253,6 @@
         "xpath": "//button[contains(text(), ' Continue adventure ')]",
         "description": "'Continue adventure' on the bottom right side of the screen"
       }
-    }
-  },
-
-  "questWaitingForTransacrion": {
-    "indicator": {
-      "urlIndicator": "/story/",
-      "xpath": "//app-animation-papyrus",
-      "description": "Anscestor element of papyrus animation"
-    }
-  },
-
-  "questLoading": {
-    "indicator": {
-      "xpath": "//div[contains(@class, 'title')]//img[contains(@alt, 'loading') and not(//app-animation-papyrus)]",
-      "description": "Element with for dots and amination to the right of the quest title"
     }
   },
 
