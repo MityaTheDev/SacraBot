@@ -1,6 +1,6 @@
 $baseCommand = "node index.js"
 $workingDirectory = "C:\Users\origin\Desktop\SacraBot"
-$mode = "daily"
+$mode = "level"
 
 [Int16[]]$idsToRun = Get-Content -Path "$PsScriptRoot\ids.txt"
 foreach ($id in $idsToRun) {

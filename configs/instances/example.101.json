@@ -1,6 +1,7 @@
 {
   "MODE": "level",
   "LOG_LEVEL": 2,
+  "USE_CONTROLLER": false,
   "BASE_URL": "https://sonic.sacra.game/hero/",
   "MIN_TIME_GAP_BETWEEN_ACTIONS": 2000,
   "RABBY_WALLET_AUTO_CONFIRM": false,
@@ -21,7 +22,7 @@
       "currentLevel": 1,
       "targetLevel": 12,
       "sessionMaxDurationInMinutes": 240,
-      "firstBossKilled": true
+      "firstBossKilled": false
     }
   }
 }

@@ -68,7 +68,7 @@ async function sendState(hero, stateInfo) {
   message.type = "state";
   message.State = stateInfo;
   message.Level = hero.currentLevel;
-  message.Lives = Math.floor(Math.random() * 5);
+  message.Lives = hero.currentLives;
   message["Last scene"] = hero.lastScene;
   ws.send(JSON.stringify(message));
 }
