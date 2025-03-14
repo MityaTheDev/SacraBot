@@ -741,7 +741,7 @@ async function takeAction(hero, currentScene) {
           messageModifiers: ["italic", "magentaBright"],
         }
       );
-      hero.client && (await hero.client.sendState(hero, "home"));
+      if (hero.client) await hero.client.sendState(hero, "home");
       break;
     case "adventureCongratulations":
       const timestamp = config.HEROES[hero.ID].lastCompletedDungeonTimestamp;
@@ -755,7 +755,7 @@ async function takeAction(hero, currentScene) {
         config = await updateJson(configPath, config);
       }
 
-      hero.client && (await hero.client.sendState(hero, "adv is finished"));
+      if (hero.client) await hero.client.sendState(hero, "adv is finished");
       break;
     case "delegationPopupLowBalance":
       //todo:
