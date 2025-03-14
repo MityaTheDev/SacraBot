@@ -1003,13 +1003,14 @@ async function levelUp(hero) {
   logger.log(`clicking on 'Level Up' button...`);
   await puppeteer.clickByPage(hero.page, xpath.LEVEL_UP_BUTTON);
   logger.log(`waiting for Page idle for 5 seconds...`);
-  await hero.page.waitForNetworkIdle({ idleTime: 5000 });
-  logger.log(
-    `available stats: ${await getText(
-      hero.page,
-      xpath.LEVEL_UP_AVAILABLE_STATS
-    )}`
+  await hero.page.waitForNetworkIdle({ idleTime: SECOND * 5 });
+  const availableStats = await getText(
+    hero.page,
+    xpath.LEVEL_UP_AVAILABLE_STATS
   );
+
+  logger.log(`available stats: ${availableStats}`);
+  
   while ((await getText(hero.page, xpath.LEVEL_UP_AVAILABLE_STATS)) > 0) {
     logger.log(`clicking plus button...`);
     await puppeteer.clickByPage(hero.page, xpathAttr, {
