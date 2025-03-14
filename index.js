@@ -1032,15 +1032,25 @@ async function levelUp(hero) {
 }
 
 async function isNextLevel(hero) {
-  if (
-    ((await getElem(hero.page, xpath.LEVEL_UP_NOTIFICATION_ICON, 500)) ||
-      (await getElem(hero.page, xpath.LEVEL_UP_TO, 500))) &&
-    !(await getElem(hero.page, xpath.CONTINUE_ADVENTURE_BUTTON, 500))
-  ) {
-    logger.log(`is ready to level up`);
-    return true;
+
+  let isHeroNextLevel = false;
+
+  const conditions = [
+    xpath.LEVEL_UP_NOTIFICATION_ICON,
+    xpath.LEVEL_UP_TO,
+    xpath.CONTINUE_ADVENTURE_BUTTON
+  ];
+
+  for await (const condition of conditions) {
+    const conditionExists = await getElem(hero.page, condition, 500);
+    if (conditionExists) {
+      logger.log(`is ready to level up`);
+      isHeroNextLevel = true;
+      break;
+    }
   }
-  return false;
+
+  return isHeroNextLevel;
 }
 
 async function getCurrentLives(hero) {
