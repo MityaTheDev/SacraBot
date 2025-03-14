@@ -1010,16 +1010,23 @@ async function levelUp(hero) {
   );
 
   logger.log(`available stats: ${availableStats}`);
-  
-  while ((await getText(hero.page, xpath.LEVEL_UP_AVAILABLE_STATS)) > 0) {
+
+  let availableStatsCount = await getText(hero.page, 
+    xpath.LEVEL_UP_AVAILABLE_STATS);
+
+  while (availableStatsCount > 0) {
     logger.log(`clicking plus button...`);
     await puppeteer.clickByPage(hero.page, xpathAttr, {
       timeoput: 200,
       offset: 0.1,
     });
-    logger.log(`waiting for 200 milliseconds...`);
+    // logger.log(`waiting for 200 milliseconds...`);
     await pause(200);
-  }
+
+    availableStatsCount = await getText(hero.page, 
+      xpath.LEVEL_UP_AVAILABLE_STATS);
+  };
+
   await puppeteer.clickByPage(hero.page, xpath.LEVEL_UP_BUTTON_CONFIRM);
   await pause(SECOND);
 }
