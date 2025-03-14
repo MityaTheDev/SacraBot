@@ -158,7 +158,7 @@ async function getIDs() {
 
 async function getBrowsers(IDs) {
   let browsers = [];
-  for (let id of IDs) {
+  for await (let id of IDs) {
     let browserStatusBySN = await Ads.browserStatusBySN(id);
     let isBroswerActive =
       browserStatusBySN && browserStatusBySN.status === "Active" ? true : false;
@@ -365,7 +365,7 @@ async function getCurrentAnswerOptions(hero) {
   const answerOptionsElems = await getElems(hero.page, xpath.QUEST_ANSWER);
   if (answerOptionsElems) {
     let answerOptions = [];
-    for (let element of answerOptionsElems) {
+    for await (let element of answerOptionsElems) {
       const text = (await puppeteer.elementInnerText(element))
         .replaceAll("\nChoose", "")
         .replaceAll("\nApprove", "")
@@ -564,7 +564,7 @@ async function answerQuest(hero) {
   }
 
   logger.log(`answering with correct answer [${correctAnswer}]`);
-  for (let option of currentAnswerOptions) {
+  for await (let option of currentAnswerOptions) {
     if (option.text === correctAnswer) {
       await clickAnswerButton(hero, option);
     }
@@ -1107,7 +1107,7 @@ class Hero {
   const browsers = await getBrowsers(browserIDs);
   let currentHeroes = [];
   let openPages = [];
-  for (const browser of browsers) {
+  for await (const browser of browsers) {
     if (!browser) {
       logger.error("Failed to initiate browser");
       return;
