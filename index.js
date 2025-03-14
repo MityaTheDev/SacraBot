@@ -350,6 +350,8 @@ async function checkHealth(hero) {
       logger.error(
         `waiting for 1 hour... need to restart the bot \ntodo: make drink health potion function`
       );
+
+      // TODO: lastActionTime instead of pause
       await pause(MINUTE * 60);
 
       //todo: drink health potion
@@ -693,7 +695,7 @@ async function takeAction(hero, currentScene) {
             `${hero.prefix} is ready for the 2nd boss fight!`
           );
 
-          // TODO: set timestamp to wait instead 
+          // TODO: set timestamp to wait instead  lastActionTime
           await pause(MINUTE * 60);
         }
 
@@ -714,8 +716,7 @@ async function takeAction(hero, currentScene) {
         logger.log("ready for 1st boss!", {
           messageModifiers: ["greenBright"],
         });
-        if (hero.client)
-          await hero.client.sendState(hero, "ready for 1st boss");
+        hero.client && await hero.client.sendState(hero, "ready for 1st boss");
         await pause(MINUTE * 60);
         return;
       }
@@ -731,19 +732,22 @@ async function takeAction(hero, currentScene) {
           messageModifiers: ["italic", "magentaBright"],
         }
       );
-      if (hero.client) await hero.client.sendState(hero, "home");
+      hero.client && await hero.client.sendState(hero, "home");
       break;
     case "adventureCongratulations":
-      if (
-        Date.now() - config.HEROES[hero.ID].lastCompletedDungeonTimestamp >
-        120 * 1000
-      ) {
+
+    const timestamp = config.HEROES[hero.ID].lastCompletedDungeonTimestamp;
+    const isAdventureFinished = Date.now() - timestamp > 120 * 1000;
+    // TODO: no magic numbers 120 * 1000
+      
+      if (isAdventureFinished) {
         logger.log(`adventure is finished`);
         config.HEROES[hero.ID].dungeonsCompleted++;
         config.HEROES[hero.ID].lastCompletedDungeonTimestamp = Date.now();
         config = await updateJson(configPath, config);
       }
-      if (hero.client) await hero.client.sendState(hero, "adv is finished");
+
+      hero.client && await hero.client.sendState(hero, "adv is finished");
       break;
     case "delegationPopupLowBalance":
       //todo:
