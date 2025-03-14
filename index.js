@@ -333,7 +333,10 @@ async function checkHealth(hero) {
     const maxHealth = healthText.split("/")[1];
     logger.log(`health is [${currentHealth}/${maxHealth}]`);
 
-    if (currentHealth / maxHealth < 0.25) {
+    const isLowHP = currentHealth / maxHealth < 0.25 || currentHealth < 7;
+    // TODO: Attack of the enemy
+
+    if (isLowHP) {
       await telegram.sendMessage(
         `${hero.ID}: health is LOW! ${currentHealth}/${maxHealth}, need to drink potion!`
       );
