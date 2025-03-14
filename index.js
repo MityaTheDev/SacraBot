@@ -371,7 +371,11 @@ async function getCurrentAnswerOptions(hero) {
         .replaceAll("\nApprove", "")
         .replaceAll("\nSkip", "");
       const buttonElement = await element.$('::-p-xpath("\\button")');
-      if (text.toLowerCase().includes("hey, i know how it ends!")) {
+
+      const foundSkipAnswer = text.toLowerCase()
+        .includes("hey, i know how it ends!");
+
+      if (foundSkipAnswer) {
         logger.log("found skip answer!");
         answerOptions = [{ text: text, buttonElement: buttonElement }];
         break;
