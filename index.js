@@ -280,10 +280,11 @@ async function getCurrentScene(hero, iterationsLeft = 4) {
   let result = [];
 
   for (let scene in scenes) {
-    let sceneIndicatorXpath = scenes[scene].indicator.xpath;
-    let IndicatorXpathDescription = scenes[scene].indicator.description;
+    const sceneIndicatorXpath = scenes[scene].indicator.xpath;
+    const IndicatorXpathDescription = scenes[scene].indicator.description;
+    const sceneExists = await puppeteer.xPathExist(hero.page, sceneIndicatorXpath);
 
-    if (await puppeteer.xPathExist(hero.page, sceneIndicatorXpath)) {
+    if (sceneExists) {
       result.push(scene);
 
       if (
@@ -1125,7 +1126,7 @@ class Hero {
     );
 
     //check if one of the pages contains ID of the hero
-    for (let page of openPages) {
+    for await (let page of openPages) {
       const url = await page.url();
       if (!url.includes("sonic.sacra.game")) {
         continue;
