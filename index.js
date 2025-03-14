@@ -158,7 +158,7 @@ async function getIDs() {
 
 async function getBrowsers(IDs) {
   let browsers = [];
-  for await (let id of IDs) {
+  for (let id of IDs) {
     let browserStatusBySN = await Ads.browserStatusBySN(id);
     let isBroswerActive =
       browserStatusBySN && browserStatusBySN.status === "Active" ? true : false;
@@ -370,7 +370,7 @@ async function getCurrentAnswerOptions(hero) {
   const answerOptionsElems = await getElems(hero.page, xpath.QUEST_ANSWER);
   if (answerOptionsElems) {
     let answerOptions = [];
-    for await (let element of answerOptionsElems) {
+    for (let element of answerOptionsElems) {
       const text = (await puppeteer.elementInnerText(element))
         .replaceAll("\nChoose", "")
         .replaceAll("\nApprove", "")
@@ -570,7 +570,7 @@ async function answerQuest(hero) {
   }
 
   logger.log(`answering with correct answer [${correctAnswer}]`);
-  for await (let option of currentAnswerOptions) {
+  for (let option of currentAnswerOptions) {
     if (option.text === correctAnswer) {
       await clickAnswerButton(hero, option);
       break;
@@ -833,7 +833,7 @@ async function play(currentHeroes) {
   const pauseTime = 700 / currentHeroes.length;
 
   while (true) {
-    for await (let hero of currentHeroes) {
+    for (let hero of currentHeroes) {
       await pause(pauseTime);
       if (!hero.isPlaying) continue;
 
@@ -1069,24 +1069,19 @@ async function levelUp(hero) {
 }
 
 async function isNextLevel(hero) {
-  let isHeroNextLevel = false;
-
-  const conditions = [
-    xpath.LEVEL_UP_NOTIFICATION_ICON,
-    xpath.LEVEL_UP_TO,
+  const levelUpButtonPresent =
+    (await getElem(hero.page, xpath.LEVEL_UP_NOTIFICATION_ICON, 500)) ||
+    (await getElem(hero.page, xpath.LEVEL_UP_TO, 500));
+  const isInAdventure = await getElem(
+    hero.page,
     xpath.CONTINUE_ADVENTURE_BUTTON,
-  ];
-
-  for await (const condition of conditions) {
-    const conditionExists = await getElem(hero.page, condition, 500);
-    if (conditionExists) {
-      logger.log(`is ready to level up`);
-      isHeroNextLevel = true;
-      break;
-    }
+    500
+  );
+  if (levelUpButtonPresent && !isInAdventure) {
+    logger.log(`is ready to level up`);
+    return true;
   }
-
-  return isHeroNextLevel;
+  return false;
 }
 
 async function getCurrentLives(hero) {
@@ -1194,7 +1189,7 @@ class Hero {
   const browsers = await getBrowsers(browserIDs);
   let currentHeroes = [];
   let openPages = [];
-  for await (const browser of browsers) {
+  for (const browser of browsers) {
     if (!browser) {
       logger.error("Failed to initiate browser");
       return;
@@ -1222,7 +1217,7 @@ class Hero {
     );
 
     //check if one of the pages contains ID of the hero
-    for await (let page of openPages) {
+    for (let page of openPages) {
       const url = await page.url();
       if (!url.includes("sonic.sacra.game")) {
         continue;
