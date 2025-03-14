@@ -717,6 +717,8 @@ async function takeAction(hero, currentScene) {
           messageModifiers: ["greenBright"],
         });
         hero.client && await hero.client.sendState(hero, "ready for 1st boss");
+
+        // TODO: set lastActionTime instead of pause
         await pause(MINUTE * 60);
         return;
       }
@@ -833,7 +835,8 @@ async function play(currentHeroes) {
 
       hero.page.waitForNetworkIdle({ idleTime: 750 });
 
-      if (await isOutOfTime(hero)) {
+      const heroIsOutOfTime = await isOutOfTime(hero);
+      if (heroIsOutOfTime) {
         logger.log(`is out of time!`);
         currentHeroes.pop(hero);
         logger.log(`is removed from the [currentHeroes]`);
