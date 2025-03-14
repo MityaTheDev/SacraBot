@@ -1095,7 +1095,8 @@ class Hero {
     messageModifiers: ["whiteBright", "underline", "bold"],
   });
 
-  const browsers = await getBrowsers(await getIDs());
+  const browserIDs = await getIDs();
+  const browsers = await getBrowsers(browserIDs);
   let currentHeroes = [];
   let openPages = [];
   for (const browser of browsers) {
