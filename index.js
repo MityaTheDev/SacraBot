@@ -666,25 +666,34 @@ async function takeAction(hero, currentScene) {
       hero.currentLevel = config.HEROES[hero.ID].currentLevel;
       hero.currentLives = config.HEROES[hero.ID].currentLives;
 
-      if (config.ALLOW_LEVEL_UP && (await isNextLevel(hero))) {
+      const isNextLevelHero = await isNextLevel(hero);
+      const isReadyToLVLup = config.ALLOW_LEVEL_UP && isNextLevelHero;
+      if (isReadyToLVLup) {
         // temp stop at level 4, go virtual till 7
-        if (
+
+        const currentLevelNeedsLVLUP = 
           config.HEROES[hero.ID].currentLevel <= 4 ||
-          (config.HEROES[hero.ID].currentLevel >= 7 &&
-            config.HEROES[hero.ID].currentLevel < 12)
-        ) {
+            config.HEROES[hero.ID].currentLevel >= 7 &&
+            config.HEROES[hero.ID].currentLevel < 12;
+
+        if (currentLevelNeedsLVLUP) {
           await levelUp(hero);
         }
+        
+        const levelIsGreaterThan12 = config.HEROES[hero.ID].currentLevel >= 12;
 
-        if (config.HEROES[hero.ID].currentLevel >= 12) {
-          if (hero.client)
-            await hero.client.sendState(hero, "ready for 2nd boss");
-          await telegram.sendMessage(
-            `${hero.prefix} is ready for the 2nd boss fight!`
-          );
+        if (levelIsGreaterThan12) {
+          hero.client && await hero.client.sendState(hero, "ready for 2nd boss");
+            
           logger.log("ready for 2nd boss!", {
             messageModifiers: ["greenBright"],
           });
+
+          await telegram.sendMessage(
+            `${hero.prefix} is ready for the 2nd boss fight!`
+          );
+
+          // TODO: set timestamp to wait instead 
           await pause(MINUTE * 60);
         }
 
@@ -695,10 +704,10 @@ async function takeAction(hero, currentScene) {
       }
 
       //todo: put on items, if don't have a weapon, go and buy one
-      if (
-        !config.HEROES[hero.ID].firstBossKilled &&
-        config.HEROES[hero.ID].currentLevel == 7
-      ) {
+      const isReadyToKillFirstBoss = !config.HEROES[hero.ID].firstBossKilled 
+        && config.HEROES[hero.ID].currentLevel == 7;
+      
+      if (isReadyToKillFirstBoss) {
         await telegram.sendMessage(
           `${hero.prefix} is ready for the 1st boss fight!`
         );
