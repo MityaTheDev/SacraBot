@@ -651,18 +651,21 @@ async function takeAction(hero, currentScene) {
       await refresh(hero.page);
       return;
     case "home":
-      config.HEROES[hero.ID].currentLevel = await getCurrentLevel(hero);
+      const levels = await getLevels(hero);
+      config.HEROES[hero.ID].currentLevel = levels.current;
+      config.HEROES[hero.ID].virtualLevel = levels.virtual;
       config.HEROES[hero.ID].currentLives = await getCurrentLives(hero);
       config = await updateJson(configPath, config);
       hero.currentLevel = config.HEROES[hero.ID].currentLevel;
+      hero.virtualLevel = config.HEROES[hero.ID].virtualLevel;
       hero.currentLives = config.HEROES[hero.ID].currentLives;
 
       if (config.ALLOW_LEVEL_UP && (await isNextLevel(hero))) {
         // temp stop at level 4, go virtual till 7
         if (
-          config.HEROES[hero.ID].currentLevel <= 4 ||
-          (config.HEROES[hero.ID].currentLevel >= 7 &&
-            config.HEROES[hero.ID].currentLevel < 12)
+          config.HEROES[hero.ID].virtualLevel <= 4 ||
+          (config.HEROES[hero.ID].virtualLevel >= 7 &&
+            config.HEROES[hero.ID].virtualLevel < 12)
         ) {
           await levelUp(hero);
         }
@@ -688,7 +691,7 @@ async function takeAction(hero, currentScene) {
       //todo: put on items, if don't have a weapon, go and buy one
       if (
         !config.HEROES[hero.ID].firstBossKilled &&
-        config.HEROES[hero.ID].currentLevel == 7
+        config.HEROES[hero.ID].currentLevel == 6
       ) {
         await telegram.sendMessage(
           `${hero.prefix} is ready for the 1st boss fight!`
@@ -935,41 +938,8 @@ async function getDailyReward(hero) {
 }
 
 async function levelUp(hero) {
-  logger.log(`levelling up to ${config.HEROES[hero.ID].currentLevel}...`);
-
-  //temp, todo: add logic for selecting correct attribute
-  let xpathAttr;
-  switch (config.HEROES[hero.ID].currentLevel) {
-    case 2:
-      xpathAttr = xpath.LEVEL_UP_PLUS_VIT;
-      break;
-    case 3:
-      xpathAttr = xpath.LEVEL_UP_PLUS_DEX;
-      break;
-    case 4:
-      xpathAttr = xpath.LEVEL_UP_PLUS_DEX;
-      break;
-    case 7:
-      xpathAttr = xpath.LEVEL_UP_PLUS_DEX;
-      break;
-    case 8:
-      xpathAttr = xpath.LEVEL_UP_PLUS_STR;
-      break;
-    case 9:
-      xpathAttr = xpath.LEVEL_UP_PLUS_STR;
-      break;
-    case 10:
-      xpathAttr = xpath.LEVEL_UP_PLUS_STR;
-      break;
-    case 11:
-      xpathAttr = xpath.LEVEL_UP_PLUS_VIT;
-      break;
-    default:
-      logger.log(
-        `can't level up on level [${config.HEROES[hero.ID].currentLevel}]!`
-      );
-      return;
-  }
+  logger.log(`levelling up to ${config.HEROES[hero.ID].virtualLevel}...`);
+  if (hero.client) hero.client.sendState(hero, "leveling up");
 
   logger.log(`clicking on 'Level Up' button...`);
   await puppeteer.clickByPage(hero.page, xpath.LEVEL_UP_BUTTON);
@@ -981,17 +951,88 @@ async function levelUp(hero) {
       xpath.LEVEL_UP_AVAILABLE_STATS
     )}`
   );
-  while ((await getText(hero.page, xpath.LEVEL_UP_AVAILABLE_STATS)) > 0) {
-    logger.log(`clicking plus button...`);
-    await puppeteer.clickByPage(hero.page, xpathAttr, {
-      timeoput: 200,
-      offset: 0.1,
-    });
-    logger.log(`waiting for 200 milliseconds...`);
-    await pause(200);
+
+  let stats = [];
+  const statsXpaths = [
+    xpath.LEVEL_UP_PLUS_STR,
+    xpath.LEVEL_UP_PLUS_DEX,
+    xpath.LEVEL_UP_PLUS_VIT,
+    xpath.LEVEL_UP_PLUS_ENERGY,
+  ];
+
+  switch (config.HEROES[hero.ID].currentLevel) {
+    case 2:
+      stats = [0, 5, 0, 0];
+      break;
+    case 3:
+      stats = [0, 5, 0, 0];
+      break;
+    case 4:
+      stats = [0, 5, 0, 0];
+      break;
+    case 5:
+      stats = [0, 3, 2, 0];
+      break;
+    case 6:
+      //todo: put on items than lvlup
+      // stats = [0, 1, 3, 1];
+      logger.log(`put on items, then lvl up with ${stats}`);
+      if (hero.client) hero.client.sendState(hero, "at lvl 6, items!");
+      return;
+      break;
+    case 7:
+      stats = [0, 5, 0, 0];
+      break;
+    case 8:
+      stats = [0, 3, 2, 0];
+      break;
+    case 9:
+      stats = [5, 0, 0, 0];
+      break;
+    case 10:
+      stats = [5, 0, 0, 0];
+      break;
+    case 11:
+      stats = [5, 0, 0, 0];
+      break;
+    default:
+      logger.log(
+        `can't level up on level [${config.HEROES[hero.ID].currentLevel}]!`
+      );
+      return;
   }
-  await puppeteer.clickByPage(hero.page, xpath.LEVEL_UP_BUTTON_CONFIRM);
-  await pause(SECOND);
+
+  for (let i = 0; i < stats.length; i++) {
+    while (stats[i] > 0) {
+      let availableStatsBefore = await getText(
+        hero.page,
+        xpath.LEVEL_UP_AVAILABLE_STATS
+      );
+      let xpathAttr = statsXpaths[i];
+
+      logger.log(`clicking plus button...`);
+      await puppeteer.clickByPage(hero.page, xpathAttr, {
+        timeout: 200,
+      });
+      await pause(200);
+
+      let availableStatsAfter = await getText(
+        hero.page,
+        xpath.LEVEL_UP_AVAILABLE_STATS
+      );
+      if (availableStatsAfter - availableStatsBefore === 1) stats[i]--;
+    }
+  }
+
+  if ((await getText(hero.page, xpath.LEVEL_UP_AVAILABLE_STATS)) === 0) {
+    await puppeteer.clickByPage(hero.page, xpath.LEVEL_UP_BUTTON_CONFIRM);
+    await pause(SECOND);
+  } else {
+    logger.error(`not all stats were appointed`);
+    if (hero.client) hero.client.sendState(hero, "lvl up error");
+    await pause(SECOND * 30);
+    return;
+  }
 }
 
 async function isNextLevel(hero) {
@@ -1013,18 +1054,18 @@ async function getCurrentLives(hero) {
   return src ? src.slice(-5).substring(0, 1) : false;
 }
 
-async function getCurrentLevel(hero) {
-  logger.log(`getting current level...`);
-  //selects all digits in string
+async function getLevels(hero) {
+  logger.log(`getting current and virtual levels...`);
+  const levels = { current: -1, virtual: -1 };
+  levels.current = await getText(hero.page, xpath.LEVEL);
   const regex = RegExp("\\d+", "g");
   const levelUpToText = await getText(hero.page, xpath.LEVEL_UP_TO, {
     timeout: 1000,
   });
+  //selects all digits in string
   const digit = regex.exec(levelUpToText);
-  if (digit) {
-    return parseInt(digit[0]);
-  }
-  return await getText(hero.page, xpath.LEVEL);
+  levels.virtual = digit ? digit[0] : levels.current;
+  return levels;
 }
 
 async function commandBots() {
@@ -1056,6 +1097,7 @@ class Hero {
   prefix;
   browserID;
   currentLevel;
+  virtualLevel;
   currentLives;
   homeURL;
   adventuresCompleted = 0;
@@ -1067,11 +1109,22 @@ class Hero {
   lastScene = "";
   lastSceneChangeTime = 0;
   lastActionTime = 0;
-  constructor(ID, name, browserID, currentLevel, homeURL, sessionMaxDuration) {
+  constructor(
+    ID,
+    name,
+    browserID,
+    currentLevel,
+    virtualLevel,
+    currentLives,
+    homeURL,
+    sessionMaxDuration
+  ) {
     this.ID = ID;
     this.name = name;
     this.browserID = browserID;
     this.currentLevel = currentLevel;
+    this.virtualLevel = virtualLevel;
+    this.currentLives = currentLives;
     this.prefix = `(${browserID})${name}[${ID}]`;
     this.homeURL = homeURL;
     this.sessionMaxDuration = sessionMaxDuration;
@@ -1119,6 +1172,8 @@ class Hero {
       heroesToLaunch[heroIndex].heroName,
       heroesToLaunch[heroIndex].browser_id,
       heroesToLaunch[heroIndex].currentLevel,
+      heroesToLaunch[heroIndex].virtualLevel,
+      heroesToLaunch[heroIndex].currentLives,
       `${config.BASE_URL}${heroesToLaunch[heroIndex].classContractAddress}/${heroesToLaunch[heroIndex].heroID}`,
       heroesToLaunch[heroIndex].sessionMaxDurationInMinutes
     );

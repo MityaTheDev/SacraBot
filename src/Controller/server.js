@@ -6,6 +6,9 @@ const { Table } = require("console-table-printer");
 const { styleText } = require("node:util");
 const readline = require(`readline`);
 const ansiEscapes = require("ansi-escapes");
+const activityIndicatorSymblos = ["᎐", "᎓", "᎒"];
+let activityIndicatorIndex = 0;
+let activityIndicatorIndexDirection = 1;
 const prompt = styleText("yellow", "command> ");
 let currentCommand = "";
 let commandCursorPosition = 0;
@@ -89,20 +92,14 @@ wss.on("connection", (ws) => {
     process.stdout.write(ansiEscapes.cursorHide);
     process.stdout.write(ansiEscapes.clearScreen);
     printTable();
-    process.stdout.write(prompt + currentCommand);
+    process.stdout.write(nextSymblol() + prompt + currentCommand);
+    process.stdout.write(ansiEscapes.cursorBackward(currentCommand.length));
+    process.stdout.write(ansiEscapes.cursorForward(commandCursorPosition));
     process.stdout.write(ansiEscapes.cursorShow);
     const sleepTime = 1000 - (Date.now() - startTime);
     await pause(sleepTime);
   }
 })();
-
-// setInterval(async () => {
-//   process.stdout.write(ansiEscapes.cursorHide);
-//   process.stdout.write(ansiEscapes.clearScreen);
-//   printTable();
-//   process.stdout.write(prompt + currentCommand);
-//   process.stdout.write(ansiEscapes.cursorShow);
-// }, 1500);
 
 // Send commands to a specific bot
 function sendCommand(botId, command) {
@@ -248,6 +245,14 @@ function listenToInput() {
       commandCursorPosition++;
     }
   });
+}
+
+function nextSymblol() {
+  if (activityIndicatorIndex == activityIndicatorSymblos.length - 1)
+    activityIndicatorIndexDirection = -1;
+  if (activityIndicatorIndex == 0) activityIndicatorIndexDirection = 1;
+  activityIndicatorIndex += activityIndicatorIndexDirection;
+  return activityIndicatorSymblos[activityIndicatorIndex];
 }
 
 exports.listenToInput = listenToInput;
