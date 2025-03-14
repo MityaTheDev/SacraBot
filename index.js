@@ -158,7 +158,7 @@ async function getIDs() {
 
 async function getBrowsers(IDs) {
   let browsers = [];
-  for (let id of IDs) {
+  for await (let id of IDs) {
     let browserStatusBySN = await Ads.browserStatusBySN(id);
     let isBroswerActive =
       browserStatusBySN && browserStatusBySN.status === "Active" ? true : false;
@@ -280,10 +280,14 @@ async function getCurrentScene(hero, iterationsLeft = 4) {
   let result = [];
 
   for (let scene in scenes) {
-    let sceneIndicatorXpath = scenes[scene].indicator.xpath;
-    let IndicatorXpathDescription = scenes[scene].indicator.description;
+    const sceneIndicatorXpath = scenes[scene].indicator.xpath;
+    const IndicatorXpathDescription = scenes[scene].indicator.description;
+    const sceneExists = await puppeteer.xPathExist(
+      hero.page,
+      sceneIndicatorXpath
+    );
 
-    if (await puppeteer.xPathExist(hero.page, sceneIndicatorXpath)) {
+    if (sceneExists) {
       result.push(scene);
 
       if (
@@ -332,7 +336,10 @@ async function checkHealth(hero) {
     const maxHealth = healthText.split("/")[1];
     logger.log(`health is [${currentHealth}/${maxHealth}]`);
 
-    if (currentHealth / maxHealth < 0.25) {
+    const isLowHP = currentHealth / maxHealth < 0.25 || currentHealth < 7;
+    // TODO: Attack of the enemy
+
+    if (isLowHP) {
       await telegram.sendMessage(
         `${hero.ID}: health is LOW! ${currentHealth}/${maxHealth}, need to drink potion!`
       );
@@ -346,6 +353,8 @@ async function checkHealth(hero) {
       logger.error(
         `waiting for 1 hour... need to restart the bot \ntodo: make drink health potion function`
       );
+
+      // TODO: lastActionTime instead of pause
       await pause(MINUTE * 60);
 
       //todo: drink health potion
@@ -361,13 +370,18 @@ async function getCurrentAnswerOptions(hero) {
   const answerOptionsElems = await getElems(hero.page, xpath.QUEST_ANSWER);
   if (answerOptionsElems) {
     let answerOptions = [];
-    for (let element of answerOptionsElems) {
+    for await (let element of answerOptionsElems) {
       const text = (await puppeteer.elementInnerText(element))
         .replaceAll("\nChoose", "")
         .replaceAll("\nApprove", "")
         .replaceAll("\nSkip", "");
       const buttonElement = await element.$('::-p-xpath("\\button")');
-      if (text.toLowerCase().includes("hey, i know how it ends!")) {
+
+      const foundSkipAnswer = text
+        .toLowerCase()
+        .includes("hey, i know how it ends!");
+
+      if (foundSkipAnswer) {
         logger.log("found skip answer!");
         answerOptions = [{ text: text, buttonElement: buttonElement }];
         break;
@@ -556,9 +570,10 @@ async function answerQuest(hero) {
   }
 
   logger.log(`answering with correct answer [${correctAnswer}]`);
-  for (let option of currentAnswerOptions) {
+  for await (let option of currentAnswerOptions) {
     if (option.text === correctAnswer) {
       await clickAnswerButton(hero, option);
+      break;
     }
   }
 }
@@ -660,25 +675,33 @@ async function takeAction(hero, currentScene) {
       hero.virtualLevel = config.HEROES[hero.ID].virtualLevel;
       hero.currentLives = config.HEROES[hero.ID].currentLives;
 
-      if (config.ALLOW_LEVEL_UP && (await isNextLevel(hero))) {
+      const isNextLevelHero = await isNextLevel(hero);
+      const isReadyToLVLup = config.ALLOW_LEVEL_UP && isNextLevelHero;
+      if (isReadyToLVLup) {
         // temp stop at level 4, go virtual till 7
-        if (
+        const isReadyForLevelUp =
           config.HEROES[hero.ID].virtualLevel <= 4 ||
           (config.HEROES[hero.ID].virtualLevel >= 7 &&
-            config.HEROES[hero.ID].virtualLevel < 12)
-        ) {
-          await levelUp(hero);
-        }
+            config.HEROES[hero.ID].virtualLevel < 12);
 
-        if (config.HEROES[hero.ID].currentLevel >= 12) {
+        if (isReadyForLevelUp) await levelUp(hero);
+
+        const isReadyForSecondBoss =
+          config.HEROES[hero.ID].virtualLevel >= 12 &&
+          config.HEROES[hero.ID].currentLevel === 11;
+
+        if (isReadyForSecondBoss) {
           if (hero.client)
             await hero.client.sendState(hero, "ready for 2nd boss");
-          await telegram.sendMessage(
-            `${hero.prefix} is ready for the 2nd boss fight!`
-          );
           logger.log("ready for 2nd boss!", {
             messageModifiers: ["greenBright"],
           });
+
+          await telegram.sendMessage(
+            `${hero.prefix} is ready for the 2nd boss fight!`
+          );
+
+          // TODO: set timestamp to wait instead  lastActionTime
           await pause(MINUTE * 60);
         }
 
@@ -689,10 +712,10 @@ async function takeAction(hero, currentScene) {
       }
 
       //todo: put on items, if don't have a weapon, go and buy one
-      if (
+      const isReadyToKillFirstBoss =
         !config.HEROES[hero.ID].firstBossKilled &&
-        config.HEROES[hero.ID].currentLevel == 6
-      ) {
+        config.HEROES[hero.ID].currentLevel == 6;
+      if (isReadyToKillFirstBoss) {
         await telegram.sendMessage(
           `${hero.prefix} is ready for the 1st boss fight!`
         );
@@ -701,6 +724,8 @@ async function takeAction(hero, currentScene) {
         });
         if (hero.client)
           await hero.client.sendState(hero, "ready for 1st boss");
+
+        // TODO: set lastActionTime instead of pause
         await pause(MINUTE * 60);
         return;
       }
@@ -716,19 +741,21 @@ async function takeAction(hero, currentScene) {
           messageModifiers: ["italic", "magentaBright"],
         }
       );
-      if (hero.client) await hero.client.sendState(hero, "home");
+      hero.client && (await hero.client.sendState(hero, "home"));
       break;
     case "adventureCongratulations":
-      if (
-        Date.now() - config.HEROES[hero.ID].lastCompletedDungeonTimestamp >
-        120 * 1000
-      ) {
+      const timestamp = config.HEROES[hero.ID].lastCompletedDungeonTimestamp;
+      const isAdventureFinished = Date.now() - timestamp > 120 * 1000;
+      // TODO: no magic numbers 120 * 1000
+
+      if (isAdventureFinished) {
         logger.log(`adventure is finished`);
         config.HEROES[hero.ID].dungeonsCompleted++;
         config.HEROES[hero.ID].lastCompletedDungeonTimestamp = Date.now();
         config = await updateJson(configPath, config);
       }
-      if (hero.client) await hero.client.sendState(hero, "adv is finished");
+
+      hero.client && (await hero.client.sendState(hero, "adv is finished"));
       break;
     case "delegationPopupLowBalance":
       //todo:
@@ -814,7 +841,8 @@ async function play(currentHeroes) {
 
       hero.page.waitForNetworkIdle({ idleTime: 750 });
 
-      if (await isOutOfTime(hero)) {
+      const heroIsOutOfTime = await isOutOfTime(hero);
+      if (heroIsOutOfTime) {
         logger.log(`is out of time!`);
         currentHeroes.pop(hero);
         logger.log(`is removed from the [currentHeroes]`);
@@ -847,12 +875,16 @@ async function play(currentHeroes) {
 
       let currentScene = await getCurrentScene(hero);
       await takeAction(hero, currentScene);
+
+      // TODO: pause if action requires gas
+
       //temp, todo: think of a way to pause until rabby confirm is clicked
-      if (
+      const sceneRequiresPopup =
         currentScene === "delegationPopupActivate" ||
-        currentScene === "delegationPopupLowBalance"
-      )
-        await pause(SECOND * 30);
+        currentScene === "delegationPopupLowBalance";
+
+      // TODO: no magic numbers, set config
+      sceneRequiresPopup && (await pause(SECOND * 30));
     }
 
     if (currentHeroes.length === 0) {
@@ -898,6 +930,7 @@ async function getDailyReward(hero) {
   }
 
   //number of daily rewards
+  // TODO: comment daily chest feature
   while ((await getText(hero.page, xpath.DAILY_REWARD_COUNT))[1] > 0) {
     await puppeteer.clickByPage(hero.page, xpath.DAILY_CHEST, {
       timeout: 5000,
@@ -1036,15 +1069,24 @@ async function levelUp(hero) {
 }
 
 async function isNextLevel(hero) {
-  if (
-    ((await getElem(hero.page, xpath.LEVEL_UP_NOTIFICATION_ICON, 500)) ||
-      (await getElem(hero.page, xpath.LEVEL_UP_TO, 500))) &&
-    !(await getElem(hero.page, xpath.CONTINUE_ADVENTURE_BUTTON, 500))
-  ) {
-    logger.log(`is ready to level up`);
-    return true;
+  let isHeroNextLevel = false;
+
+  const conditions = [
+    xpath.LEVEL_UP_NOTIFICATION_ICON,
+    xpath.LEVEL_UP_TO,
+    xpath.CONTINUE_ADVENTURE_BUTTON,
+  ];
+
+  for await (const condition of conditions) {
+    const conditionExists = await getElem(hero.page, condition, 500);
+    if (conditionExists) {
+      logger.log(`is ready to level up`);
+      isHeroNextLevel = true;
+      break;
+    }
   }
-  return false;
+
+  return isHeroNextLevel;
 }
 
 async function getCurrentLives(hero) {
@@ -1148,10 +1190,11 @@ class Hero {
     messageModifiers: ["whiteBright", "underline", "bold"],
   });
 
-  const browsers = await getBrowsers(await getIDs());
+  const browserIDs = await getIDs();
+  const browsers = await getBrowsers(browserIDs);
   let currentHeroes = [];
   let openPages = [];
-  for (const browser of browsers) {
+  for await (const browser of browsers) {
     if (!browser) {
       logger.error("Failed to initiate browser");
       return;
@@ -1179,7 +1222,7 @@ class Hero {
     );
 
     //check if one of the pages contains ID of the hero
-    for (let page of openPages) {
+    for await (let page of openPages) {
       const url = await page.url();
       if (!url.includes("sonic.sacra.game")) {
         continue;
