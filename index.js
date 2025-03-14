@@ -869,12 +869,15 @@ async function play(currentHeroes) {
 
       let currentScene = await getCurrentScene(hero);
       await takeAction(hero, currentScene);
+
+      // TODO: pause if action requires gas
+
       //temp, todo: think of a way to pause until rabby confirm is clicked
-      if (
-        currentScene === "delegationPopupActivate" ||
-        currentScene === "delegationPopupLowBalance"
-      )
-        await pause(SECOND * 30);
+      const sceneRequiresPopup = currentScene === "delegationPopupActivate" ||
+        currentScene === "delegationPopupLowBalance";
+
+      // TODO: no magic numbers, set config
+      sceneRequiresPopup && await pause(SECOND * 30);
     }
 
     if (currentHeroes.length === 0) {
@@ -920,6 +923,7 @@ async function getDailyReward(hero) {
   }
 
   //number of daily rewards
+  // TODO: comment daily chest feature
   while ((await getText(hero.page, xpath.DAILY_REWARD_COUNT))[1] > 0) {
     await puppeteer.clickByPage(hero.page, xpath.DAILY_CHEST, {
       timeout: 5000,
@@ -966,7 +970,7 @@ async function levelUp(hero) {
   let xpathAttr;
   switch (config.HEROES[hero.ID].currentLevel) {
     case 2:
-      xpathAttr = xpath.LEVEL_UP_PLUS_VIT;
+      xpathAttr = xpath.LEVEL_UP_PLUS_DEX;
       break;
     case 3:
       xpathAttr = xpath.LEVEL_UP_PLUS_DEX;
@@ -974,11 +978,11 @@ async function levelUp(hero) {
     case 4:
       xpathAttr = xpath.LEVEL_UP_PLUS_DEX;
       break;
-    case 7:
-      xpathAttr = xpath.LEVEL_UP_PLUS_DEX;
-      break;
+    // case 7:
+    //   xpathAttr = xpath.LEVEL_UP_PLUS_DEX;
+    //   break;
     case 8:
-      xpathAttr = xpath.LEVEL_UP_PLUS_STR;
+      xpathAttr = xpath.LEVEL_UP_PLUS_VIT;
       break;
     case 9:
       xpathAttr = xpath.LEVEL_UP_PLUS_STR;
@@ -986,9 +990,9 @@ async function levelUp(hero) {
     case 10:
       xpathAttr = xpath.LEVEL_UP_PLUS_STR;
       break;
-    case 11:
-      xpathAttr = xpath.LEVEL_UP_PLUS_VIT;
-      break;
+    // case 11:
+    //   xpathAttr = xpath.LEVEL_UP_PLUS_STR;
+    //   break;
     default:
       logger.log(
         `can't level up on level [${config.HEROES[hero.ID].currentLevel}]!`
