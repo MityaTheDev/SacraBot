@@ -567,6 +567,7 @@ async function answerQuest(hero) {
   for await (let option of currentAnswerOptions) {
     if (option.text === correctAnswer) {
       await clickAnswerButton(hero, option);
+      break;
     }
   }
 }
