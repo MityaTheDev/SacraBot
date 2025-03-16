@@ -105,6 +105,19 @@
     }
   },
 
+  "levelUp": {
+    "indicator": {
+      "xpath": "//div[contains(@class, 'cdk-overlay-container')]//div[text() = ' Level up ' and (//button[text() = ' Level Up '])]",
+      "description": "'Level up' text and presence of 'Level Up' button"
+    },
+    "actionTargets": {
+      "close": {
+        "xpath": "//div[contains(@class, 'cdk-overlay-container')]//button[contains(@class, 'btn-close')]",
+        "description": "Close button"
+      }
+    }
+  },
+
   "home": {
     "indicator": {
       "xpath": "//div[contains(@class, 'hero-stat')]/button[@id='show-all-stats' and not(//cdk-dialog-container)]",
