@@ -857,7 +857,7 @@ async function play(currentHeroes) {
           }
         case MODE.LEVEL:
           if (
-            config.HEROES[hero.ID].currentLevel >=
+            config.HEROES[hero.ID].virtualLevel >=
             config.HEROES[hero.ID].targetLevel
           ) {
             logger.log(`is done with levelling!`, {
@@ -988,7 +988,7 @@ async function levelUp(hero) {
     xpath.LEVEL_UP_PLUS_ENERGY,
   ];
 
-  switch (config.HEROES[hero.ID].currentLevel) {
+  switch (parseInt(config.HEROES[hero.ID].currentLevel)) {
     case 2:
       stats = [0, 5, 0, 0];
       break;
@@ -1020,9 +1020,9 @@ async function levelUp(hero) {
     case 10:
       stats = [5, 0, 0, 0];
       break;
-    case 11:
-      stats = [5, 0, 0, 0];
-      break;
+    // case 11:
+    //   stats = [5, 0, 0, 0];
+    //   break;
     default:
       logger.log(
         `can't level up on level [${config.HEROES[hero.ID].currentLevel}]!`
@@ -1052,7 +1052,7 @@ async function levelUp(hero) {
     }
   }
 
-  if ((await getText(hero.page, xpath.LEVEL_UP_AVAILABLE_STATS)) === 0) {
+  if ((await getText(hero.page, xpath.LEVEL_UP_AVAILABLE_STATS)) == 0) {
     await puppeteer.clickByPage(hero.page, xpath.LEVEL_UP_BUTTON_CONFIRM);
     await pause(SECOND);
   } else {
@@ -1089,14 +1089,14 @@ async function getCurrentLives(hero) {
 async function getLevels(hero) {
   logger.log(`getting current and virtual levels...`);
   const levels = { current: -1, virtual: -1 };
-  levels.current = await getText(hero.page, xpath.LEVEL);
+  levels.current = parseInt(await getText(hero.page, xpath.LEVEL));
   const regex = RegExp("\\d+", "g");
   const levelUpToText = await getText(hero.page, xpath.LEVEL_UP_TO, {
     timeout: 1000,
   });
   //selects all digits in string
   const digit = regex.exec(levelUpToText);
-  levels.virtual = digit ? digit[0] : levels.current;
+  levels.virtual = digit ? parseInt(digit[0]) : levels.current;
   return levels;
 }
 
