@@ -83,7 +83,7 @@
   "quest": {
     "indicator": {
       "urlIndicator": "/story/",
-      "xpath": "//div[@id='story-name' and not(//app-animation-papyrus) and not(//img[contains(@alt, 'loading')]) and not(//button[contains(@class, 'btn-exit') and text()=' Continue '])]",
+      "xpath": "//div[@id='story-name' and not(//app-animation-papyrus) and not(//img[contains(@alt, 'loading')]) and not(//div[@class='cdk-overlay-container']/*) and not(//button[contains(@class, 'btn-exit') and text()=' Continue '])]",
       "description": "Element with the unique id"
     }
   },
