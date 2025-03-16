@@ -586,7 +586,7 @@ async function throwQuestsError(
   currentAnswerOptions = [],
   storedAnswerOptions = []
 ) {
-  const pauseTime = SECOND * 60;
+  const pauseTime = SECOND * 60 * 3;
   let errorMessage = "";
   let telegramMessage = "";
   let partOfStoryText = "";
