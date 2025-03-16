@@ -404,38 +404,39 @@ async function getCurrentAnswerOptions(hero) {
   return false;
 }
 
-async function compareAnswers(array1, array2) {
-  if (array1 === array2) return true;
+async function compareAnswers(storedArray, currentArray) {
+  currentArray = currentArray.map((elem) => elem.replaceAll("\n", ""));
+  if (storedArray === currentArray) return true;
   logger.log("comparing answers...", { messageModifiers: ["yellow"] });
-  if (!array1) {
+  if (!storedArray) {
     logger.log("array1 is empty or null", {
       messageModifiers: ["yellow", "bold"],
     });
     return false;
   }
-  if (!array2) {
+  if (!currentArray) {
     logger.log("array2 is empty or null", {
       messageModifiers: ["yellow", "bold"],
     });
     return false;
   }
-  if (array1.length !== array2.length) {
+  if (storedArray.length !== currentArray.length) {
     logger.log(
-      `array1's length[${array1.length}] is not equal to array2's length[${array2.length}]`,
+      `array1's length[${storedArray.length}] is not equal to array2's length[${currentArray.length}]`,
       {
         messageModifiers: ["yellow", "bold"],
       }
     );
     return false;
   }
-  array1.sort();
-  array2.sort();
+  storedArray.sort();
+  currentArray.sort();
 
-  for (let i = 0; i < array1.length; ++i) {
-    if (array1[i] !== array2[i]) {
+  for (let i = 0; i < storedArray.length; ++i) {
+    if (storedArray[i] !== currentArray[i]) {
       logger.log(
         `arrays are not equal:
-        \n\t[${array1}]\n\t[${array2}]`,
+        \n\t[${storedArray}]\n\t[${currentArray}]`,
         {
           messageModifiers: ["yellow", "bold"],
         }
