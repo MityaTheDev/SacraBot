@@ -20,6 +20,7 @@
       "lastDailyQuestDate": "",
       "currentLives": -1,
       "currentLevel": 1,
+      "virtualLevel": 3,
       "targetLevel": 12,
       "sessionMaxDurationInMinutes": 240,
       "firstBossKilled": false
