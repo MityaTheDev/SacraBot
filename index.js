@@ -686,48 +686,43 @@ async function takeAction(hero, currentScene) {
 
         if (isReadyForLevelUp) await levelUp(hero);
 
+        //todo: put on items, if don't have a weapon, go and buy one
+        const isReadyForFirstBoss =
+          !config.HEROES[hero.ID].firstBossKilled &&
+          config.HEROES[hero.ID].currentLevel == 6;
+        if (isReadyForFirstBoss) {
+          if (hero.client)
+            await hero.client.sendState(hero, "ready for 1st boss");
+          await telegram.sendMessage(
+            `${hero.prefix} is ready for the 1st boss fight!`
+          );
+          logger.log("ready for 1st boss!", {
+            messageModifiers: ["greenBright"],
+          });
+          await pause(MINUTE * 60);
+          return;
+        }
+
         const isReadyForSecondBoss =
           config.HEROES[hero.ID].virtualLevel >= 12 &&
           config.HEROES[hero.ID].currentLevel === 11;
-
         if (isReadyForSecondBoss) {
           if (hero.client)
             await hero.client.sendState(hero, "ready for 2nd boss");
           logger.log("ready for 2nd boss!", {
             messageModifiers: ["greenBright"],
           });
-
           await telegram.sendMessage(
             `${hero.prefix} is ready for the 2nd boss fight!`
           );
-
-          // TODO: set timestamp to wait instead  lastActionTime
           await pause(MINUTE * 60);
+          return;
         }
 
         if (config.ALLOW_LEVEL_UP && config.HEROES[hero.ID].currentLevel > 12) {
           config.ALLOW_LEVEL_UP = false;
           config = await updateJson(configPath, config);
         }
-      }
-
-      //todo: put on items, if don't have a weapon, go and buy one
-      const isReadyToKillFirstBoss =
-        !config.HEROES[hero.ID].firstBossKilled &&
-        config.HEROES[hero.ID].currentLevel == 6;
-      if (isReadyToKillFirstBoss) {
-        await telegram.sendMessage(
-          `${hero.prefix} is ready for the 1st boss fight!`
-        );
-        logger.log("ready for 1st boss!", {
-          messageModifiers: ["greenBright"],
-        });
-        if (hero.client)
-          await hero.client.sendState(hero, "ready for 1st boss");
-
-        // TODO: set lastActionTime instead of pause
-        await pause(MINUTE * 60);
-        return;
       }
 
       logger.log(
@@ -1053,7 +1048,7 @@ async function levelUp(hero) {
         hero.page,
         xpath.LEVEL_UP_AVAILABLE_STATS
       );
-      if (availableStatsAfter - availableStatsBefore === 1) stats[i]--;
+      if (availableStatsAfter - availableStatsBefore === -1) stats[i]--;
     }
   }
 

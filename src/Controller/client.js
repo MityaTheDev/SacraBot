@@ -15,7 +15,7 @@ const baseMessage = {
   Name: "",
   Level: "",
   Lives: "",
-  "Last scene": "",
+  // "Last scene": "",
   State: "",
 };
 
@@ -67,9 +67,9 @@ async function sendState(hero, stateInfo) {
   const message = { ...baseMessage };
   message.type = "state";
   message.State = stateInfo;
-  message.Level = hero.currentLevel;
+  message.Level = `${hero.currentLevel}(${hero.virtualLevel})`;
   message.Lives = hero.currentLives;
-  message["Last scene"] = hero.lastScene;
+  // message["Last scene"] = hero.lastScene;
   ws.send(JSON.stringify(message));
 }
 
