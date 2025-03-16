@@ -864,6 +864,7 @@ async function play(currentHeroes) {
             logger.log(`is done with levelling!`, {
               messageModifiers: ["green"],
             });
+            if (hero.client) hero.client.sendState(hero, "finished");
             currentHeroes.pop(hero);
             continue;
           }

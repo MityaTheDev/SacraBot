@@ -120,25 +120,34 @@ function printTable() {
     const object = printableObjects[objectKey];
     for (let key in object) {
       let color = switchingColor;
-      if (key === "Level" && object[key] == 12) color = "greenBright";
       if (key === "Lives") {
         switch (object[key]) {
-          case 5:
+          case "5":
             color = "greenBright";
             break;
-          case 4:
+          case "4":
             color = "green";
             break;
-          case 3:
+          case "3":
             color = "yellow";
             break;
-          case 2:
+          case "2":
             color = "red";
             break;
-          case 1:
+          case "1":
             color = "redBright";
         }
       }
+      if (key === "State") {
+        switch (object[key]) {
+          case "finished":
+            color = "greenBright";
+            break;
+          case "offline":
+            color = "redBright";
+        }
+      }
+
       object[key] = styleText(color, "" + object[key]);
     }
     table.addRow(printableObjects[objectKey], { color: switchingColor });
