@@ -341,7 +341,7 @@ async function checkHealth(hero) {
 
     if (isLowHP) {
       await telegram.sendMessage(
-        `${hero.ID}: health is LOW! ${currentHealth}/${maxHealth}, need to drink potion!`
+        `${hero.prefix}: health is LOW! ${currentHealth}/${maxHealth}, need to drink potion!`
       );
       logger.log(
         `health is too low! [${currentHealth}/${maxHealth}], telegram message sent`,
