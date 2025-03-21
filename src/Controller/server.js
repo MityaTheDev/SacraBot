@@ -6,46 +6,90 @@ const { Table } = require("console-table-printer");
 const { styleText } = require("node:util");
 const readline = require(`readline`);
 const ansiEscapes = require("ansi-escapes");
-const activityIndicatorSymblos = ["᎐", "᎓", "᎒"];
-let activityIndicatorIndex = 0;
-let activityIndicatorIndexDirection = 1;
+const activityIndicatorSymblos = [
+  "⠀",
+  "⠁",
+  "⠂",
+  "⠄",
+  "⡀",
+  "⡈",
+  "⡐",
+  "⡠",
+  "⣀",
+  "⣁",
+  "⣂",
+  "⣄",
+  "⣌",
+  "⣔",
+  "⣤",
+  "⣥",
+  "⣦",
+  "⣮",
+  "⣶",
+  "⣷",
+  "⣿",
+  "⢿",
+  "⠿",
+  "⡻",
+  "⠻",
+  "⢛",
+  "⠛",
+  "⠝",
+  "⡙",
+  "⠙",
+  "⠩",
+  "⢉",
+  "⠉",
+  "⠊",
+  "⠌",
+  "⡈",
+  "⠈",
+  "⠐",
+  "⠠",
+  "⢀",
+];
+let activityIndicatorSymbolIndex = 0;
 const prompt = styleText("yellow", "command> ");
+const promptLength = prompt.replaceAll(/\x1B\[[0-9;]*m/gi, "").length;
 let currentCommand = "";
 let commandCursorPosition = 0;
 const app = express();
 const port = serverConfig.port;
-const printableObjects = {};
-const oldObjects = {};
-
-// const dim = "dim";
-// const colors = [
-//   "black",
-//   "red",
-//   "green",
-//   "yellow",
-//   "blue",
-//   "magenta",
-//   "cyan",
-//   "white",
-//   "gray",
-//   "redBright",
-//   "greenBright",
-//   "yellowBright",
-//   "blueBright",
-//   "magentaBright",
-//   "cyanBright",
-//   "whiteBright",
-// ];
-// const reset = "\x1b[0m";
-// const text = "Wow! What a string of text this is...";
-// console.log("\x1b[33m" + text + reset);
-// console.log("\x1b[33;2m" + text + reset);
-// console.log("\x1b[33;1m" + text + reset);
-// console.log("\x1b[33;2;1m" + text + reset);
-// for (let color of colors) {
-//   console.log(`${color}: ${styleText(color, text)}`);
-//   console.log(`${color}(dim): ${styleText([color, dim], text)}`);
-// }
+const printableObjects = {
+  // 153: {
+  //   ID: 153,
+  //   Name: "DqR[1098]",
+  //   Level: "10(12)",
+  //   Lives: "3",
+  //   State: "offline",
+  // },
+  // 157: {
+  //   ID: 157,
+  //   Name: "00psie[777]",
+  //   Level: "8(10)",
+  //   Lives: "1",
+  //   State: "offline",
+  // },
+  // 158: {
+  //   ID: 158,
+  //   Name: "Gera[1095]",
+  //   Level: "9(9)",
+  //   Lives: "4",
+  //   State: "offline",
+  // },
+  // 159: {
+  //   ID: 159,
+  //   Name: "Master-Majat2[1100]",
+  //   Level: "9(12)",
+  //   Lives: "2",
+  //   State: "offline",
+  // },
+};
+let secondsPassed = 0;
+const interval = 1000;
+let lastCycleTime = 0;
+let startTime = Date.now() - interval;
+let overallSlippage = 0;
 
 // HTTP server for initial setup
 app.use(express.json());
@@ -53,8 +97,9 @@ app.get("/", (req, res) => {
   res.send("Bot Control Server is running.");
 });
 
-const server = app.listen(port, () => {
-  console.log(`Server running at http://localhost:${port}`);
+const server = app.listen(port, async () => {
+  await listenToInput();
+  await print();
 });
 
 const wss = new WebSocket.Server({ server });
@@ -63,7 +108,6 @@ const wss = new WebSocket.Server({ server });
 const bots = new Map();
 
 wss.on("connection", (ws) => {
-  // return;
   let botId = -1;
 
   ws.on("message", (messageRaw) => {
@@ -81,25 +125,30 @@ wss.on("connection", (ws) => {
 
   ws.on("close", () => {
     printableObjects[botId].State = "offline";
-    // printTable();
     bots.delete(botId);
   });
 });
 
-(async () => {
+async function print() {
   while (true) {
-    const startTime = Date.now();
-    process.stdout.write(ansiEscapes.cursorHide);
-    process.stdout.write(ansiEscapes.clearScreen);
-    printTable();
-    process.stdout.write(nextSymblol() + prompt + currentCommand);
-    process.stdout.write(ansiEscapes.cursorBackward(currentCommand.length));
-    process.stdout.write(ansiEscapes.cursorForward(commandCursorPosition));
-    process.stdout.write(ansiEscapes.cursorShow);
-    const sleepTime = 1000 - (Date.now() - startTime);
+    const now = Date.now();
+    lastCycleTime = now - startTime;
+    const slippage = lastCycleTime - interval;
+    overallSlippage += slippage;
+    startTime = now;
+    let output =
+      ansiEscapes.clearScreen +
+      "\n" +
+      (await getTable()) +
+      (prompt + currentCommand) +
+      ansiEscapes.cursorLeft +
+      ansiEscapes.cursorForward(promptLength + commandCursorPosition);
+    process.stdout.write(output);
+    const elapsedTime = Date.now() - startTime;
+    const sleepTime = interval - elapsedTime;
     await pause(sleepTime);
   }
-})();
+}
 
 // Send commands to a specific bot
 function sendCommand(botId, command) {
@@ -112,12 +161,23 @@ function sendCommand(botId, command) {
   }
 }
 
-function printTable() {
-  const table = new Table();
+async function getTable() {
+  const table = new Table({
+    title: `${await nextSymblol(false)} Server is running ${await nextSymblol(
+      true
+    )}`,
+    columns: [
+      { name: "ID", minLen: 3 },
+      { name: "Name", minLen: 20 },
+      { name: "Level", minLen: 6 },
+      { name: "Lives", minLen: 1 },
+      { name: "State", minLen: 20 },
+    ],
+  });
   const colors = ["whiteBright", "yellowBright"];
   let switchingColor = colors[1];
-  for (let objectKey in printableObjects) {
-    const object = printableObjects[objectKey];
+  for (const objectKey in printableObjects) {
+    const object = { ...printableObjects[objectKey] };
     for (let key in object) {
       let color = switchingColor;
       if (key === "Lives") {
@@ -150,14 +210,14 @@ function printTable() {
 
       object[key] = styleText(color, "" + object[key]);
     }
-    table.addRow(printableObjects[objectKey], { color: switchingColor });
+    table.addRow(object);
     switchingColor = switchingColor === colors[0] ? colors[1] : colors[0];
   }
-  table.render();
-  table.printTable();
+
+  return table.render() + "\n";
 }
 
-function listenToInput() {
+async function listenToInput() {
   let historyIndex = 0;
   const rl = readline.createInterface({
     input: process.stdin,
@@ -165,19 +225,14 @@ function listenToInput() {
     prompt: prompt,
   });
   rl.prompt();
-  rl.on("line", async (input) => {
-    // console.log(`history:`, rl.history);
-    // console.log(`historyIndex: ${historyIndex}[${rl.history[historyIndex]}]`);
-    // console.log("input:", input);
-    // console.log("position:", commandCursorPosition);
-    // console.log("current command:", currentCommand);
+  rl.on("line", (input) => {
     currentCommand = "";
     commandCursorPosition = 0;
     historyIndex = -1;
     if (input.trim() === "q") rl.close();
     else rl.prompt();
   }).on("close", () => {
-    console.log("Goodbye!");
+    console.log(styleText("redBright", "\nprogram terminated"));
     process.exit(0);
   });
 
@@ -256,12 +311,14 @@ function listenToInput() {
   });
 }
 
-function nextSymblol() {
-  if (activityIndicatorIndex == activityIndicatorSymblos.length - 1)
-    activityIndicatorIndexDirection = -1;
-  if (activityIndicatorIndex == 0) activityIndicatorIndexDirection = 1;
-  activityIndicatorIndex += activityIndicatorIndexDirection;
-  return activityIndicatorSymblos[activityIndicatorIndex];
+async function nextSymblol(next) {
+  const symbol = activityIndicatorSymblos[activityIndicatorSymbolIndex];
+  if (next) {
+    activityIndicatorSymbolIndex++;
+    if (activityIndicatorSymbolIndex == activityIndicatorSymblos.length)
+      activityIndicatorSymbolIndex = 0;
+  }
+  return symbol;
 }
 
 exports.listenToInput = listenToInput;

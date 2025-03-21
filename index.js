@@ -1104,9 +1104,6 @@ async function getLevels(hero) {
 
 async function commandBots() {
   const server = require("./src/Controller/server.js");
-  await pause(1000);
-  server.listenToInput();
-
   return true;
 }
 
