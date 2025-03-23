@@ -991,6 +991,9 @@ async function levelUp(hero) {
   ];
 
   switch (parseInt(config.HEROES[hero.ID].currentLevel)) {
+    case 1:
+      stats = [0, 5, 0, 0];
+      break;
     case 2:
       stats = [0, 5, 0, 0];
       break;
@@ -998,23 +1001,23 @@ async function levelUp(hero) {
       stats = [0, 5, 0, 0];
       break;
     case 4:
-      stats = [0, 5, 0, 0];
+      stats = [0, 3, 2, 0];
       break;
     case 5:
-      stats = [0, 3, 2, 0];
+      stats = [0, 1, 3, 1];
       break;
     case 6:
       //todo: put on items than lvlup
-      // stats = [0, 1, 3, 1];
+      stats = [0, 5, 0, 0];
       logger.log(`put on items, then lvl up with ${stats}`);
-      if (hero.client) hero.client.sendState(hero, "at lvl 6, items!");
+      if (hero.client) hero.client.sendState(hero, "at lvl to 7, items!");
       return;
       break;
     case 7:
-      stats = [0, 5, 0, 0];
+      stats = [0, 3, 2, 0];
       break;
     case 8:
-      stats = [0, 3, 2, 0];
+      stats = [5, 0, 0, 0];
       break;
     case 9:
       stats = [5, 0, 0, 0];
@@ -1023,7 +1026,10 @@ async function levelUp(hero) {
       stats = [5, 0, 0, 0];
       break;
     // case 11:
-    //   stats = [5, 0, 0, 0];
+    //   stats = [3, 0, 2, 0];
+    //   logger.log(`put on items, then lvl up with ${stats}`);
+    //   if (hero.client) hero.client.sendState(hero, "at lvl to 12, items!");
+    //   return;
     //   break;
     default:
       logger.log(
