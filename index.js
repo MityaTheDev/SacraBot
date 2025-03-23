@@ -1091,7 +1091,7 @@ async function getCurrentLives(hero) {
   const src = await hero.page.$eval("::-p-xpath(" + xpath.LIVES + ")", (el) =>
     el.getAttribute("src")
   );
-  return src ? src.slice(-5).substring(0, 1) : false;
+  return src ? parseInt(src.slice(-5).substring(0, 1)) : false;
 }
 
 async function getLevels(hero) {
