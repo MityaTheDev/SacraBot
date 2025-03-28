@@ -262,17 +262,15 @@ async function getText(
 // scene is found an error is thrown.
 async function getCurrentScene(hero, iterationsLeft = 4) {
   if (iterationsLeft <= 0) {
-    await telegram.sendMessage(
-      `[${hero.prefix}] failed to accurately detect scene!`
-    );
-    await saveBodyOfPage(hero.page, `${hero.prefix}_unknownScene`);
-    logger.log(
-      `failed to accurately detect scene! telegram message sent, scene saved as '${hero.prefix}_unknownScene'`,
-      {
-        importance: 1,
-        messageModifiers: ["magenta", "underline"],
-      }
-    );
+    // await telegram.sendMessage(
+    //   `[${hero.prefix}] failed to accurately detect scene!`
+    // );
+    // await saveBodyOfPage(hero.page, `${hero.prefix}_unknownScene`);
+    logger.log(`failed to accurately detect scene! Going home...`, {
+      importance: 1,
+      messageModifiers: ["magentaBright"],
+    });
+    await goToHomePage(hero);
     return false;
   }
 
@@ -322,7 +320,7 @@ async function getCurrentScene(hero, iterationsLeft = 4) {
       logger.log(`retrying... iterations left: [${iterationsLeft}]`, {
         messageModifiers: ["yellow"],
       });
-      await pause(SECOND * 2);
+      await pause(SECOND * 10);
       return await getCurrentScene(hero, --iterationsLeft);
   }
 }
@@ -336,20 +334,18 @@ async function checkHealth(hero) {
     const maxHealth = healthText.split("/")[1];
     logger.log(`health is [${currentHealth}/${maxHealth}]`);
 
+    //TODO: getMonsterAttack
     const isLowHP = currentHealth / maxHealth < 0.25 || currentHealth < 7;
     // TODO: Attack of the enemy
 
     if (isLowHP) {
-      await telegram.sendMessage(
-        `${hero.prefix}: health is LOW! ${currentHealth}/${maxHealth}, need to drink potion!`
-      );
-      logger.log(
-        `health is too low! [${currentHealth}/${maxHealth}], telegram message sent`,
-        {
-          importance: 1,
-          messageModifiers: ["yellow"],
-        }
-      );
+      // await telegram.sendMessage(
+      //   `${hero.prefix}: health is LOW! ${currentHealth}/${maxHealth}, need to drink potion!`
+      // );
+      logger.log(`health is too low! [${currentHealth}/${maxHealth}]`, {
+        importance: 1,
+        messageModifiers: ["yellow"],
+      });
       logger.error(
         `waiting for 1 hour... need to restart the bot \ntodo: make drink health potion function`
       );
@@ -505,13 +501,6 @@ async function answerQuest(hero) {
   const striptedStoryText = storyText
     .toLowerCase()
     .replaceAll(regexAllButCharacters, "");
-
-  // if (currentAnswerOptions && currentAnswerOptions)
-  //   if (questTitle === "Guardian of the Forest") {
-  //     //temp; todo: at lvl 7 put on closthes, if don't have a weapon, go and buy one
-  //     await telegram.sendMessage(`${hero.prefix} is at Guardian of the Forest`);
-  //     return;
-  //   }
 
   //search quests.json for quest title and for quest text
   let storedQuest = "";
