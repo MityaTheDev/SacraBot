@@ -454,22 +454,25 @@ async function clickAnswerButton(hero, answerObj) {
   const text = answerObj.text;
   const buttonElem = answerObj.buttonElement;
 
-  let xpathToButton = `no xpath specified`;
-  if (!text.includes("'"))
-    xpathToButton = `//*[text()='${text}']/ancestor::div[contains(@class, "answer ")]/button`;
-  else if (text[0] === '"' && text[text.length - 1] === '"')
-    xpathToButton = `//*[text()=concat('"', ${text}, '"')]/ancestor::div[contains(@class, "answer ")]/button`;
-  else
-    xpathToButton = `//*[text()="${text}"]/ancestor::div[contains(@class, "answer ")]/button`;
-  let success = await puppeteer.clickByPage(hero.page, xpathToButton, {
-    timeout: 1000,
-    logError: false,
-  });
-  if (!success) await buttonElem.click();
+  await buttonElem.click();
+
+  // let xpathToButton = `no xpath specified`;
+  // if (!text.includes("'"))
+  //   xpathToButton = `//*[text()='${text}']/ancestor::div[contains(@class, "answer ")]/button`;
+  // else if (text[0] === '"' && text[text.length - 1] === '"')
+  //   xpathToButton = `//*[text()=concat('"', ${text}, '"')]/ancestor::div[contains(@class, "answer ")]/button`;
+  // else
+  //   xpathToButton = `//*[text()="${text}"]/ancestor::div[contains(@class, "answer ")]/button`;
+  // let success = await puppeteer.clickByPage(hero.page, xpathToButton, {
+  //   timeout: 1000,
+  //   logError: false,
+  // });
+  // if (!success) await buttonElem.click();
 }
 
 async function answerQuest(hero) {
   logger.log(`answering quest...`);
+  const regexAllButCharacters = /[^a-z]/g;
   quests = await readJson(questsPath);
 
   const questTitle = await getText(hero.page, xpath.QUEST_TITLE, {
@@ -487,7 +490,6 @@ async function answerQuest(hero) {
   logger.log(
     `quest title: ${questTitle}, quest text: ${storyText.substring(0, 25)}...`
   );
-
   const currentAnswerOptions = await getCurrentAnswerOptions(hero);
 
   //if only one answer option found, answer with it
@@ -497,15 +499,29 @@ async function answerQuest(hero) {
     return;
   }
 
-  if (currentAnswerOptions && currentAnswerOptions)
-    if (questTitle === "Guardian of the Forest") {
-      //temp; todo: at lvl 7 put on closthes, if don't have a weapon, go and buy one
-      await telegram.sendMessage(`${hero.prefix} is at Guardian of the Forest`);
-      return;
-    }
+  const striptedQuestTitle = questTitle
+    .toLowerCase()
+    .replaceAll(regexAllButCharacters, "");
+  const striptedStoryText = storyText
+    .toLowerCase()
+    .replaceAll(regexAllButCharacters, "");
+
+  // if (currentAnswerOptions && currentAnswerOptions)
+  //   if (questTitle === "Guardian of the Forest") {
+  //     //temp; todo: at lvl 7 put on closthes, if don't have a weapon, go and buy one
+  //     await telegram.sendMessage(`${hero.prefix} is at Guardian of the Forest`);
+  //     return;
+  //   }
 
   //search quests.json for quest title and for quest text
-  const storedQuest = quests[questTitle];
+  let storedQuest = "";
+  for (const questTitle in quests) {
+    storedQuest =
+      questTitle.toLowerCase().replaceAll(regexAllButCharacters, "") ===
+      striptedQuestTitle
+        ? quests[questTitle]
+        : "";
+  }
   if (!storedQuest) {
     await throwQuestsError(
       "noStoredQuest",
@@ -517,7 +533,14 @@ async function answerQuest(hero) {
     return;
   }
 
-  const storedStory = storedQuest[storyText];
+  let storedStory = "";
+  for (const storyText in storedQuest) {
+    storedStory =
+      storyText.toLowerCase().replaceAll(regexAllButCharacters, "") ===
+      striptedStoryText
+        ? storedQuest[storyText]
+        : "";
+  }
   if (!storedStory) {
     await throwQuestsError(
       "noStoredStory",
@@ -542,8 +565,12 @@ async function answerQuest(hero) {
   }
 
   const areAnswerOptionsEqual = await compareAnswers(
-    storedAnswerOptions,
-    currentAnswerOptions.map((obj) => obj.text)
+    storedAnswerOptions.map((answer) =>
+      answer.toLowerCase().replaceAll(regexAllButCharacters, "")
+    ),
+    currentAnswerOptions.map((obj) =>
+      obj.text.toLowerCase().replaceAll(regexAllButCharacters, "")
+    )
   );
   if (!areAnswerOptionsEqual) {
     await throwQuestsError(
@@ -572,7 +599,10 @@ async function answerQuest(hero) {
 
   logger.log(`answering with correct answer [${correctAnswer}]`);
   for (let option of currentAnswerOptions) {
-    if (option.text === correctAnswer) {
+    if (
+      option.text.toLowerCase().replaceAll(regexAllButCharacters, "") ===
+      correctAnswer.toLowerCase().replaceAll(regexAllButCharacters, "")
+    ) {
       await clickAnswerButton(hero, option);
       break;
     }
@@ -664,7 +694,7 @@ async function takeAction(hero, currentScene) {
     case "emptySreen":
     case "error":
       if (hero.client) await hero.client.sendState(hero, "error");
-      await refresh(hero.page);
+      await goToHomePage(hero);
       return;
     case "home":
       const levels = await getLevels(hero);
@@ -742,7 +772,6 @@ async function takeAction(hero, currentScene) {
     case "adventureCongratulations":
       const timestamp = config.HEROES[hero.ID].lastCompletedDungeonTimestamp;
       const isAdventureFinished = Date.now() - timestamp > 120 * 1000;
-      // TODO: no magic numbers 120 * 1000
 
       if (isAdventureFinished) {
         logger.log(`adventure is finished`);
