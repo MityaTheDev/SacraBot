@@ -72,6 +72,10 @@
     "\"That's nice!\"Belav sits down nearby and pours some of the urine they call beer here on your feet. He's totally drunk.\"I knew you were a real person, not a f..cking kudja!\"": {
       "answerOptions": ["Take a drink.", "Keep silent.", "Eject!"],
       "correctAnswer": "Eject!"
+    },
+    "\"That's nice!\" Belav sits down nearby and pours some of the urine they call beer here on your feet. He's totally drunk.\"I knew you were a real person, not a f..cking kudja!\"": {
+      "answerOptions": ["Eject!", "Take a drink.", "Keep silent."],
+      "correctAnswer": "Eject!"
     }
   },
   "Tuunbag": {
@@ -384,6 +388,19 @@
         "Try to reach your elbow with your tongue and realize that you are already old and inflexible."
       ],
       "correctAnswer": "Show your breasts instead."
+    },
+    "\"What is the purpose of your visit?\" guardman asks.": {
+      "answerOptions": [
+        "\"Savage things! SAVAGE!\"",
+        "\"Cannibalism and cakes. Maybe cakes.\"",
+        "\"Mass slaughter and an even more massive orgy.\"",
+        "\"Beer destroyed my homeland. I came to destroy all the beer. REVENGE!\""
+      ],
+      "correctAnswer": "\"Cannibalism and cakes. Maybe cakes.\""
+    },
+    "You are approaching a small town. The sign reads \"Lof-Blaid\". A mean-spirited guard in heavy armor looks at you with narrowed eyes and blocks your way.": {
+      "answerOptions": ["[...]", "Hey, I know how it ends! quest (Cost: 5\n)"],
+      "correctAnswer": "Hey, I know how it ends! quest (Cost: 5\n)"
     }
   },
   "Fight Club": {
@@ -580,6 +597,22 @@
         "\"Compared to you, I'm nothing.\""
       ],
       "correctAnswer": "Scatter the groupies to the side and kick him in the groin."
+    },
+    "The beautiful words of your song hurt the bard, but he resists and interrupts you with a new portion of shit.\"You fleet my dream c..m the morbidYour scent - berries fart, dick sweetTo dream of raven f..cks bristle, bore meOf violent eyes, blistering as you shit.\"": {
+      "answerOptions": [
+        "\"I do not regret, and I do not shed tears\nAll, like haze off apple-trees, must pass\nTurning gold, I’m fading, it appears\nI will not be young again, alas\"",
+        "\"Scarlet light of sunset shows up on the lake\nGrouses are crying in the wood, awake\"",
+        "Just scream like a rabid coyote being tortured and it will be better than the bard's song.",
+        "\"My voice for you, so tender and so languorous\nDisturbs the silence of the night time darkness\nI am in bed, the candle by my side\nIs burning sadly; and my poems flow and slide\""
+      ],
+      "correctAnswer": "\"I do not regret, and I do not shed tears\nAll, like haze off apple-trees, must pass\nTurning gold, I’m fading, it appears\nI will not be young again, alas\""
+    },
+    "You see a tavern at the edge of the city. The sign reads: \"House Road.\" You have an uncontrollable desire to go somewhere death does not hold you by the nipples. You are looking for salvation and rest in this place, but suddenly a terrible thing happens. A bard goes to the center of the hall and takes out a lute. It looks like your life is in danger!": {
+      "answerOptions": [
+        "Stop that bastard!",
+        "Hey, I know how it ends! quest (Cost: 5\n)"
+      ],
+      "correctAnswer": "Hey, I know how it ends! quest (Cost: 5\n)"
     }
   },
   "Wedding Planner": {
@@ -653,6 +686,14 @@
         "Grab an axe and spin on the spot with such force and speed that the rising wind extinguishes the fire."
       ],
       "correctAnswer": "Run away."
+    },
+    "A young girl with a beautiful smile and festive attire stands at the intersection with a wreath of flowers in her hands. When she sees you, she starts to greet you, blocking your way and smiling as she puts the wreath on your head. \"Shambakala!\" she says loudly and starts laughing.Immediately, you are surrounded by festively dressed residents, who begin to dance around you. Oh, no! Now you are a guest at the wedding!": {
+      "answerOptions": [
+        "Try to run away.",
+        "Let them drag you into the gloomy venue of the wedding.",
+        "Hey, I know how it ends! quest (Cost: 5\n)"
+      ],
+      "correctAnswer": "Hey, I know how it ends! quest (Cost: 5\n)"
     }
   },
   "Postman": {
@@ -663,6 +704,10 @@
     "\"You're a traveler, right? I have a letter here, a very important letter that needs to be delivered to my friend who lives in the swamp. A very simple job, for which I will pay handsomely. What do you think?\"": {
       "answerOptions": ["Refuse.", "Agree."],
       "correctAnswer": "Agree."
+    },
+    "The man waves his hand at you and comes closer.": {
+      "answerOptions": ["[...]", "Hey, I know how it ends! quest (Cost: 5\n)"],
+      "correctAnswer": "Hey, I know how it ends! quest (Cost: 5\n)"
     }
   },
   "Self Treatment": {
@@ -716,6 +761,15 @@
         "Arrange a therapeutic bloodletting."
       ],
       "correctAnswer": "Wrap the knee with a tight bandage and let the leg rest at least until the next morning."
+    },
+    "The bleeding from the last wound does not stop in any way. A tight bandage does not help; instead, you become weak and dizzy. It looks like you're going to lose consciousness now.": {
+      "answerOptions": [
+        "Find a safe place, sit down, unbutton your clothes, calm your breathing and slow down your movements.",
+        "Keep going until you fall.",
+        "Give yourself a slap in the face.",
+        "Drink some water and wet your face."
+      ],
+      "correctAnswer": "Find a safe place, sit down, unbutton your clothes, calm your breathing and slow down your movements."
     }
   },
   "Find a Way": {
@@ -779,6 +833,27 @@
         "Start digging a hole for shelter"
       ],
       "correctAnswer": "Try to light a fire before it's too late."
+    },
+    "At first, the soil is soft and springy under your feet, but it becomes wetter and stickier as you go. With alarming speed, you begin sinking into the viscous mass, already up to your ankles in it. You're drowning in the quagmire!": {
+      "answerOptions": [
+        "Try to reach the nearest trees.",
+        "Try to escape by force.",
+        "Gently lie on your back, try to stay afloat, and pull out your legs."
+      ],
+      "correctAnswer": "Try to reach the nearest trees."
+    },
+    "The struggle is exhausting you, and now you are waist deep in the swamp.": {
+      "answerOptions": [
+        "Start panicking.",
+        "Grab yourself by the hair and start dragging yourself out of the swamp.",
+        "Try to call for help.",
+        "Take a piece of the junk you have collected on your journey from your backpack. Pressing your chest into this, try to push yourself up, rotating your hips and stretching your legs one by one."
+      ],
+      "correctAnswer": "Take a piece of the junk you have collected on your journey from your backpack. Pressing your chest into this, try to push yourself up, rotating your hips and stretching your legs one by one."
+    },
+    "A new obstacle appears in your way!": {
+      "answerOptions": ["[...]", "Hey, I know how it ends! quest (Cost: 5\n)"],
+      "correctAnswer": "Hey, I know how it ends! quest (Cost: 5\n)"
     }
   },
   "Time to Rest": {
@@ -937,6 +1012,30 @@
         "Go into the house, and try to steal something valuable before everything burns down."
       ],
       "correctAnswer": "Go into the house, and try to steal something valuable before everything burns down."
+    },
+    "A rather unusual person for this area is waiting for you at the road intersection. A pretty middle-aged woman with black hair and a tight black leather suit gives you a lustful look and asks:\"And you're here again. Do you want to obey again, dog?\"": {
+      "answerOptions": ["No.", "Yes."],
+      "correctAnswer": "Yes."
+    },
+    "\"Come closer, put your hands behind your back, spread your legs wide and look me straight in the eyes. Don't look away!\" Domina orders.": {
+      "answerOptions": ["Refuse.", "Submit."],
+      "correctAnswer": "Submit."
+    },
+    "It's pretty hot inside! The fire is already climbing the walls!": {
+      "answerOptions": [
+        "Try to find something valuable and steal it.",
+        "Get out before the house collapses!",
+        "Try to save things from the fire."
+      ],
+      "correctAnswer": "Get out before the house collapses!"
+    },
+    "\"I'm tired of standing here waiting for you, dog. I want to take a break and drink tea for a while, but for that I need a chair I can sit on. Well, what are you looking at? Become my chair. Now!\" Domina orders.": {
+      "answerOptions": ["Refuse.", "Submit."],
+      "correctAnswer": "Submit."
+    },
+    "You are experiencing a suspicious itching in your nose.  This is usually signifies an opportunity for profit... or trouble.": {
+      "answerOptions": ["[...]", "Hey, I know how it ends! quest (Cost: 5\n)"],
+      "correctAnswer": "Hey, I know how it ends! quest (Cost: 5\n)"
     }
   },
   "Find Food": {
@@ -1030,6 +1129,51 @@
         "Eat them raw."
       ],
       "correctAnswer": "Roast them on a fire and eat them."
+    },
+    "You notice a thicket of grass, which is quite expected in a forest. Try to satisfy your hunger with grass?": {
+      "answerOptions": [
+        "Make an even more disgusting vegan soup.",
+        "Make a disgusting salad.",
+        "Eat it raw.",
+        "Keep searching."
+      ],
+      "correctAnswer": "Keep searching."
+    },
+    "A successful stone throw brings you a prize in the form of a small rabbit. You have the foresight to break its neck so that it can’t run away.": {
+      "answerOptions": [
+        "Fry it and eat it.",
+        "Eat it raw.",
+        "Make soup.",
+        "Keep searching."
+      ],
+      "correctAnswer": "Fry it and eat it."
+    },
+    "You see small red berries. They have sweet juice and prickly branches.": {
+      "answerOptions": [
+        "Roast them on a fire and eat them.",
+        "Eat them raw.",
+        "Try one and wait for death for a while. If you don't die, satisfy your hunger.",
+        "Keep searching."
+      ],
+      "correctAnswer": "Roast them on a fire and eat them."
+    },
+    "Small fish bask in a pond near the shallows. Try to stop their fun?": {
+      "answerOptions": [
+        "Fry them and eat them.",
+        "Make soup.",
+        "Eat them raw.",
+        "Keep searching."
+      ],
+      "correctAnswer": "Fry them and eat them."
+    },
+    "You see the gnawed bark of a tree. Maybe this food will suit you too?": {
+      "answerOptions": [
+        "Keep searching.",
+        "Remove the top layer. Cut off the more tender and juicy bottom layer and try to think of something to do with it. Maybe you can cook it, maybe you can grind it into flour, maybe you can make chips on the fire... At least it's not poisonous and doesn't rot in your mouth.",
+        "Pounce on the tree like a hungry beaver.",
+        "Break off a little and try to chew."
+      ],
+      "correctAnswer": "Keep searching."
     }
   },
   "Cow Terror": {
@@ -1054,6 +1198,14 @@
         "\"I'm a cow.\""
       ],
       "correctAnswer": "\"I'm not a cow.\""
+    },
+    "The old man threateningly points his staff in your direction.\"Answer me immediately! Where did you hide the cow?! Don't you understand? They are pure evil. It must be destroyed!\"": {
+      "answerOptions": [
+        "Keep silent.",
+        "\"No, you’re a cow, you fat old dick!\"",
+        "Attack."
+      ],
+      "correctAnswer": "Keep silent."
     }
   },
   "Be My Guest": {
@@ -1098,6 +1250,18 @@
         "Run!"
       ],
       "correctAnswer": "Run!"
+    },
+    "A modest tent and a modest campfire. A tired, thin man in colorful clothes is sitting by the fire. With a gesture, he motions you to a place by the fire. Then he takes out a lute from somewhere behind his back and settles it in his hands. Oh, no! It's a bard!": {
+      "answerOptions": ["Run away.", "Stay."],
+      "correctAnswer": "Run away."
+    },
+    "A tall man with big, strong hands and a full beard looks at you from under his brows, clutching an axe. He realizes that you do not pose a threat, relaxes, and invites you to sit down by the fire.": {
+      "answerOptions": ["Politely decline and go away.", "Sit by the fire."],
+      "correctAnswer": "Sit by the fire."
+    },
+    "At first, both of you are silent, but to your surprise, a young woman comes out of the tent. She smiles and breaks the ice by offering you a sip of wine.": {
+      "answerOptions": ["Politely decline.", "Drink what is offered."],
+      "correctAnswer": "Drink what is offered."
     }
   },
   "Poisoned": {
@@ -1111,7 +1275,7 @@
         "Shake head negatively and leave.",
         "Give him some Berry Compote."
       ],
-      "correctAnswer": "Give him some Berry Compote."
+      "correctAnswer": "Try to help."
     },
     "The poor man looks at you with gratitude and tears.": {
       "answerOptions": ["Leave him", "Stay."],
@@ -1131,6 +1295,14 @@
         "\"Nope. You're the one who wants me to chop off your leg!\""
       ],
       "correctAnswer": "\"Nope. You're the one who wants me to chop off your leg!\""
+    },
+    "Belav is heavy. You start dragging him, and after ten steps, you feel the urge to drop him.": {
+      "answerOptions": ["Leave this bum in the forest!", "Keep dragging him!"],
+      "correctAnswer": "Keep dragging him!"
+    },
+    "You have walked a few dozen more steps, sweat dripping off you in large drops, and you are wobbly.": {
+      "answerOptions": ["Leave this bum in the forest!", "Keep dragging him!"],
+      "correctAnswer": "Keep dragging him!"
     }
   },
   "Guardian of the Forest": {
@@ -1182,6 +1354,13 @@
     }
   },
   "Stranger": {
+    "The girl sighs heavily and her leaden eyes glide over you, as if you have already tired her with your presence. She winces and then suddenly bows.\"I am Bruria, and it is my pleasure to welcome you again, Sacred One. Again... again... and again... Ugh...\"\"How tired I am of repeating the same thing... It's almost worth stabbing one of you immediately upon our meeting; maybe it would cheer me up?\"The girl rolls her eyes, sighs again, and squeezes out a smile. \"Let's get this over with quickly. Do you remember the appearance of an Angel? On the last day of your first life.The endless night was interrupted by the long-awaited dawn. The sky turned red.The moon covered the sun and then fell.\"\"The blood rain has given you immortality; you have gained new lives, but you have forgotten the old ones.It's been a long time, but you're here again, the same as you were that day. We call people like you Sacreds.And I'm here to help you.\"\"I don't have all the answers for you, but I know the key is in your blessed blood, Sacra.Look for people like you and collect their blood, and try not to die too often.\"": {
+      "answerOptions": [
+        "\"Stab me! I don't like it here!\" (answers like this can get you killed, don't be an idiot)",
+        "\"Whaaaat?\""
+      ],
+      "correctAnswer": "\"Whaaaat?\""
+    },
     "\"We've lost a lot of time in the middle of nowhere. We need to find a way out of here. Stop walking in circles!\"": {
       "answerOptions": [
         "\"Where should I go?\"",
@@ -1307,6 +1486,22 @@
         "\"I can smell your stale breath and that you haven't had a bath in a while.\""
       ],
       "correctAnswer": "\"What?\""
+    },
+    "\"Be careful with Shrines; sometimes they pass on the negative properties of other Sacreds.\"": {
+      "answerOptions": [
+        "\"I could use some more advice.\"",
+        "\"What are these Shrines?\"",
+        "\"Stab me in the gut!\""
+      ],
+      "correctAnswer": "\"What are these Shrines?\""
+    },
+    "\"Different bastards have different weaknesses. Your weaknesses are shit and local beer.\"": {
+      "answerOptions": [
+        "\"I could use some more advice.\"",
+        "\"I'm stronger than you think.\"",
+        "\"Stab me, I'm bored.\""
+      ],
+      "correctAnswer": "\"I'm stronger than you think.\""
     }
   },
   "Wild Animal": {
@@ -1345,6 +1540,60 @@
         "Try to run away and die."
       ],
       "correctAnswer": "Freeze and don't move."
+    },
+    "The chunpacamumbra is not going to give way to you.": {
+      "answerOptions": [
+        "Try blowing east and then spinning around your axis three times.",
+        "Do nothing.",
+        "A battle of the eyes. The chunpacamumbra has a lot of eyes and it won't be easy to win.",
+        "Slap yourself in the face and say, \"Cla-cla.\""
+      ],
+      "correctAnswer": "Do nothing."
+    },
+    "You feel something following your footsteps from behind, but you don't see anything.": {
+      "answerOptions": [
+        "Accelerate.",
+        "Freeze in place.",
+        "Get down on the ground and effortlessly pretend to be a pile of shit.",
+        "Make loud noises to get the animal to leave you alone."
+      ],
+      "correctAnswer": "Accelerate."
+    },
+    "Silently stepping with cool big soft paws toward you is a calm and non-aggressive lynx.": {
+      "answerOptions": [
+        "Shout loudly and raise your hands.",
+        "Fall to the ground and pretend to be dead.",
+        "Throw it some food.",
+        "Freeze and don't move."
+      ],
+      "correctAnswer": "Throw it some food."
+    },
+    "The chunpacamumbra stares at you, unblinking. What's next?": {
+      "answerOptions": [
+        "Try blowing east and then spinning around your axis three times.",
+        "Slap yourself in the face and say, \"Cla-cla.\"",
+        "A battle of the eyes. The chunpacamumbra has a lot of eyes and it won't be easy to win.",
+        "Do nothing."
+      ],
+      "correctAnswer": "Try blowing east and then spinning around your axis three times."
+    },
+    "The wolf doesn't leave. It growls and starts slowly creeping toward you.": {
+      "answerOptions": [
+        "Try to leave cautiously.",
+        "Climb a tree.",
+        "Run away.",
+        "Force it to become a cute puppy."
+      ],
+      "correctAnswer": "Climb a tree."
+    },
+    "A gigantic moose freezes two meters away from you. Its nostrils are flaring nervously, it stamps the ground with its hoof and points its horns at you.": {
+      "answerOptions": [
+        "Run away.",
+        "Shout loudly and raise your hands.",
+        "Fall to the ground and pretend to be dead.",
+        "Freeze and don't move."
+      ],
+      "correctAnswer": "Freeze and don't move."
     }
   },
   "Guilt": {
@@ -1369,6 +1618,19 @@
     "The forest silence is suddenly broken by distant shouts.": {
       "answerOptions": ["Ignore it, and move on.", "Go towards the shouts."],
       "correctAnswer": "Ignore it, and move on."
+    },
+    "The shouts seem to be getting louder.": {
+      "answerOptions": ["Ignore it, and move on.", "Go towards the shouts."],
+      "correctAnswer": "Ignore it, and move on."
+    },
+    "A dirty, beaten and bald man is cowering at your appearance from the bushes. He tries to run away, but then two more dirty, beaten and bald men come out to face you.One of them is clutching a thick stick, and it looks like he's going to fight you.": {
+      "answerOptions": [
+        "Run away.",
+        "Beg them not to touch you.",
+        "Attack first.",
+        "Try to resolve the situation peacefully."
+      ],
+      "correctAnswer": "Run away."
     }
   },
   "Sleeping Beauty": {
@@ -1399,6 +1661,50 @@
         "Relax and let the hot dead chick eat you alive."
       ],
       "correctAnswer": "Fight like a lion."
+    },
+    "\"Get off her, you weirdo! Are you deaf?!\"A dwarf is talking to you. He’s waist-high, but twice as wide in the shoulders. It seems that he’s devoted a lot of time to either bodybuilding or mining. He is very angry and does not believe in miracles. He runs up to you and pushes you away from the awakened beauty.": {
+      "answerOptions": [
+        "Try to leave.",
+        "Ignore him and continue smiling.",
+        "\"Scream and hit him... You know what a woman wants! SEXUAL REEEVEEENGEEE!!!\""
+      ],
+      "correctAnswer": ""
+    },
+    "The beauty wakes up, opens her eyes, sees you, smiles enchantingly at you, and reaches out to kiss you back.": {
+      "answerOptions": [
+        "Don't offer her your lips and play the virgin.",
+        "Respond to her kiss."
+      ],
+      "correctAnswer": "Don't offer her your lips and play the virgin."
+    },
+    "The beauty smiles enchantingly at you, mysteriously silent. She rises from her bed, gently takes your hand, and leads you into the forest.Sounds like a great date night!": {
+      "answerOptions": [
+        "Remember that you're an ugly freak and would be unlikely to attract such a beautiful woman. Something's wrong.",
+        "Enjoy your date."
+      ],
+      "correctAnswer": "Remember that you're an ugly freak and would be unlikely to attract such a beautiful woman. Something's wrong."
+    },
+    "...Suddenly you feel an unbearable monster headache. Nausea rises in your throat, and you vomit in such a way that you feel like you are about to turn yourself inside-out. You are very weak, you can barely control your body, and you are in a dark and unfamiliar place.": {
+      "answerOptions": ["Run!", "Take a look around."],
+      "correctAnswer": "Run!"
+    },
+    "\"Take it easy, friend!\" says one of the stinky tramps lying nearby. \"And it would be nice if you'd stop throwing up on me. Is this the first time you've ever smelled swamp gas?\"": {
+      "answerOptions": [
+        "\"What the hell is going on here?!\"",
+        "\"Where's my beauty?!\"",
+        "Pretend to be dead.",
+        "Run!"
+      ],
+      "correctAnswer": "Run!"
+    },
+    "With difficulty, you break out of the clutches of the dead girl and run into the forest... That’s the good news. The bad news is, now she's running after you.": {
+      "answerOptions": [
+        "Climb a tree.",
+        "Throw a shoe at her to make her fall!.",
+        "Squeal.",
+        "Run faster."
+      ],
+      "correctAnswer": "Run faster."
     }
   },
   "Imyarek": {
@@ -1411,6 +1717,10 @@
       "correctAnswer": "Leave him."
     },
     "A dried-up corpse is sitting on the stones, leaning against a tree. It is obvious that despair filled his last minutes, but what exactly killed him is a mystery. But now his belongings are free to be taken.Go over and see if he has anything of value?": {
+      "answerOptions": ["Leave him.", "Yes."],
+      "correctAnswer": "Leave him."
+    },
+    "A man is sitting by a tree, arrows sticking out of his chest, his legs cut off just below the hips. He died recently, and someone took his legs. Probably some kind of local hospitality.Go over and see if he has anything of value?": {
       "answerOptions": ["Leave him.", "Yes."],
       "correctAnswer": "Leave him."
     }
@@ -1428,6 +1738,26 @@
         "Try to run."
       ],
       "correctAnswer": "Try to run."
+    },
+    "You walk out to the riverbank, take off your shoes, walk on the nice sand into the ankle-deep water, and wash your face.Suddenly, you feel something in the silt beneath your feet.": {
+      "answerOptions": ["Get out of the water.", "See what's in there."],
+      "correctAnswer": "See what's in there."
+    },
+    "You hear the cheerful laughter of a woman and the splash of water nearby. From the bushes, you see three young, hot, naked girls swimming carefree in the lake and splashing water on each other.": {
+      "answerOptions": [
+        "Jerk off.",
+        "Go out and join them.",
+        "Keep watching them.",
+        "Leave them alone and walk away."
+      ],
+      "correctAnswer": ""
+    },
+    "You see a group of young guys and girls relaxing by the water. They are drinking alcohol, frying meat, swimming and jumping into the water from the jetty.": {
+      "answerOptions": [
+        "Leave them alone. You're too old for this.",
+        "Approach them."
+      ],
+      "correctAnswer": "Leave them alone. You're too old for this."
     }
   },
   "Buried Alive": {
@@ -1456,6 +1786,15 @@
         "Open your veins."
       ],
       "correctAnswer": "Start shredding the side wall."
+    },
+    "The lanky man's face shrinks. \"Very strange and suspicious. You can't walk around here and act like this for long. You should have been beaten at least once. There should have been traces of the beating. But you're the same... just like the last meeting. And that means...\"": {
+      "answerOptions": [
+        "\"Giantess beat first! Arrr!\"",
+        "\"Men are weak!\"",
+        "\"Strange that you think your pelvis is too strong to be broken, little persistent man! One more word and I'll be interested in checking out just how strong it actually is!\"",
+        "\"We are having a party after all! Hurray!\""
+      ],
+      "correctAnswer": ""
     }
   },
   "Boar Hunter": {
@@ -1533,6 +1872,69 @@
         "\"Died of old age.\""
       ],
       "correctAnswer": "\"I'm not immortal.\""
+    },
+    "\"Let's see what we have. I'm looking for rare potions today, they're in high demand for resale.\"": {
+      "answerOptions": [
+        "Give him one Spider Juice.",
+        "Give him one Dose of Spinach.",
+        "Give him one Spoiled Berry Compote.",
+        "Refuse the exchange."
+      ],
+      "correctAnswer": "Give him one Spider Juice."
+    },
+    "You hear a noise, turn around and see that you are surrounded by armed bandits.\"It would be fair to trade your life and ass for something valuable!\" says one of them.": {
+      "answerOptions": [
+        "Give them your ass.",
+        "Don't give them anything!",
+        "Give them your life.",
+        "Give them your valuables."
+      ],
+      "correctAnswer": "Give them your valuables."
+    },
+    "\"We'll take your jewelry, you're a freak anyway, and it doesn't help you.\"": {
+      "answerOptions": [
+        "Give them your ass.",
+        "Don't give them anything!",
+        "Give them your life.",
+        "Give them what they ask for."
+      ],
+      "correctAnswer": "Give them what they ask for."
+    },
+    "The man looks at you contemptuously.\"You have nothing of value but your body, whore. Get me interested enough to pay you.\"": {
+      "answerOptions": [
+        "Dance for him.",
+        "Show him your ass.",
+        "Refuse the exchange.",
+        "Show him your tits."
+      ],
+      "correctAnswer": "Dance for him."
+    },
+    "The man pulls a beautiful red vial out of his pocket, waves it in front of your face and smiles lustfully.\"You don't look so good, slut. You could use a little freshening up, right? And I could use having my natural needs met. We can help each other out, you know what I mean?\"": {
+      "answerOptions": [
+        "Give him a night of savage passion for free.",
+        "Break his pelvis.",
+        "Rob the pervert and throw him into a thorny bush.",
+        "Refuse the exchange."
+      ],
+      "correctAnswer": "Rob the pervert and throw him into a thorny bush."
+    },
+    "You hear a noise, turn around and see you are surrounded by surly masked men. \"Well, well, well\", says one of them. \"Only an immortal would have time to make money in these parts and have spare cash. Got you, Sacred!\"": {
+      "answerOptions": [
+        "Fight!",
+        "Try to refute their accusations.",
+        "Run!",
+        "Be silent."
+      ],
+      "correctAnswer": "Try to refute their accusations."
+    },
+    "You hear a noise, turn around and see that you are surrounded by armed bandits. \"It would be fair to trade your life and ass for something valuable!\" says one of them.": {
+      "answerOptions": [
+        "Give them your ass.",
+        "Give them your life.",
+        "Don't give them anything!",
+        "Give them your valuables."
+      ],
+      "correctAnswer": "Give them your valuables."
     }
   },
   "Fog Gate": {
@@ -1680,6 +2082,22 @@
         "Go to bed."
       ],
       "correctAnswer": "Go to bed."
+    },
+    "A tall man with big, strong hands and a full beard looks at you from under his brows, clutching an axe. He realizes that you do not pose a threat, relaxes, and invites you to sit down by the fire.": {
+      "answerOptions": ["Politely decline and go away.", "Sit by the fire."],
+      "correctAnswer": "Sit by the fire."
+    },
+    "At first, both of you are silent, but to your surprise, a young woman comes out of the tent. She smiles and breaks the ice by offering you a sip of wine.": {
+      "answerOptions": ["Drink what is offered.", "Politely decline."],
+      "correctAnswer": "Drink what is offered."
+    },
+    "After a few bottles of wine, you're already drunk enough to have lost track of time. Suddenly, the woman takes you by the hand and leads you into the tent. You don't understand what's going on, but she's no longer wearing any clothes and is trying to kiss you.": {
+      "answerOptions": ["Politely decline and go away.", "Kiss her back."],
+      "correctAnswer": "Kiss her back."
+    },
+    "Her kisses are very hot and passionate. But the man enters the tent. He doesn't look angry; on the contrary, for the first time this evening, he starts to smile. He watches her gyrate on your lap for a while. Then he starts taking off his clothes.": {
+      "answerOptions": ["Run! Save your...", "Stay."],
+      "correctAnswer": "Stay."
     }
   },
   "Secrets of the Past": {
@@ -1701,5 +2119,6 @@
       "answerOptions": ["\"Nope.\"", "\"Yep.\""],
       "correctAnswer": "\"Nope.\""
     }
-  }
+  },
+  "Rite of Passage": {}
 }

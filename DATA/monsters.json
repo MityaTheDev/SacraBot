@@ -1,0 +1,30 @@
+{
+  "CritChance": {
+    "Banished Peasant": 0,
+    "Tough Deserter": 3,
+    "Bloodthirsty Madman": 5,
+    "Ferocious Wolfs": 10,
+    "Drunk Crossbowman": 3,
+    "Vile Serpent": 0,
+    "The Man-Eating Bear": 3,
+    "Bandit Crowd": 0,
+    "Hangman's Patrol": 0,
+    "Midnighter": 15,
+    "Forest Chort": 0,
+    "Infected Spirit of the Forest": 5,
+    "Restless Spirit": 0,
+    "Starving Wolfs": 0,
+    "Pedophile Hunter": 9,
+    "Style Police": 0,
+    "Bad Bear": 7,
+    "Ordinary Goose": 1,
+    "Local Dude": 0,
+    "Hungry Dog": 5,
+    "Training Buddy": 0,
+    "Ferocious Wife": 10
+  },
+  "ReflectMeleeDamage": {
+    "Training Buddy": 0.23
+  },
+  "MagicAttack": ["Restless Spirit"]
+}

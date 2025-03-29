@@ -103,12 +103,13 @@ async function refresh(page) {
 }
 
 async function goToHomePage(hero) {
+  logger.log("Going home...", { messageModifiers: ["magentaBright"] });
   await hero.page.goto(hero.homeURL, {
     waitUntil: "networkidle0",
   });
 }
 
-//todo: add to helper module as time.js
+//todo: add to helper module as a part of time.js
 function getTimestamp() {
   return DateFormat.asString("dd-MM_hh.mm", new Date());
 }
@@ -118,8 +119,12 @@ async function logInRabbyWallet(browser) {
   await page.goto(config.RABBY_WALLET_LOGIN_URL, {
     waitUntil: "domcontentloaded",
   });
-  const inputElem = await getElem(page, xpath.RABBY_INPUT_PASSWORD);
-  const buttonElem = await getElem(page, xpath.RABBY_SUBMIT_BUTTON);
+  const inputElem = await getElem(page, xpath.RABBY_INPUT_PASSWORD, {
+    timeout: 10000,
+  });
+  const buttonElem = await getElem(page, xpath.RABBY_SUBMIT_BUTTON, {
+    timeout: 10000,
+  });
   await puppeteer.fillInInputWithoutCheck(
     inputElem,
     config.RABBY_WALLET_PASSWORD
@@ -188,26 +193,30 @@ async function getBrowsers(IDs) {
   return browsers;
 }
 
-async function getElem(page, xpath, timeout = 10000) {
+async function getElem(page, xpath, { timeout = 0, logError = false } = {}) {
   try {
-    await page.waitForSelector("::-p-xpath(" + xpath + ")", {
-      timeout: timeout,
-    });
+    if (timeout) {
+      await page.waitForSelector("::-p-xpath(" + xpath + ")", {
+        timeout: timeout,
+      });
+    }
     return await page.$("::-p-xpath(" + xpath + ")");
   } catch (error) {
-    // logger.error(error);
+    if (logError) logger.error(error);
     return false;
   }
 }
 
-async function getElems(page, xpath, timeout = 10000) {
+async function getElems(page, xpath, { timeout = 0, logError = false } = {}) {
   try {
-    await page.waitForSelector("::-p-xpath(" + xpath + ")", {
-      timeout: timeout,
-    });
+    if (timeout) {
+      await page.waitForSelector("::-p-xpath(" + xpath + ")", {
+        timeout: timeout,
+      });
+    }
     return await page.$$("::-p-xpath(" + xpath + ")");
   } catch (error) {
-    logger.error(error);
+    if (logError) logger.error(error);
     resolve(false);
   }
 }
@@ -266,10 +275,7 @@ async function getCurrentScene(hero, iterationsLeft = 4) {
     //   `[${hero.prefix}] failed to accurately detect scene!`
     // );
     // await saveBodyOfPage(hero.page, `${hero.prefix}_unknownScene`);
-    logger.log(`failed to accurately detect scene! Going home...`, {
-      importance: 1,
-      messageModifiers: ["magentaBright"],
-    });
+    logger.error(`Failed to accurately detect scene!`);
     await goToHomePage(hero);
     return false;
   }
@@ -320,7 +326,7 @@ async function getCurrentScene(hero, iterationsLeft = 4) {
       logger.log(`retrying... iterations left: [${iterationsLeft}]`, {
         messageModifiers: ["yellow"],
       });
-      await pause(SECOND * 10);
+      await pause(SECOND * 5);
       return await getCurrentScene(hero, --iterationsLeft);
   }
 }
@@ -334,26 +340,85 @@ async function checkHealth(hero) {
     const maxHealth = healthText.split("/")[1];
     logger.log(`health is [${currentHealth}/${maxHealth}]`);
 
-    //TODO: getMonsterAttack
-    const isLowHP = currentHealth / maxHealth < 0.25 || currentHealth < 7;
-    // TODO: Attack of the enemy
+    let isLowHP = false;
+    const monsterAttackText = await getText(hero.page, xpath.MONSTER_ATTACK);
+    if (monsterAttackText) {
+      const monsterName = await getText(hero.page, xpath.MONSTER_NAME);
+      const monstersDB = await readJson("./DATA/monsters.json");
+      const hasCritChance = monstersDB.CritChance[monsterName] > 0;
+      /*todo:
+      const hasMagicAttack
+      const hasMeleeReflect
+      monsterMaxAttack += ...
+      */
+      const monsterMaxAttack = hasCritChance
+        ? monsterAttackText.split("-")[1] * 2
+        : monsterAttackText.split("-")[1];
+
+      isLowHP = parseFloat(currentHealth) <= parseFloat(monsterMaxAttack);
+      logger.log(
+        `Monster! Name: ${monsterName}, CritChance: ${hasCritChance}, MaxAttack: ${monsterMaxAttack}`,
+        { messageModifiers: "cyanBright" }
+      );
+      logger.log(`isLowHP: ${isLowHP}`, { messageModifiers: "cyanBright" });
+    } else {
+      logger.error(`Failed to detect monster attack text!`);
+      isLowHP = currentHealth / maxHealth < 0.25 || currentHealth < 7;
+    }
 
     if (isLowHP) {
-      // await telegram.sendMessage(
-      //   `${hero.prefix}: health is LOW! ${currentHealth}/${maxHealth}, need to drink potion!`
-      // );
-      logger.log(`health is too low! [${currentHealth}/${maxHealth}]`, {
-        importance: 1,
-        messageModifiers: ["yellow"],
+      logger.log(`Drinking potion...`, {
+        messageModifiers: "magentaBright",
       });
-      logger.error(
-        `waiting for 1 hour... need to restart the bot \ntodo: make drink health potion function`
+
+      await puppeteer.clickByPage(hero.page, xpath.POTIONS_POUCH_OPEN_BUTTON);
+      const smallHealthPotion = await getElem(
+        hero.page,
+        xpath.HEALT_POTION_SMALL,
+        { timeout: 10000 }
       );
-
-      // TODO: lastActionTime instead of pause
-      await pause(MINUTE * 60);
-
-      //todo: drink health potion
+      if (smallHealthPotion) {
+        await puppeteer.clickByPage(hero.page, xpath.HEALT_POTION_SMALL);
+        logger.log(`Clicked on small potion...`, {
+          messageModifiers: "magentaBright",
+        });
+        const potionUseButton = await getElem(
+          hero.page,
+          xpath.HEALT_POTION_SMALL,
+          { timeout: 10000 }
+        );
+        if (potionUseButton) {
+          await puppeteer.clickByPage(hero.page, xpath.POTION_USE_BUTTON);
+          logger.log(`Clicked on use button...`, {
+            messageModifiers: "magentaBright",
+          });
+          await pause(SECOND * 10);
+        }
+        // TODO: add logic for bigger potions
+        else {
+          const potionCloseButton = await getElem(
+            hero.page,
+            xpath.POTION_CLOSE_BUTTON,
+            { timeout: 10000 }
+          );
+          if (potionCloseButton) {
+            await puppeteer.clickByPage(hero.page, xpath.POTION_CLOSE_BUTTON);
+            logger.log(`Clicked on close icon...`, {
+              messageModifiers: "magentaBright",
+            });
+            await pause(SECOND * 3);
+          } else {
+            await goToHomePage(hero);
+          }
+          //todo: either close pouch or send telegram message or client state
+          //or drink bigger potion
+        }
+      } else {
+        logger.error("small potion is unavailbale!!!");
+        await telegram.sendMessage(`${hero.prefix} can't drink small potion!`);
+        if (hero.client) hero.client.sendState(hero, "low hp, no potion");
+        await pause(SECOND * 1000000);
+      }
     }
   } catch (error) {
     logger.error(`error while checking health!\n${error}`);
@@ -363,7 +428,9 @@ async function checkHealth(hero) {
 async function getCurrentAnswerOptions(hero) {
   logger.log(`getting current answer options...`);
 
-  const answerOptionsElems = await getElems(hero.page, xpath.QUEST_ANSWER);
+  const answerOptionsElems = await getElems(hero.page, xpath.QUEST_ANSWER, {
+    timeout: 10000,
+  });
   if (answerOptionsElems) {
     let answerOptions = [];
     for (let element of answerOptionsElems) {
@@ -388,7 +455,7 @@ async function getCurrentAnswerOptions(hero) {
       `${
         answerOptions.length
       } answer options found on screen: [${answerOptions.map((answer) =>
-        answer.text.replaceAll("\n", "")
+        answer.text.replaceAll("\n", "").substring(0, 20)
       )}]`
     );
     return answerOptions;
@@ -505,11 +572,13 @@ async function answerQuest(hero) {
   //search quests.json for quest title and for quest text
   let storedQuest = "";
   for (const questTitle in quests) {
-    storedQuest =
+    if (
       questTitle.toLowerCase().replaceAll(regexAllButCharacters, "") ===
       striptedQuestTitle
-        ? quests[questTitle]
-        : "";
+    ) {
+      storedQuest = quests[questTitle];
+      break;
+    }
   }
   if (!storedQuest) {
     await throwQuestsError(
@@ -524,11 +593,13 @@ async function answerQuest(hero) {
 
   let storedStory = "";
   for (const storyText in storedQuest) {
-    storedStory =
+    if (
       storyText.toLowerCase().replaceAll(regexAllButCharacters, "") ===
       striptedStoryText
-        ? storedQuest[storyText]
-        : "";
+    ) {
+      storedStory = storedQuest[storyText];
+      break;
+    }
   }
   if (!storedStory) {
     await throwQuestsError(
@@ -670,10 +741,10 @@ async function takeAction(hero, currentScene) {
     hero.lastSceneChangeTime = Date.now();
     hero.lastScene = currentScene;
   } else if (Date.now() - hero.lastSceneChangeTime > MINUTE * 5) {
-    await telegram.sendMessage(
-      `${hero.prefix} is stuck on [${hero.lastScene}] scene! Going home...`
-    );
-    logger.log(`stuck on [${currentScene}]! Going home...`);
+    // await telegram.sendMessage(
+    //   `${hero.prefix} is stuck on [${hero.lastScene}] scene! Going home...`
+    // );
+    logger.error(`stuck on [${currentScene}]! Going home...`);
     if (hero.client) await hero.client.sendState(hero, "stuck on scene");
     await goToHomePage(hero);
     await hero.page.waitForNetworkIdle({ idleTime: 10000 });
@@ -797,6 +868,8 @@ async function takeAction(hero, currentScene) {
     case "fight":
       if (hero.client) await hero.client.sendState(hero, "fighting");
       await checkHealth(hero);
+      // logger.error("UH-OH, WE ARE ATTACKING!");
+      // await pause(10000000);
       break;
     case "quest":
       if (hero.client) await hero.client.sendState(hero, "questing");
@@ -890,16 +963,6 @@ async function play(currentHeroes) {
 
       let currentScene = await getCurrentScene(hero);
       await takeAction(hero, currentScene);
-
-      // TODO: pause if action requires gas
-
-      //temp, todo: think of a way to pause until rabby confirm is clicked
-      const sceneRequiresPopup =
-        currentScene === "delegationPopupActivate" ||
-        currentScene === "delegationPopupLowBalance";
-
-      // TODO: no magic numbers, set config
-      sceneRequiresPopup && (await pause(SECOND * 30));
     }
 
     if (currentHeroes.length === 0) {
@@ -1091,12 +1154,13 @@ async function levelUp(hero) {
 
 async function isNextLevel(hero) {
   const levelUpButtonPresent =
-    (await getElem(hero.page, xpath.LEVEL_UP_NOTIFICATION_ICON, 500)) ||
-    (await getElem(hero.page, xpath.LEVEL_UP_TO, 500));
+    (await getElem(hero.page, xpath.LEVEL_UP_NOTIFICATION_ICON, {
+      timeout: 500,
+    })) || (await getElem(hero.page, xpath.LEVEL_UP_TO, { timeout: 500 }));
   const isInAdventure = await getElem(
     hero.page,
     xpath.CONTINUE_ADVENTURE_BUTTON,
-    500
+    { timeout: 500 }
   );
   if (levelUpButtonPresent && !isInAdventure) {
     logger.log(`is ready to level up`);

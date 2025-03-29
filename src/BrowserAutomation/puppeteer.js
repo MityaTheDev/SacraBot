@@ -102,6 +102,10 @@ async function elementScrollIntoViewConsole(page, element, range) {
   );
 }
 
+//TODO: check how offset really works. As far as i understand, when offset is
+//enabled, coordinates for click start at top left corner of the elem. How to get
+//elem width and height? If we can get those numbers, than offset should be in
+//percents (0 to 99).
 // Maybe it is harder to spot automated activity because
 // the mouse is clicking with random offsets
 // of the center of the element
