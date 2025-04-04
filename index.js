@@ -957,6 +957,12 @@ async function takeAction(hero, currentScene) {
     logger.log(`clicking on [${target}] target`);
     await puppeteer.clickByPage(hero.page, targets[target].xpath);
     hero.lastActionTime = Date.now();
+
+    switch (currentScene) {
+      case "delegationPopupActivate":
+        await pause(15 * SECOND);
+        break;
+    }
     break;
   }
 }
