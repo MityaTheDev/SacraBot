@@ -90,11 +90,11 @@ async function sighAndConfirm(page) {
   if (config.RABBY_WALLET_AUTO_CONFIRM) {
     await puppeteer.clickByPage(page, xpath.RABBY_SIGN_BUTTON, {
       timeout: 5000,
-      logError: false,
+      logError: true,
     });
     await puppeteer.clickByPage(page, xpath.RABBY_CONFIRM_BUTTON, {
       timeout: 5000,
-      logError: false,
+      logError: true,
     });
   } else {
     logger.error("confirm transaction by hand or change flag in config!");
