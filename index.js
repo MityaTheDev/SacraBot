@@ -72,7 +72,11 @@ async function setListenerForNewPageCreated(browser) {
     const newPage = await target.page();
     if (newPage) {
       const url = await newPage.url();
-      if (!url.includes(RABBY.NOTIFICATION_URL)) return;
+      if (!url.includes(RABBY.NOTIFICATION_URL)) {
+        logger.log("newly created page has url we are not interested in...");
+        logger.log(`URL: ${url}`);
+        return;
+      }
 
       if (
         await puppeteer.xPathExist(newPage, xpath.RABBY_DELEGATION_TEXT, {
@@ -80,18 +84,25 @@ async function setListenerForNewPageCreated(browser) {
           logError: true,
         })
       ) {
+        logger.log("found delegation text, it is the page we need! Signing...");
         await sighAndConfirm(newPage);
       }
+
+      logger.log("Finished!");
+    } else {
+      logger.error(`lost newly created page!`);
     }
   });
 }
 
 async function sighAndConfirm(page) {
   if (config.RABBY_WALLET_AUTO_CONFIRM) {
+    logger.log("clicking SIGN...");
     await puppeteer.clickByPage(page, xpath.RABBY_SIGN_BUTTON, {
       timeout: 5000,
       logError: true,
     });
+    logger.log("clicking CONFIRM...");
     await puppeteer.clickByPage(page, xpath.RABBY_CONFIRM_BUTTON, {
       timeout: 5000,
       logError: true,
