@@ -1,0 +1,15 @@
+{
+  "BOSS_1": {
+    "head": ["Bone Glasses"],
+    "amulet": ["Strange Rock", "Fancy Potato"],
+    "body": ["Dumb Bandit Swimsuit", "Caitiff Jacket"],
+    "gloves": ["Caitiff Gloves", "Dumb Bandit Mittens"],
+    "ring": ["Wooden Ring", "Hunter Ring"],
+    "belt": ["Ass Spanking Belt", "Piece of Deer Intestine"],
+    "leftRing": ["Wooden Ring", "Hunter Ring"],
+    "rightHand": ["Imperial Scimitar"],
+    "boots": ["Caitiff Boots", "Dumb Bandit Sandals", "Fishing Boots"],
+    "leftHand": ["Middle Finger"],
+    "skill1": ["Golden Eye"]
+  }
+}

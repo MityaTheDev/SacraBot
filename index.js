@@ -11,6 +11,7 @@ const RABBY = require("./configs/rabby_config.json");
 const fs = require("fs");
 const path = require("path");
 const DateFormat = require("date-format");
+const { BrowserLauncher } = require("puppeteer");
 const specifiedMode = process.argv[3];
 const INSTANCE = process.argv[2];
 const serverMode = !INSTANCE;
@@ -21,6 +22,8 @@ const questsPath = "\\\\DESKTOP-MAIN\\Shared\\quests.json";
 // const questsPath = path.join(__dirname, "/DATA/quests.json");
 let quests;
 let config;
+let items;
+let builds;
 const MODE = Object.freeze({
   DAILY: "daily",
   LEVEL: "level",
@@ -217,7 +220,7 @@ async function getElems(page, xpath, { timeout = 0, logError = false } = {}) {
     return await page.$$("::-p-xpath(" + xpath + ")");
   } catch (error) {
     if (logError) logger.error(error);
-    resolve(false);
+    return false;
   }
 }
 
@@ -757,64 +760,7 @@ async function takeAction(hero, currentScene) {
       await goToHomePage(hero);
       return;
     case "home":
-      const levels = await getLevels(hero);
-      config.HEROES[hero.ID].currentLevel = levels.current;
-      config.HEROES[hero.ID].virtualLevel = levels.virtual;
-      config.HEROES[hero.ID].currentLives = await getCurrentLives(hero);
-      config = await updateJson(configPath, config);
-      hero.currentLevel = config.HEROES[hero.ID].currentLevel;
-      hero.virtualLevel = config.HEROES[hero.ID].virtualLevel;
-      hero.currentLives = config.HEROES[hero.ID].currentLives;
-
-      const isNextLevelHero = await isNextLevel(hero);
-      const isReadyToLVLup = config.ALLOW_LEVEL_UP && isNextLevelHero;
-      if (isReadyToLVLup) {
-        // temp stop at level 4, go virtual till 7
-        const isReadyForLevelUp =
-          config.HEROES[hero.ID].virtualLevel <= 4 ||
-          (config.HEROES[hero.ID].virtualLevel >= 7 &&
-            config.HEROES[hero.ID].virtualLevel < 12);
-
-        if (isReadyForLevelUp) await levelUp(hero);
-
-        //todo: put on items, if don't have a weapon, go and buy one
-        const isReadyForFirstBoss =
-          !config.HEROES[hero.ID].firstBossKilled &&
-          config.HEROES[hero.ID].currentLevel == 6;
-        if (isReadyForFirstBoss) {
-          if (hero.client)
-            await hero.client.sendState(hero, "ready for 1st boss");
-          await telegram.sendMessage(
-            `${hero.prefix} is ready for the 1st boss fight!`
-          );
-          logger.log("ready for 1st boss!", {
-            messageModifiers: ["greenBright"],
-          });
-          await pause(MINUTE * 60);
-          return;
-        }
-
-        const isReadyForSecondBoss =
-          config.HEROES[hero.ID].virtualLevel >= 12 &&
-          config.HEROES[hero.ID].currentLevel === 11;
-        if (isReadyForSecondBoss) {
-          if (hero.client)
-            await hero.client.sendState(hero, "ready for 2nd boss");
-          logger.log("ready for 2nd boss!", {
-            messageModifiers: ["greenBright"],
-          });
-          await telegram.sendMessage(
-            `${hero.prefix} is ready for the 2nd boss fight!`
-          );
-          await pause(MINUTE * 60);
-          return;
-        }
-
-        if (config.ALLOW_LEVEL_UP && config.HEROES[hero.ID].currentLevel > 12) {
-          config.ALLOW_LEVEL_UP = false;
-          config = await updateJson(configPath, config);
-        }
-      }
+      if (hero.client) await hero.client.sendState(hero, "home");
 
       logger.log(
         `${
@@ -827,7 +773,70 @@ async function takeAction(hero, currentScene) {
           messageModifiers: ["italic", "magentaBright"],
         }
       );
-      if (hero.client) await hero.client.sendState(hero, "home");
+
+      const levels = await getLevels(hero);
+      config.HEROES[hero.ID].currentLevel = levels.current;
+      config.HEROES[hero.ID].virtualLevel = levels.virtual;
+      config.HEROES[hero.ID].currentLives = await getCurrentLives(hero);
+      config = await updateJson(configPath, config);
+      hero.currentLevel = config.HEROES[hero.ID].currentLevel;
+      hero.virtualLevel = config.HEROES[hero.ID].virtualLevel;
+      hero.currentLives = config.HEROES[hero.ID].currentLives;
+
+      if ((await isNextLevel(hero)) && config.ALLOW_LEVEL_UP) {
+        if (
+          hero.virtualLevel == 7 &&
+          hero.currentLevel == 6 &&
+          !hero.isDressedForBoss1
+        ) {
+          await dressUpForBoss(hero, "1");
+        }
+
+        // temp stop at level 4, go virtual untill level 7
+        const isAppropriateLevel =
+          config.HEROES[hero.ID].virtualLevel <= 4 ||
+          (config.HEROES[hero.ID].virtualLevel >= 7 &&
+            config.HEROES[hero.ID].virtualLevel < 12);
+
+        if (isAppropriateLevel) {
+          if (hero.currentLevel == 6 && !hero.isDressedForBoss1) return;
+          await levelUp(hero);
+          return;
+        }
+      }
+
+      const isReadyForSecondBoss =
+        config.HEROES[hero.ID].virtualLevel >= 12 &&
+        config.HEROES[hero.ID].currentLevel == 11;
+      if (isReadyForSecondBoss) {
+        if (hero.client)
+          await hero.client.sendState(hero, "ready for 2nd boss");
+        logger.log("ready for 2nd boss!", {
+          messageModifiers: ["greenBright"],
+        });
+        await telegram.sendMessage(
+          `${hero.prefix} is ready for the 2nd boss fight!`
+        );
+        await pause(MINUTE * 60);
+        return;
+      }
+
+      if (
+        hero.currentLevel == 7 &&
+        !config.HEROES[hero.ID].firstBossKilled &&
+        !hero.isDressedForBoss1
+      ) {
+        hero.isDressedForBoss1 = await checkEquipedItemsOnMainPage(hero);
+      }
+
+      if (
+        hero.currentLevel >= 7 &&
+        config.HEROES[hero.ID].firstBossKilled &&
+        hero.isDressedForBoss1
+      ) {
+        await takeOffItems(hero);
+      }
+
       break;
     case "adventureCongratulations":
       const timestamp = config.HEROES[hero.ID].lastCompletedDungeonTimestamp;
@@ -868,13 +877,38 @@ async function takeAction(hero, currentScene) {
     case "fight":
       if (hero.client) await hero.client.sendState(hero, "fighting");
       await checkHealth(hero);
-      // logger.error("UH-OH, WE ARE ATTACKING!");
-      // await pause(10000000);
       break;
     case "quest":
       if (hero.client) await hero.client.sendState(hero, "questing");
       await answerQuest(hero);
       return;
+    case "victory_With_PopupWindow":
+    case "victory_Without_PopupWindow":
+      const monsterName = await getText(hero.page, xpath.MONSTER_NAME);
+      if (monsterName === "Infected Spirit of the Forest") {
+        config.HEROES[hero.ID].firstBossKilled = true;
+        await updateJson(configPath, config);
+      }
+      break;
+    case "biomeSelection":
+      if (
+        hero.currentLevel >= 7 &&
+        !hero.isDressedForBoss1 &&
+        (await getElem(hero.page, xpath.BOSS_1_IS_POSSIBLE))
+      ) {
+        await dressUpForBoss(hero, "1");
+        await puppeteer.clickByPage(hero.page, xpath.BACK);
+        return;
+      }
+
+      if (
+        hero.currentLevel >= 7 &&
+        !(await getElem(hero.page, xpath.BOSS_1_IS_POSSIBLE))
+      ) {
+        config.HEROES[hero.ID].firstBossKilled = true;
+        await updateJson(configPath, config);
+      }
+      break;
   }
 
   let targets = scenes[currentScene].actionTargets
@@ -1049,12 +1083,12 @@ async function getDailyReward(hero) {
 }
 
 async function levelUp(hero) {
-  logger.log(`levelling up to ${config.HEROES[hero.ID].virtualLevel}...`);
+  logger.log(`leveling up to ${config.HEROES[hero.ID].virtualLevel}...`);
   if (hero.client) hero.client.sendState(hero, "leveling up");
 
-  logger.log(`clicking on 'Level Up' button...`);
+  // logger.log(`clicking on 'Level Up' button...`);
   await puppeteer.clickByPage(hero.page, xpath.LEVEL_UP_BUTTON);
-  logger.log(`waiting for Page idle for 5 seconds...`);
+  // logger.log(`waiting for Page idle for 5 seconds...`);
   await hero.page.waitForNetworkIdle({ idleTime: 5000 });
   logger.log(
     `available stats: ${await getText(
@@ -1088,11 +1122,10 @@ async function levelUp(hero) {
       stats = [0, 1, 3, 1];
       break;
     case 6:
-      //todo: put on items than lvlup
       stats = [0, 5, 0, 0];
-      logger.log(`put on items, then lvl up with ${stats}`);
-      if (hero.client) hero.client.sendState(hero, "at lvl to 7, items!");
-      return;
+      // logger.log(`put on items, then lvl up with ${stats}`);
+      // if (hero.client) hero.client.sendState(hero, "at lvl to 7, items!");
+      // return;
       break;
     case 7:
       stats = [0, 3, 2, 0];
@@ -1143,7 +1176,7 @@ async function levelUp(hero) {
 
   if ((await getText(hero.page, xpath.LEVEL_UP_AVAILABLE_STATS)) == 0) {
     await puppeteer.clickByPage(hero.page, xpath.LEVEL_UP_BUTTON_CONFIRM);
-    await pause(SECOND);
+    await pause(SECOND * 10);
   } else {
     logger.error(`not all stats were appointed`);
     if (hero.client) hero.client.sendState(hero, "lvl up error");
@@ -1152,6 +1185,8 @@ async function levelUp(hero) {
   }
 }
 
+//TODO: change xpath.LEVEL_UP_NOTIFICATION_ICON to correct src value of img
+// element /*.png. NEED TO BE NEXT LEVEL!
 async function isNextLevel(hero) {
   const levelUpButtonPresent =
     (await getElem(hero.page, xpath.LEVEL_UP_NOTIFICATION_ICON, {
@@ -1190,6 +1225,306 @@ async function getLevels(hero) {
   return levels;
 }
 
+//"ITEM_CARD_TITLE": "//div[contains(@class, 'item__title')]",
+async function dressUpForBoss(hero, bossIndex) {
+  const allowedItems = (await readJson("./DATA/builds.json"))[
+    `BOSS_${bossIndex}`
+  ];
+  const slotsXpaths = {
+    head: {
+      available: xpath.AVAILABLE_SLOT_HEAD,
+      occupied: xpath.OCCUPIED_SLOT_HEAD,
+    },
+    amulet: {
+      available: xpath.AVAILABLE_SLOT_AMULET,
+      occupied: xpath.OCCUPIED_SLOT_AMULET,
+    },
+    body: {
+      available: xpath.AVAILABLE_SLOT_BODY,
+      occupied: xpath.OCCUPIED_SLOT_BODY,
+    },
+    gloves: {
+      available: xpath.AVAILABLE_SLOT_GLOVES,
+      occupied: xpath.OCCUPIED_SLOT_GLOVES,
+    },
+    rightRing: {
+      available: xpath.AVAILABLE_SLOT_RIGHT_RING,
+      occupied: xpath.OCCUPIED_SLOT_RIGHT_RING,
+    },
+    belt: {
+      available: xpath.AVAILABLE_SLOT_BELT,
+      occupied: xpath.OCCUPIED_SLOT_BELT,
+    },
+    leftRing: {
+      available: xpath.AVAILABLE_SLOT_LEFT_RING,
+      occupied: xpath.OCCUPIED_SLOT_LEFT_RING,
+    },
+    rightHand: {
+      available: xpath.AVAILABLE_SLOT_RIGHT_HAND,
+      occupied: xpath.OCCUPIED_SLOT_RIGHT_HAND,
+    },
+    boots: {
+      available: xpath.AVAILABLE_SLOT_BOOTS,
+      occupied: xpath.OCCUPIED_SLOT_BOOTS,
+    },
+    leftHand: {
+      available: xpath.AVAILABLE_SLOT_LEFT_HAND,
+      occupied: xpath.OCCUPIED_SLOT_LEFT_HAND,
+    },
+    skill1: {
+      available: xpath.AVAILABLE_SLOT_SKILL_1,
+      occupied: xpath.OCCUPIED_SLOT_SKILL_1,
+    },
+  };
+
+  await puppeteer.clickByPage(hero.page, xpath.MENU, { timeout: 10000 });
+  await puppeteer.clickByPage(hero.page, xpath.MENU_INVENTORY_BUTTON, {
+    timeout: 20000,
+  });
+  await pause(SECOND * 5);
+
+  for (let slotName in slotsXpaths) {
+    const isInventoryOpen = await getElem(
+      hero.page,
+      xpath.INVENTORY_POPUP_WINDOW
+    );
+    if (!isInventoryOpen) {
+      await goToHomePage(hero);
+      return;
+    }
+
+    console.log(`Selecting |${slotName}|...`);
+    if (await getElem(hero.page, slotsXpaths[slotName].occupied)) {
+      console.log(`Aready occupied`);
+      continue;
+    }
+    await puppeteer.clickByPage(hero.page, slotsXpaths[slotName].available, {
+      timeout: 1000,
+      logError: false,
+    });
+    const headerText = await getText(hero.page, xpath.ITEM_SELECTION_HEADER, {
+      timeout: 10000,
+    });
+    if (
+      headerText &&
+      headerText.toLowerCase().split("slot ")[1].replaceAll(" ", "") ===
+        slotName.toLowerCase()
+    ) {
+      const itemCardElems = await getElems(hero.page, xpath.ITEM_CARD, {
+        timeout: 5000,
+      });
+
+      if (itemCardElems && itemCardElems.length > 0) {
+        let itemEquipped = false;
+        if (slotName.includes("Ring")) slotName = "ring";
+        for (const allowedItemName of allowedItems[slotName]) {
+          console.log(`looking for '${allowedItemName}' item`);
+          // NOTE: xpath search is not working properly for some reason. It
+          // searching the whole page instead of only descendads of
+          // 'currentItemCardElem':
+          // const currentItemCardElem = itemCardElems[i];
+          // const titleElem = await currentItemCardElem.$(
+          //   "::-p-xpath(" + xpath.ITEM_CARD_TITLE + ")"
+          // );
+          // const button = await currentItemCardElem.$(
+          //   "::-p-xpath(" + xpath.ITEM_CARD_BUTTON + ")"
+          // );
+          for (let i = itemCardElems.length - 1; i >= 0; i--) {
+            let currentItemCardElem = itemCardElems[i];
+            const title = await currentItemCardElem.$eval(
+              "div[class^='item__title']",
+              (elem) => elem.innerText
+            );
+            process.stdout.write(`${title} `);
+            if (title.toLowerCase().includes(allowedItemName.toLowerCase())) {
+              const button = await currentItemCardElem.$("button");
+              await button.click();
+              itemEquipped = true;
+              process.stdout.write("true\n");
+              allowedItems[slotName] = allowedItems[slotName].filter(
+                (itemName) => itemName !== allowedItemName
+              );
+              await pause(SECOND * 5);
+              break;
+            } else {
+              process.stdout.write("false\n");
+            }
+          }
+          if (itemEquipped) break;
+        }
+        if (!itemEquipped) {
+          logger.error(`Failed to equip for |${slotName}|`);
+          await puppeteer.clickByPage(hero.page, xpath.ITEM_SELECTION_CLOSE);
+          await pause(SECOND * 2);
+        }
+      }
+    } else {
+      if (!headerText) logger.error("Item selection popup window not found!");
+      else
+        logger.error(
+          `Wrong selection opened! Need: ${slotName}, found: ${headerText}`
+        );
+    }
+  }
+
+  //check if minimum amount of items is equipped
+  const minimumRequirements = {
+    head: false,
+    body: false,
+    rightHand: false,
+    boots: false,
+  };
+  (await getElem(hero.page, xpath.OCCUPIED_SLOT_HEAD, { timeout: SECOND * 7 }))
+    ? (minimumRequirements.head = true)
+    : (minimumRequirements.head = false);
+  (await getElem(hero.page, xpath.OCCUPIED_SLOT_BODY))
+    ? (minimumRequirements.body = true)
+    : (minimumRequirements.body = false);
+  (await getElem(hero.page, xpath.OCCUPIED_SLOT_RIGHT_HAND))
+    ? (minimumRequirements.rightHand = true)
+    : (minimumRequirements.rightHand = false);
+  (await getElem(hero.page, xpath.OCCUPIED_SLOT_BOOTS))
+    ? (minimumRequirements.boots = true)
+    : (minimumRequirements.boots = false);
+
+  const missingSlots = [];
+  for (const slot in minimumRequirements) {
+    if (!minimumRequirements[slot]) {
+      missingSlots.push(slot);
+    }
+  }
+  if (missingSlots.length > 0) {
+    if (hero.client) hero.client.sendState(`NEED ITEMS FOR ${missingSlots}`);
+    logger.error(`Failed to meet the requirements, missing: [${missingSlots}]`);
+  } else {
+    hero.isDressedForBoss1 = true;
+    logger.log("dressed up for boss 1");
+  }
+
+  await puppeteer.clickByPage(hero.page, xpath.INVENTORY_CLOSE);
+  await pause(SECOND * 5);
+}
+
+async function takeOffItems(hero) {
+  await puppeteer.clickByPage(hero.page, xpath.MENU, { timeout: 10000 });
+  await puppeteer.clickByPage(hero.page, xpath.MENU_INVENTORY_BUTTON, {
+    timeout: 20000,
+  });
+  await pause(SECOND * 5);
+
+  logger.log("taking off items...");
+  await puppeteer.clickByPage(hero.page, xpath.INVENTORY_GET_NAKED, {
+    timeout: 10000,
+  });
+  await pause(SECOND * 20);
+
+  const slotsXpaths = {
+    head: xpath.OCCUPIED_SLOT_HEAD,
+    amulet: xpath.OCCUPIED_SLOT_AMULET,
+    body: xpath.OCCUPIED_SLOT_BODY,
+    gloves: xpath.OCCUPIED_SLOT_GLOVES,
+    rightRing: xpath.OCCUPIED_SLOT_RIGHT_RING,
+    belt: xpath.OCCUPIED_SLOT_BELT,
+    leftRing: xpath.OCCUPIED_SLOT_LEFT_RING,
+    rightHand: xpath.OCCUPIED_SLOT_RIGHT_HAND,
+    boots: xpath.OCCUPIED_SLOT_BOOTS,
+    leftHand: xpath.OCCUPIED_SLOT_LEFT_HAND,
+    skill1: xpath.OCCUPIED_SLOT_SKILL_1,
+    skill2: xpath.OCCUPIED_SLOT_SKILL_2,
+    skill3: xpath.OCCUPIED_SLOT_SKILL_3,
+  };
+
+  let isNaked = true;
+  for (let slotName in slotsXpaths) {
+    if (await getElem(hero.page, slotsXpaths[slotName])) {
+      isNaked = false;
+      break;
+    }
+  }
+  isDressedForBoss1 = !isNaked;
+  logger.log(`items are off: ${isDressedForBoss1}`);
+
+  await puppeteer.clickByPage(hero.page, xpath.INVENTORY_CLOSE);
+  await pause(SECOND * 10);
+}
+
+async function checkEquipedItemsOnMainPage(hero) {
+  let minimumRequirements = {
+    head: {
+      index: 0,
+      isEquipped: false,
+      items: builds.BOSS_1.head.map((element) => items[element]),
+    },
+    body: {
+      isEquipped: false,
+      items: builds.BOSS_1.body.map((element) => items[element]),
+    },
+    rightHand: {
+      isEquipped: false,
+      items: builds.BOSS_1.rightHand.map((element) => items[element]),
+    },
+    boots: {
+      isEquipped: false,
+      items: builds.BOSS_1.boots.map((element) => items[element]),
+    },
+  };
+  const smallSlots = await getElems(hero.page, xpath.SMALL_SLOT);
+  for (let i = 0; i < smallSlots.length; i++) {
+    //small slots: 0 - head, 1 - body, 2 - boots, 5 - right hand
+    if (i != 0 && i != 1 && i != 2 && i != 5) {
+      continue;
+    }
+    minimumRequirements = await smallSlots[i].$$eval(
+      "div img",
+      (elems, minimumRequirements) => {
+        for (const elem of elems) {
+          let foundItem = false;
+          if (elem && !elem.getAttribute("src").includes("broken")) {
+            const src = elem.getAttribute("src");
+            console.log(src);
+            for (const slotType in minimumRequirements) {
+              if (foundItem) break;
+              const itemNames = minimumRequirements[slotType].items;
+              console.log(`items: ${itemNames}`);
+              for (const itemName of itemNames) {
+                console.log(itemName);
+                if (src.includes(itemName)) {
+                  console.log(`found!`);
+                  minimumRequirements[slotType].isEquipped = true;
+                  foundItem = true;
+                  break;
+                }
+              }
+            }
+          }
+        }
+        return minimumRequirements;
+      },
+      minimumRequirements
+    );
+  }
+
+  logger.log(
+    JSON.stringify(
+      {
+        head: minimumRequirements.head.isEquipped,
+        body: minimumRequirements.body.isEquipped,
+        rightHand: minimumRequirements.rightHand.isEquipped,
+        boots: minimumRequirements.boots.isEquipped,
+      },
+      null,
+      2
+    )
+  );
+
+  return (
+    minimumRequirements.head.isEquipped &&
+    minimumRequirements.body.isEquipped &&
+    minimumRequirements.rightHand.isEquipped &&
+    minimumRequirements.boots.isEquipped
+  );
+}
+
 async function commandBots() {
   const server = require("./src/Controller/server.js");
   return true;
@@ -1198,6 +1533,8 @@ async function commandBots() {
 async function init() {
   quests = await readJson(questsPath);
   config = await readJson(configPath);
+  items = await readJson("./DATA/items.json");
+  builds = await readJson("./DATA/builds.json");
   logger.setDefaultOptions({ importance: 0 });
   logger.setLogLevel(config.LOG_LEVEL);
   if (
@@ -1223,6 +1560,8 @@ class Hero {
   adventureCounterTimestamp = 0;
   page;
   client = false;
+  isDressedForBoss1 = false;
+  isReadyForBoss1 = false;
   sessionStartTime;
   sessionMaxDuration;
   lastScene = "";
@@ -1341,6 +1680,8 @@ class Hero {
     return;
   }
 
+  // await takeOffItems(currentHeroes[0]);
+  // await dressUpForBoss(currentHeroes[0], "1");
   await play(currentHeroes);
 
   logger.error("machines will rise", {
