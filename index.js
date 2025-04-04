@@ -955,57 +955,62 @@ async function play(currentHeroes) {
 
   while (true) {
     for (let hero of currentHeroes) {
-      await pause(pauseTime);
-      if (!hero.isPlaying) continue;
+      try {
+        await pause(pauseTime);
+        if (!hero.isPlaying) continue;
 
-      logger.setDefaultOptions({ prefix: hero.prefix });
+        logger.setDefaultOptions({ prefix: hero.prefix });
 
-      hero.page.waitForNetworkIdle({ idleTime: 750 });
+        hero.page.waitForNetworkIdle({ idleTime: 750 });
 
-      const heroIsOutOfTime = await isOutOfTime(hero);
-      if (heroIsOutOfTime) {
-        logger.log(`is out of time!`);
-        currentHeroes.pop(hero);
-        logger.log(`is removed from the [currentHeroes]`);
-        continue;
+        const heroIsOutOfTime = await isOutOfTime(hero);
+        if (heroIsOutOfTime) {
+          logger.log(`is out of time!`);
+          currentHeroes.pop(hero);
+          logger.log(`is removed from the [currentHeroes]`);
+          continue;
+        }
+
+        switch (config.MODE) {
+          case MODE.DAILY:
+            if (config.HEROES[hero.ID].dungeonsCompleted >= 3) {
+              logger.log(`is done with dungeons!`, {
+                messageModifiers: ["green"],
+              });
+              // let rewardClaimed = await getDailyReward(hero);
+              // if (rewardClaimed) currentHeroes.pop(hero);
+              currentHeroes.pop(hero);
+              continue;
+            }
+          case MODE.LEVEL:
+            if (
+              config.HEROES[hero.ID].virtualLevel >=
+              config.HEROES[hero.ID].targetLevel
+            ) {
+              logger.log(`is done with levelling!`, {
+                messageModifiers: ["green"],
+              });
+              if (hero.client) hero.client.sendState(hero, "finished");
+              currentHeroes.pop(hero);
+              continue;
+            }
+        }
+
+        let currentScene = await getCurrentScene(hero);
+        await takeAction(hero, currentScene);
+      } catch (error) {
+        logger.error(`MAJOR ERROR OCCURED!`);
+        logger.error(error);
       }
 
-      switch (config.MODE) {
-        case MODE.DAILY:
-          if (config.HEROES[hero.ID].dungeonsCompleted >= 3) {
-            logger.log(`is done with dungeons!`, {
-              messageModifiers: ["green"],
-            });
-            // let rewardClaimed = await getDailyReward(hero);
-            // if (rewardClaimed) currentHeroes.pop(hero);
-            currentHeroes.pop(hero);
-            continue;
-          }
-        case MODE.LEVEL:
-          if (
-            config.HEROES[hero.ID].virtualLevel >=
-            config.HEROES[hero.ID].targetLevel
-          ) {
-            logger.log(`is done with levelling!`, {
-              messageModifiers: ["green"],
-            });
-            if (hero.client) hero.client.sendState(hero, "finished");
-            currentHeroes.pop(hero);
-            continue;
-          }
+      if (currentHeroes.length === 0) {
+        logger.log(`\n\t~= ALL HEROES ARE DONE =~\n`, {
+          messageModifiers: ["green", "underline"],
+          prefixPresence: false,
+          timestampPresence: false,
+        });
+        return;
       }
-
-      let currentScene = await getCurrentScene(hero);
-      await takeAction(hero, currentScene);
-    }
-
-    if (currentHeroes.length === 0) {
-      logger.log(`\n\t~= ALL HEROES ARE DONE =~\n`, {
-        messageModifiers: ["green", "underline"],
-        prefixPresence: false,
-        timestampPresence: false,
-      });
-      return;
     }
   }
 }
