@@ -168,7 +168,7 @@ async function saveBodyOfPage(page, fileName) {
 }
 
 async function getIDs() {
-  let IDs = new Set();
+  const IDs = new Set();
   for (let hero in config.HEROES) {
     if (config.HEROES[hero].active) IDs.add(config.HEROES[hero].browser_id);
   }
@@ -1628,23 +1628,23 @@ class Hero {
     messageModifiers: ["whiteBright", "underline", "bold"],
   });
 
-  const browserIDs = await getIDs();
-  const browsers = await getBrowsers(browserIDs);
-  let currentHeroes = [];
-  let openPages = [];
-  for (const browser of browsers) {
-    if (!browser) {
-      logger.error("Failed to initiate browser");
-      return;
-    }
+  // const browserIDs = await getIDs();
+  // const browsers = await getBrowsers(browserIDs);
+  // let openPages = [];
+  // for (const browser of browsers) {
+  //   if (!browser) {
+  //     logger.error("Failed to initiate browser");
+  //     return;
+  //   }
 
-    // await logInRabbyWallet(browser);
-    await setListenerForNewPageCreated(browser);
+  //   // await logInRabbyWallet(browser);
+  //   await setListenerForNewPageCreated(browser);
 
-    openPages.push(...(await browser.pages()));
-  }
+  //   openPages.push(...(await browser.pages()));
+  // }
 
-  let heroesToLaunch = config.HEROES;
+  const currentHeroes = [];
+  const heroesToLaunch = config.HEROES;
   for (let heroIndex in heroesToLaunch) {
     if (!heroesToLaunch[heroIndex].active) continue;
 
@@ -1660,24 +1660,27 @@ class Hero {
     );
 
     //check if one of the pages contains ID of the hero
-    for (let page of openPages) {
-      const url = await page.url();
-      if (!url.includes("sonic.sacra.game")) {
-        continue;
-      }
+    // for (let page of openPages) {
+    //   const url = await page.url();
+    //   if (!url.includes("sonic.sacra.game")) {
+    //     continue;
+    //   }
 
-      if (url.includes(`/${hero.ID}`) || url.includes("/delegate")) {
-        hero.page = page;
-        logger.log(`found existing page for hero |${hero.name}[${hero.ID}]|`);
-        break;
-      }
-    }
+    //   if (url.includes(`/${hero.ID}`) || url.includes("/delegate")) {
+    //     hero.page = page;
+    //     logger.log(`found existing page for hero |${hero.name}[${hero.ID}]|`);
+    //     break;
+    //   }
+    // }
 
     // create new page for hero
     if (!hero.page) {
-      page = await browser.newPage();
-      await goToHomePage(hero);
+      const browser = (
+        await getBrowsers([config.HEROES[hero.ID].browser_id])
+      )[0];
+      const page = await browser.newPage();
       hero.page = page;
+      await goToHomePage(hero);
       logger.log(`opened new page for hero |${hero.name}[${hero.ID}]|`);
     }
 
