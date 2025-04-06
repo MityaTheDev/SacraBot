@@ -836,7 +836,7 @@ async function takeAction(hero, currentScene) {
         await telegram.sendMessage(
           `${hero.prefix} is ready for the 2nd boss fight!`
         );
-        await pause(MINUTE * 60);
+        // await pause(MINUTE * 60);
         return;
       }
 
@@ -1009,8 +1009,10 @@ async function play(currentHeroes) {
             }
           case MODE.LEVEL:
             if (
+              (config.HEROES[hero.ID].virtualLevel == 12 &&
+                config.HEROES[hero.ID].currentLevel == 11) ||
               config.HEROES[hero.ID].virtualLevel >=
-              config.HEROES[hero.ID].targetLevel
+                config.HEROES[hero.ID].targetLevel
             ) {
               logger.log(`is done with levelling!`, {
                 messageModifiers: ["green"],
