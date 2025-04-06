@@ -2,7 +2,7 @@ const logger = require("./src/logger.js");
 const { styleText } = require("node:util");
 const Ads = require("./src/AdsPower/index");
 const puppeteer = require(`./src/BrowserAutomation/puppeteer.js`);
-const { pause, SECOND, MINUTE } = require("./src/time.js");
+const { pause, SECOND, MINUTE, HOUR } = require("./src/time.js");
 const PptrCfg = require("./configs/puppeteer.json");
 const xpath = require("./xpath/xpath.json");
 const telegram = require("./src/telegram.js");
@@ -793,6 +793,14 @@ async function takeAction(hero, currentScene) {
       hero.currentLevel = config.HEROES[hero.ID].currentLevel;
       hero.virtualLevel = config.HEROES[hero.ID].virtualLevel;
       hero.currentLives = config.HEROES[hero.ID].currentLives;
+
+      if (hero.currentLives < 2) {
+        if (hero.client) hero.client.sendState("low lives");
+        logger.log("low lives!", {
+          messageModifiers: ["magentaBright", "blink"],
+        });
+        await pause(HOUR * 1000);
+      }
 
       if ((await isNextLevel(hero)) && config.ALLOW_LEVEL_UP) {
         if (
@@ -1678,10 +1686,20 @@ class Hero {
       const browser = (
         await getBrowsers([config.HEROES[hero.ID].browser_id])
       )[0];
+      await setListenerForNewPageCreated(browser);
       const page = await browser.newPage();
+      logger.log(`opened new page for hero |${hero.name}[${hero.ID}]|`);
       hero.page = page;
       await goToHomePage(hero);
-      logger.log(`opened new page for hero |${hero.name}[${hero.ID}]|`);
+      const openedPages = await browser.pages();
+      for (const openedPage of openedPages) {
+        const url = await openedPage.url();
+        if (url != RABBY.OFFSCREEN_URL && page != openedPage) {
+          logger.error(`closing this page: ${url}`);
+          await openedPage.close();
+          continue;
+        }
+      }
     }
 
     if (config.USE_CONTROLLER) {
@@ -1713,5 +1731,6 @@ class Hero {
     prefixPresence: false,
     timestampPresence: false,
   });
-  return true;
+
+  process.exit(0);
 })();

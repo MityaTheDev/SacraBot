@@ -10,13 +10,14 @@
   "license": "ISC",
   "dependencies": {
     "ansi-escapes": "^7.0.0",
-    "axios": "^1.7.9",
+    "axios": "^1.8.4",
     "console-table-printer": "^2.12.1",
     "date-format": "^4.0.14",
-    "express": "^4.21.2",
+    "express": "^5.1.0",
     "fs": "^0.0.1-security",
     "jsonfile": "^6.1.0",
-    "puppeteer": "^24.1.1",
+    "npm-check-updates": "^17.1.16",
+    "puppeteer": "^24.6.0",
     "ws": "^8.18.1"
   }
 }

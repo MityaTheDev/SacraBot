@@ -4,11 +4,6 @@ const serverConfig = require("../../configs/server_config.json");
 const serverUrl = "ws://" + serverConfig.ip + ":" + serverConfig.port;
 let ws = new WebSocket(serverUrl);
 const logger = require("../logger");
-logger.setDefaultOptions({
-  prefixModifiers: ["magenta"],
-  timestampModifiers: ["magenta"],
-  messageModifiers: ["magenta"],
-});
 const baseMessage = {
   type: "",
   ID: "",
@@ -28,7 +23,12 @@ async function init(hero) {
     message.type = "init";
     message.State = "initialized";
     ws.send(JSON.stringify(message));
-    logger.log(`Connected to server`);
+    logger.log(`Connected to server`),
+      {
+        prefixModifiers: ["magenta"],
+        timestampModifiers: ["magenta"],
+        messageModifiers: ["magenta"],
+      };
   });
 
   ws.on("unexpected-response", () => {
@@ -37,7 +37,11 @@ async function init(hero) {
 
   ws.on("message", (messageRaw) => {
     const message = JSON.parse(messageRaw);
-    logger.log(`Received command from server: ${message.command}`);
+    logger.log(`Received command from server: ${message.command}`, {
+      prefixModifiers: ["magenta"],
+      timestampModifiers: ["magenta"],
+      messageModifiers: ["magenta"],
+    });
 
     // Execute the command (e.g., start/stop the bot)
     if (data.command === "test") {

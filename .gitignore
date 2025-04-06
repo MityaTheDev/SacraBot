@@ -7,3 +7,4 @@ configs/*.*
 configs/instances/*
 !configs/instances/example.*.*
 PowershellScripts/ids.txt
+PowershellScripts/runOLD.ps1
