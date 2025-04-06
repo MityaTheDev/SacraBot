@@ -765,6 +765,7 @@ async function takeAction(hero, currentScene) {
   }
 
   switch (currentScene) {
+    case "wrongNetworkPopup":
     case "emptySreen":
     case "error":
       if (hero.client) await hero.client.sendState(hero, "error");
@@ -881,7 +882,7 @@ async function takeAction(hero, currentScene) {
         `*__${hero.prefix}__* LOW BALANCE ON DELEGATION!`
       );
       if (hero.client) await hero.client.sendState(hero, "low deleg balance");
-      await pause(MINUTE * 5);
+      await pause(SECOND);
       return;
     case "attacking":
     case "transactionProcessing":

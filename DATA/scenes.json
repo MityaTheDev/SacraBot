@@ -22,7 +22,7 @@
 
   "loading": {
     "indicator": {
-      "xpath": "/html/body/app-root/div[2]/main/ng-component/app-loading-small/div[contains(text(), 'Loading')]",
+      "xpath": "/html/body/app-root/div[2]/main/ng-component/app-loading-small/div[contains(text(), 'Loading') and not(//div[@class='cdk-overlay-container'])]",
       "description": "'Loading' text in the center of the screen"
     }
   },
@@ -39,6 +39,13 @@
     "indicator": {
       "xpath": "//div[contains(@class, 'title')]//img[contains(@alt, 'loading') and not(//app-animation-papyrus)]",
       "description": "Element with for dots and amination to the right of the quest title"
+    }
+  },
+
+  "wrongNetworkPopup": {
+    "indicator": {
+      "xpath": "//div[@class='cdk-overlay-container']//div[.=' Wrong blockchain network ']",
+      "description": "'Wrong blockchain network' title on a pop-up window"
     }
   },
 
