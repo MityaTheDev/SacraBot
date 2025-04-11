@@ -765,6 +765,7 @@ async function takeAction(hero, currentScene) {
   }
 
   switch (currentScene) {
+    case "wrongNetworkPopup":
     case "emptySreen":
     case "error":
       if (hero.client) await hero.client.sendState(hero, "error");
@@ -836,7 +837,7 @@ async function takeAction(hero, currentScene) {
         await telegram.sendMessage(
           `${hero.prefix} is ready for the 2nd boss fight!`
         );
-        await pause(MINUTE * 60);
+        // await pause(MINUTE * 60);
         return;
       }
 
@@ -881,7 +882,7 @@ async function takeAction(hero, currentScene) {
         `*__${hero.prefix}__* LOW BALANCE ON DELEGATION!`
       );
       if (hero.client) await hero.client.sendState(hero, "low deleg balance");
-      await pause(MINUTE * 5);
+      await pause(SECOND);
       return;
     case "attacking":
     case "transactionProcessing":
@@ -1009,8 +1010,10 @@ async function play(currentHeroes) {
             }
           case MODE.LEVEL:
             if (
+              (config.HEROES[hero.ID].virtualLevel == 12 &&
+                config.HEROES[hero.ID].currentLevel == 11) ||
               config.HEROES[hero.ID].virtualLevel >=
-              config.HEROES[hero.ID].targetLevel
+                config.HEROES[hero.ID].targetLevel
             ) {
               logger.log(`is done with levelling!`, {
                 messageModifiers: ["green"],
