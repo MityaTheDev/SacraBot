@@ -98,12 +98,12 @@ async function setListenerForNewPageCreated(browser) {
 async function sighAndConfirm(page) {
   if (config.RABBY_WALLET_AUTO_CONFIRM) {
     logger.log("clicking SIGN...");
-    await puppeteer.clickByPage(page, xpath.RABBY_SIGN_BUTTON, {
+    await puppeteer.clickElement(page, xpath.RABBY_SIGN_BUTTON, {
       timeout: 5000,
       logError: true,
     });
     logger.log("clicking CONFIRM...");
-    await puppeteer.clickByPage(page, xpath.RABBY_CONFIRM_BUTTON, {
+    await puppeteer.clickElement(page, xpath.RABBY_CONFIRM_BUTTON, {
       timeout: 5000,
       logError: true,
     });
@@ -385,14 +385,14 @@ async function checkHealth(hero) {
         messageModifiers: "magentaBright",
       });
 
-      await puppeteer.clickByPage(hero.page, xpath.POTIONS_POUCH_OPEN_BUTTON);
+      await puppeteer.clickElement(hero.page, xpath.POTIONS_POUCH_OPEN_BUTTON);
       const smallHealthPotion = await getElem(
         hero.page,
         xpath.HEALT_POTION_SMALL,
         { timeout: 10000 }
       );
       if (smallHealthPotion) {
-        await puppeteer.clickByPage(hero.page, xpath.HEALT_POTION_SMALL);
+        await puppeteer.clickElement(hero.page, xpath.HEALT_POTION_SMALL);
         logger.log(`Clicked on small potion...`, {
           messageModifiers: "magentaBright",
         });
@@ -402,7 +402,7 @@ async function checkHealth(hero) {
           { timeout: 10000 }
         );
         if (potionUseButton) {
-          await puppeteer.clickByPage(hero.page, xpath.POTION_USE_BUTTON);
+          await puppeteer.clickElement(hero.page, xpath.POTION_USE_BUTTON);
           logger.log(`Clicked on use button...`, {
             messageModifiers: "magentaBright",
           });
@@ -416,7 +416,7 @@ async function checkHealth(hero) {
             { timeout: 10000 }
           );
           if (potionCloseButton) {
-            await puppeteer.clickByPage(hero.page, xpath.POTION_CLOSE_BUTTON);
+            await puppeteer.clickElement(hero.page, xpath.POTION_CLOSE_BUTTON);
             logger.log(`Clicked on close icon...`, {
               messageModifiers: "magentaBright",
             });
@@ -540,7 +540,7 @@ async function clickAnswerButton(hero, answerObj) {
   //   xpathToButton = `//*[text()=concat('"', ${text}, '"')]/ancestor::div[contains(@class, "answer ")]/button`;
   // else
   //   xpathToButton = `//*[text()="${text}"]/ancestor::div[contains(@class, "answer ")]/button`;
-  // let success = await puppeteer.clickByPage(hero.page, xpathToButton, {
+  // let success = await puppeteer.clickElement(hero.page, xpathToButton, {
   //   timeout: 1000,
   //   logError: false,
   // });
@@ -916,7 +916,7 @@ async function takeAction(hero, currentScene) {
         (await getElem(hero.page, xpath.BOSS_1_IS_POSSIBLE))
       ) {
         await dressUpForBoss(hero, "1");
-        await puppeteer.clickByPage(hero.page, xpath.BACK);
+        await puppeteer.clickElement(hero.page, xpath.BACK);
         return;
       }
 
@@ -963,7 +963,7 @@ async function takeAction(hero, currentScene) {
     }
 
     logger.log(`clicking on [${target}] target`);
-    await puppeteer.clickByPage(hero.page, targets[target].xpath);
+    await puppeteer.clickElement(hero.page, targets[target].xpath);
     hero.lastActionTime = Date.now();
 
     switch (currentScene) {
@@ -1074,11 +1074,11 @@ async function getDailyReward(hero) {
   //number of daily rewards
   // TODO: comment daily chest feature
   while ((await getText(hero.page, xpath.DAILY_REWARD_COUNT))[1] > 0) {
-    await puppeteer.clickByPage(hero.page, xpath.DAILY_CHEST, {
+    await puppeteer.clickElement(hero.page, xpath.DAILY_CHEST, {
       timeout: 5000,
     });
     await hero.page.waitForNetworkIdle({ idleTime: 5000 });
-    await puppeteer.clickByPage(hero.page, xpath.DAILY_REWARD, {
+    await puppeteer.clickElement(hero.page, xpath.DAILY_REWARD, {
       timeout: 5000,
     });
     await hero.page.waitForNetworkIdle({ idleTime: 5000 });
@@ -1090,11 +1090,11 @@ async function getDailyReward(hero) {
 
   //number of weekly rewards
   while ((await getText(hero.page, xpath.WEAKLY_REWARD_COUNT))[1] > 0) {
-    await puppeteer.clickByPage(hero.page, xpath.WEAKLY_CHEST, {
+    await puppeteer.clickElement(hero.page, xpath.WEAKLY_CHEST, {
       timeout: 5000,
     });
     await hero.page.waitForNetworkIdle({ idleTime: 5000 });
-    await puppeteer.clickByPage(hero.page, xpath.WEAKLY_REWARD, {
+    await puppeteer.clickElement(hero.page, xpath.WEAKLY_REWARD, {
       timeout: 5000,
     });
     await hero.page.waitForNetworkIdle({ idleTime: 5000 });
@@ -1117,7 +1117,7 @@ async function levelUp(hero) {
   if (hero.client) hero.client.sendState(hero, "leveling up");
 
   // logger.log(`clicking on 'Level Up' button...`);
-  await puppeteer.clickByPage(hero.page, xpath.LEVEL_UP_BUTTON);
+  await puppeteer.clickElement(hero.page, xpath.LEVEL_UP_BUTTON);
   // logger.log(`waiting for Page idle for 5 seconds...`);
   await hero.page.waitForNetworkIdle({ idleTime: 5000 });
   logger.log(
@@ -1191,7 +1191,7 @@ async function levelUp(hero) {
       let xpathAttr = statsXpaths[i];
 
       logger.log(`clicking plus button...`);
-      await puppeteer.clickByPage(hero.page, xpathAttr, {
+      await puppeteer.clickElement(hero.page, xpathAttr, {
         timeout: 200,
       });
       await pause(200);
@@ -1205,7 +1205,7 @@ async function levelUp(hero) {
   }
 
   if ((await getText(hero.page, xpath.LEVEL_UP_AVAILABLE_STATS)) == 0) {
-    await puppeteer.clickByPage(hero.page, xpath.LEVEL_UP_BUTTON_CONFIRM);
+    await puppeteer.clickElement(hero.page, xpath.LEVEL_UP_BUTTON_CONFIRM);
     await pause(SECOND * 10);
   } else {
     logger.error(`not all stats were appointed`);
@@ -1307,8 +1307,8 @@ async function dressUpForBoss(hero, bossIndex) {
     },
   };
 
-  await puppeteer.clickByPage(hero.page, xpath.MENU, { timeout: 10000 });
-  await puppeteer.clickByPage(hero.page, xpath.MENU_INVENTORY_BUTTON, {
+  await puppeteer.clickElement(hero.page, xpath.MENU, { timeout: 10000 });
+  await puppeteer.clickElement(hero.page, xpath.MENU_INVENTORY_BUTTON, {
     timeout: 20000,
   });
   await pause(SECOND * 5);
@@ -1328,7 +1328,7 @@ async function dressUpForBoss(hero, bossIndex) {
       console.log(`Aready occupied`);
       continue;
     }
-    await puppeteer.clickByPage(hero.page, slotsXpaths[slotName].available, {
+    await puppeteer.clickElement(hero.page, slotsXpaths[slotName].available, {
       timeout: 1000,
       logError: false,
     });
@@ -1384,7 +1384,7 @@ async function dressUpForBoss(hero, bossIndex) {
         }
         if (!itemEquipped) {
           logger.error(`Failed to equip for |${slotName}|`);
-          await puppeteer.clickByPage(hero.page, xpath.ITEM_SELECTION_CLOSE);
+          await puppeteer.clickElement(hero.page, xpath.ITEM_SELECTION_CLOSE);
           await pause(SECOND * 2);
         }
       }
@@ -1431,19 +1431,19 @@ async function dressUpForBoss(hero, bossIndex) {
     logger.log("dressed up for boss 1");
   }
 
-  await puppeteer.clickByPage(hero.page, xpath.INVENTORY_CLOSE);
+  await puppeteer.clickElement(hero.page, xpath.INVENTORY_CLOSE);
   await pause(SECOND * 5);
 }
 
 async function takeOffItems(hero) {
-  await puppeteer.clickByPage(hero.page, xpath.MENU, { timeout: 10000 });
-  await puppeteer.clickByPage(hero.page, xpath.MENU_INVENTORY_BUTTON, {
+  await puppeteer.clickElement(hero.page, xpath.MENU, { timeout: 10000 });
+  await puppeteer.clickElement(hero.page, xpath.MENU_INVENTORY_BUTTON, {
     timeout: 20000,
   });
   await pause(SECOND * 5);
 
   logger.log("taking off items...");
-  await puppeteer.clickByPage(hero.page, xpath.INVENTORY_GET_NAKED, {
+  await puppeteer.clickElement(hero.page, xpath.INVENTORY_GET_NAKED, {
     timeout: 10000,
   });
   await pause(SECOND * 20);
@@ -1474,7 +1474,7 @@ async function takeOffItems(hero) {
   isDressedForBoss1 = !isNaked;
   logger.log(`items are off: ${isDressedForBoss1}`);
 
-  await puppeteer.clickByPage(hero.page, xpath.INVENTORY_CLOSE);
+  await puppeteer.clickElement(hero.page, xpath.INVENTORY_CLOSE);
   await pause(SECOND * 10);
 }
 

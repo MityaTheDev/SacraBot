@@ -134,6 +134,26 @@ async function clickByPage(
   }
 }
 
+async function clickElement(
+  page,
+  xPath,
+  { timeout = 10000, logError = true } = {}
+) {
+  if (timeout) await pause(timeout);
+  try {
+    const element = await page.$("::-p-xpath(" + xPath + ")");
+    await element.click();
+    return true;
+  } catch (error) {
+    if (logError) {
+      console.log(
+        `error while clicking by page!\nxPath: ${xPath}\n${error.stack}`
+      );
+    }
+    return false;
+  }
+}
+
 /* ========================================================================= */
 async function clickElementByConsole(page, element) {
   return await page.evaluate((element) => {
@@ -220,6 +240,6 @@ exports.clickElementByConsole = clickElementByConsole;
 exports.clickElementByLib = clickElementByLib;
 exports.fillInInputWithoutCheck = fillInInputWithoutCheck;
 exports.fillInInputWithCheck = fillInInputWithCheck;
-exports.clickByPage = clickByPage;
+exports.clickElement = clickElement;
 
 // @TODO click with gcursor ?? 123
