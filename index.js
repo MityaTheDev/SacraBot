@@ -893,7 +893,7 @@ async function takeAction(hero, currentScene) {
         `*__${hero.prefix}__* LOW BALANCE ON DELEGATION!`
       );
       if (hero.client) await hero.client.sendState(hero, "low deleg balance");
-      await pause(SECOND);
+      await pause(SECOND * 10000000);
       return;
     case "attacking":
     case "transactionProcessing":
