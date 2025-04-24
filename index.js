@@ -827,7 +827,7 @@ async function takeAction(hero, currentScene) {
         const isAppropriateLevel =
           config.HEROES[hero.ID].virtualLevel <= 4 ||
           (config.HEROES[hero.ID].virtualLevel >= 7 &&
-            config.HEROES[hero.ID].virtualLevel < 12);
+            config.HEROES[hero.ID].virtualLevel < 15);
 
         if (isAppropriateLevel) {
           if (hero.currentLevel == 6 && !hero.isDressedForBoss1) return;
