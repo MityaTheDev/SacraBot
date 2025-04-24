@@ -1,5 +1,3 @@
 {
-  "slowMo": 50,
-  "defaultViewport": null,
-  "protocolTimeout": 0
+  "defaultViewport": null
 }

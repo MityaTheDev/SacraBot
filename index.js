@@ -69,8 +69,13 @@ async function checkDelegationBalance(hero) {
 
 async function setListenerForNewPageCreated(browser) {
   browser.on("targetcreated", async (target) => {
+    logger.log(`Target has been created! Type: ${await target.type()}`, {
+      messageModifiers: ["cyan"],
+    });
+    await pause(1000);
     const newPage = await target.page();
     if (newPage) {
+      await newPage.bringToFront();
       const url = await newPage.url();
       if (!url.includes(RABBY.NOTIFICATION_URL)) {
         logger.log("newly created page has url we are not interested in...");
@@ -88,9 +93,9 @@ async function setListenerForNewPageCreated(browser) {
         await sighAndConfirm(newPage);
       }
 
-      logger.log("Finished!");
+      logger.log("Signed and confirmed!");
     } else {
-      logger.error(`lost newly created page!`);
+      logger.error(`Couldn't make a page out of target!`);
     }
   });
 }
@@ -99,12 +104,12 @@ async function sighAndConfirm(page) {
   if (config.RABBY_WALLET_AUTO_CONFIRM) {
     logger.log("clicking SIGN...");
     await puppeteer.clickElement(page, xpath.RABBY_SIGN_BUTTON, {
-      timeout: 5000,
+      timeout: 500,
       logError: true,
     });
     logger.log("clicking CONFIRM...");
     await puppeteer.clickElement(page, xpath.RABBY_CONFIRM_BUTTON, {
-      timeout: 5000,
+      timeout: 1000,
       logError: true,
     });
   } else {
@@ -118,9 +123,15 @@ async function refresh(page) {
 
 async function goToHomePage(hero) {
   logger.log("Going home...", { messageModifiers: ["magentaBright"] });
+  console.log(hero.homeURL);
+  await hero.page.goto("https://sonic.sacra.game", {
+    waitUntil: "networkidle0",
+  });
+  await pause(10000);
   await hero.page.goto(hero.homeURL, {
     waitUntil: "networkidle0",
   });
+  await pause(10000);
 }
 
 //todo: add to helper module as a part of time.js
@@ -1010,10 +1021,10 @@ async function play(currentHeroes) {
             }
           case MODE.LEVEL:
             if (
-              (config.HEROES[hero.ID].virtualLevel == 12 &&
-                config.HEROES[hero.ID].currentLevel == 11) ||
+              // config.HEROES[hero.ID].virtualLevel == 12 &&
+              // config.HEROES[hero.ID].currentLevel == 11) ||
               config.HEROES[hero.ID].virtualLevel >=
-                config.HEROES[hero.ID].targetLevel
+              config.HEROES[hero.ID].targetLevel
             ) {
               logger.log(`is done with levelling!`, {
                 messageModifiers: ["green"],
@@ -1172,12 +1183,21 @@ async function levelUp(hero) {
     case 10:
       stats = [5, 0, 0, 0];
       break;
-    // case 11:
-    //   stats = [3, 0, 2, 0];
+    case 11:
+      stats = [3, 0, 2, 0];
+      break;
+    case 12:
+      stats = [0, 0, 5, 0];
+      break;
+    case 13:
+      stats = [5, 0, 0, 0];
+      break;
+    // case 14:
+    //   stats = [0, 0, 5, 0];
+    //   break;
     //   logger.log(`put on items, then lvl up with ${stats}`);
     //   if (hero.client) hero.client.sendState(hero, "at lvl to 12, items!");
     //   return;
-    //   break;
     default:
       logger.log(
         `can't level up on level [${config.HEROES[hero.ID].currentLevel}]!`

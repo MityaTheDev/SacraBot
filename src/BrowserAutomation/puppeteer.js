@@ -137,10 +137,15 @@ async function clickByPage(
 async function clickElement(
   page,
   xPath,
-  { timeout = 10000, logError = true } = {}
+  { timeout = 10000, logError = false } = {}
 ) {
-  if (timeout) await pause(timeout);
   try {
+    // if (timeout) await pause(timeout);
+    if (timeout)
+      await page.waitForSelector("::-p-xpath(" + xPath + ")", {
+        timeout: timeout,
+      });
+
     const element = await page.$("::-p-xpath(" + xPath + ")");
     await element.click();
     return true;
