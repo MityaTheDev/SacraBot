@@ -323,7 +323,7 @@ async function getCurrentScene(hero, iterationsLeft = 4) {
       if (sceneExists) {
         result.push({ name: sceneName, obj: sceneObj });
 
-        if (category === "ErrorOrWait" || category === "PopUp") {
+        if (!category === "PopUp") {
           allowBreak = true;
           break;
         }
@@ -350,9 +350,9 @@ async function getCurrentScene(hero, iterationsLeft = 4) {
       );
       await pause(SECOND * 2);
       return await getCurrentScene(hero, --iterationsLeft);
-    case 1:
-      logger.log(`current scene: ${result[0].name}`);
-      return result[0];
+    // case 1:
+    //   logger.log(`current scene: ${result[0].name}`);
+    //   return result[0];
     default:
       logger.log(
         `${result.length} scenes found! [${result.map((scene) => scene.name)}]`,
@@ -360,11 +360,12 @@ async function getCurrentScene(hero, iterationsLeft = 4) {
           messageModifiers: ["yellow"],
         }
       );
-      logger.log(`retrying... iterations left: [${iterationsLeft}]`, {
-        messageModifiers: ["yellow"],
-      });
-      await pause(SECOND * 5);
-      return await getCurrentScene(hero, --iterationsLeft);
+      return result;
+    // logger.log(`retrying... iterations left: [${iterationsLeft}]`, {
+    //   messageModifiers: ["yellow"],
+    // });
+    // await pause(SECOND * 5);
+    // return await getCurrentScene(hero, --iterationsLeft);
   }
 }
 
@@ -772,240 +773,243 @@ async function throwQuestsError(
 
 //if JSON object of scene have 'actionTargets' key, then find target and click it,
 //else wait for second.
-async function takeAction(hero, currentScene) {
-  if (!currentScene) return;
-  if (hero.lastScene !== currentScene.name) {
-    hero.lastSceneChangeTime = Date.now();
-    hero.lastScene = currentScene.name;
-  } else if (Date.now() - hero.lastSceneChangeTime > MINUTE * 2) {
-    // await telegram.sendMessage(
-    //   `${hero.prefix} is stuck on [${hero.lastScene}] scene! Going home...`
-    // );
-    logger.error(`stuck on [${currentScene}]! Going home...`);
-    if (hero.client) await hero.client.sendState(hero, "stuck on scene");
-    await goToHomePage(hero);
-    await hero.page.waitForNetworkIdle({ idleTime: 10000 });
-  }
+async function takeAction(hero, currentScenes) {
+  for (const currentScene of currentScenes) {
+    if (!currentScene) return;
 
-  switch (currentScene.name) {
-    case "wrongNetworkPopup":
-    case "emptySreen":
-    case "error":
-      if (hero.client) await hero.client.sendState(hero, "error");
-      process.stdout.write("\u0007");
-      await pause(10000000);
+    if (hero.lastScene !== currentScene.name) {
+      hero.lastSceneChangeTime = Date.now();
+      hero.lastScene = currentScene.name;
+    } else if (Date.now() - hero.lastSceneChangeTime > MINUTE * 2) {
+      // await telegram.sendMessage(
+      //   `${hero.prefix} is stuck on [${hero.lastScene}] scene! Going home...`
+      // );
+      logger.error(`stuck on [${currentScene}]! Going home...`);
+      if (hero.client) await hero.client.sendState(hero, "stuck on scene");
       await goToHomePage(hero);
-      return;
-    case "home":
-      if (hero.client) await hero.client.sendState(hero, "home");
-
-      logger.log(
-        `${
-          hero.sessionMaxDuration -
-          (Date.now() - hero.sessionStartTime) / (1000 * 60)
-        } minutes left, level: ${config.HEROES[hero.ID].currentLevel}/${
-          config.HEROES[hero.ID].targetLevel
-        }`,
-        {
-          messageModifiers: ["italic", "magentaBright"],
-        }
-      );
-
-      const levels = await getLevels(hero);
-      config.HEROES[hero.ID].currentLevel = levels.current;
-      config.HEROES[hero.ID].virtualLevel = levels.virtual;
-      config.HEROES[hero.ID].currentLives = await getCurrentLives(hero);
-      config = await updateJson(configPath, config);
-      hero.currentLevel = config.HEROES[hero.ID].currentLevel;
-      hero.virtualLevel = config.HEROES[hero.ID].virtualLevel;
-      hero.currentLives = config.HEROES[hero.ID].currentLives;
-
-      if (hero.currentLives < 2) {
-        if (hero.client) hero.client.sendState("low lives");
-        logger.log("low lives!", {
-          messageModifiers: ["magentaBright", "blink"],
-        });
-        await pause(HOUR * 1000);
-      }
-
-      if ((await isNextLevel(hero)) && config.ALLOW_LEVEL_UP) {
-        if (
-          hero.virtualLevel == 7 &&
-          hero.currentLevel == 6 &&
-          !hero.isDressedForBoss1
-        ) {
-          await dressUpForBoss(hero, "1");
-        }
-
-        // temp stop at level 4, go virtual untill level 7
-        const isAppropriateLevel =
-          config.HEROES[hero.ID].virtualLevel <= 4 ||
-          (config.HEROES[hero.ID].virtualLevel >= 7 &&
-            config.HEROES[hero.ID].virtualLevel < 15);
-
-        if (isAppropriateLevel) {
-          if (hero.currentLevel == 6 && !hero.isDressedForBoss1) return;
-          await levelUp(hero);
-          return;
-        }
-      }
-
-      const isReadyForSecondBoss =
-        config.HEROES[hero.ID].virtualLevel >= 12 &&
-        config.HEROES[hero.ID].currentLevel == 11;
-      if (isReadyForSecondBoss) {
-        if (hero.client)
-          await hero.client.sendState(hero, "ready for 2nd boss");
-        logger.log("ready for 2nd boss!", {
-          messageModifiers: ["greenBright"],
-        });
-        await telegram.sendMessage(
-          `${hero.prefix} is ready for the 2nd boss fight!`
-        );
-        // await pause(MINUTE * 60);
-        return;
-      }
-
-      if (
-        hero.currentLevel == 7 &&
-        !config.HEROES[hero.ID].firstBossKilled &&
-        !hero.isDressedForBoss1
-      ) {
-        hero.isDressedForBoss1 = await checkEquipedItemsOnMainPage(hero);
-      }
-
-      if (
-        hero.currentLevel >= 7 &&
-        config.HEROES[hero.ID].firstBossKilled &&
-        hero.isDressedForBoss1
-      ) {
-        await takeOffItems(hero);
-      }
-
-      break;
-    case "adventureCongratulations":
-      const timestamp = config.HEROES[hero.ID].lastCompletedDungeonTimestamp;
-      const isAdventureFinished = Date.now() - timestamp > 120 * 1000;
-
-      if (isAdventureFinished) {
-        logger.log(`adventure is finished`);
-        config.HEROES[hero.ID].dungeonsCompleted++;
-        config.HEROES[hero.ID].lastCompletedDungeonTimestamp = Date.now();
-        config = await updateJson(configPath, config);
-      }
-
-      if (hero.client) await hero.client.sendState(hero, "adv is finished");
-      break;
-    case "delegationPopupLowBalance":
-      //todo:
-      // 1. send nofication to manager
-      // 2. auto withdraw from binance - add config for binance API, and flags to
-      // ***.json ("REFRESH_DELEGATION": true, "AMOUNT": 2), create delegators.json
-      // with browser ids and delegator addresses, create func to use binance API
-      // 3. confirm at manager
-      await telegram.sendMessage(
-        `*__${hero.prefix}__* LOW BALANCE ON DELEGATION!`
-      );
-      if (hero.client) await hero.client.sendState(hero, "low deleg balance");
-      await pause(SECOND * 120);
-      return;
-    case "attacking":
-    case "transactionProcessing":
-    case "loading":
-    case "questWaitingForTransacrion":
-    case "questLoading":
-      return;
-    case "delegation":
-      await checkDelegationBalance();
-      if (hero.client) await hero.client.sendState(hero, "checking deleg");
-      break;
-    case "fight":
-      if (hero.client) await hero.client.sendState(hero, "fighting");
-      await checkHealth(hero);
-      break;
-    case "quest":
-      if (hero.client) await hero.client.sendState(hero, "questing");
-      await answerQuest(hero);
-      return;
-    case "victory_With_PopupWindow":
-    case "victory_Without_PopupWindow":
-      const monsterName = await getText(hero.page, xpath.MONSTER_NAME);
-      if (monsterName === "Infected Spirit of the Forest") {
-        config.HEROES[hero.ID].firstBossKilled = true;
-        await updateJson(configPath, config);
-      }
-      break;
-    case "biomeSelection":
-      if (
-        hero.currentLevel >= 7 &&
-        !hero.isDressedForBoss1 &&
-        (await getElem(hero.page, xpath.BOSS_1_IS_POSSIBLE))
-      ) {
-        await dressUpForBoss(hero, "1");
-        await puppeteer.clickElement(hero.page, xpath.BACK);
-        return;
-      }
-
-      if (
-        hero.currentLevel >= 7 &&
-        !(await getElem(hero.page, xpath.BOSS_1_IS_POSSIBLE))
-      ) {
-        config.HEROES[hero.ID].firstBossKilled = true;
-        await updateJson(configPath, config);
-      }
-      break;
-  }
-
-  let targets = currentScene.obj.actionTargets
-    ? currentScene.obj.actionTargets
-    : false;
-
-  if (!targets) {
-    logger.log(`no action targets for ${currentScene.name} scene!`, {
-      importance: 1,
-    });
-    await pause(MINUTE * 2);
-    return;
-  }
-  logger.log(`found ${Object.keys(targets).length} targets for action`);
-
-  for (let target in targets) {
-    let targetElement = await puppeteer.xPathExist(
-      hero.page,
-      targets[target].xpath
-    );
-
-    if (!targetElement) {
-      logger.log(`target is not there!`);
-      continue;
+      await hero.page.waitForNetworkIdle({ idleTime: 10000 });
     }
-
-    const elapsedTime = Date.now() - hero.lastActionTime;
-    if (elapsedTime < config.MIN_TIME_GAP_BETWEEN_ACTIONS) {
-      logger.log(
-        `Too fast! ${elapsedTime}/${config.MIN_TIME_GAP_BETWEEN_ACTIONS} ms passed since last action`
-      );
-      const waitTime = parseFloat(
-        config.MIN_TIME_GAP_BETWEEN_ACTIONS - elapsedTime
-      );
-      logger.log(`pausing for ${waitTime} miliseconds...`);
-      await pause(waitTime);
-      logger.log(`end pause`);
-    }
-
-    logger.log(`clicking on [${target}] target`);
-    await puppeteer.clickElement(hero.page, targets[target].xpath, {
-      logError: true,
-    });
-    hero.lastActionTime = Date.now();
-    await pause(SECOND * 1.5);
 
     switch (currentScene.name) {
-      case "delegationPopupActivate":
-        await pause(10 * SECOND);
+      case "wrongNetworkPopup":
+      case "emptySreen":
+      case "error":
+        if (hero.client) await hero.client.sendState(hero, "error");
+        process.stdout.write("\u0007");
+        await pause(10000000);
+        await goToHomePage(hero);
+        return;
+      case "home":
+        if (hero.client) await hero.client.sendState(hero, "home");
+
+        logger.log(
+          `${
+            hero.sessionMaxDuration -
+            (Date.now() - hero.sessionStartTime) / (1000 * 60)
+          } minutes left, level: ${config.HEROES[hero.ID].currentLevel}/${
+            config.HEROES[hero.ID].targetLevel
+          }`,
+          {
+            messageModifiers: ["italic", "magentaBright"],
+          }
+        );
+
+        const levels = await getLevels(hero);
+        config.HEROES[hero.ID].currentLevel = levels.current;
+        config.HEROES[hero.ID].virtualLevel = levels.virtual;
+        config.HEROES[hero.ID].currentLives = await getCurrentLives(hero);
+        config = await updateJson(configPath, config);
+        hero.currentLevel = config.HEROES[hero.ID].currentLevel;
+        hero.virtualLevel = config.HEROES[hero.ID].virtualLevel;
+        hero.currentLives = config.HEROES[hero.ID].currentLives;
+
+        if (hero.currentLives < 2) {
+          if (hero.client) hero.client.sendState("low lives");
+          logger.log("low lives!", {
+            messageModifiers: ["magentaBright", "blink"],
+          });
+          await pause(HOUR * 1000);
+        }
+
+        if ((await isNextLevel(hero)) && config.ALLOW_LEVEL_UP) {
+          if (
+            hero.virtualLevel == 7 &&
+            hero.currentLevel == 6 &&
+            !hero.isDressedForBoss1
+          ) {
+            await dressUpForBoss(hero, "1");
+          }
+
+          // temp stop at level 4, go virtual untill level 7
+          const isAppropriateLevel =
+            config.HEROES[hero.ID].virtualLevel <= 4 ||
+            (config.HEROES[hero.ID].virtualLevel >= 7 &&
+              config.HEROES[hero.ID].virtualLevel < 15);
+
+          if (isAppropriateLevel) {
+            if (hero.currentLevel == 6 && !hero.isDressedForBoss1) return;
+            await levelUp(hero);
+            return;
+          }
+        }
+
+        const isReadyForSecondBoss =
+          config.HEROES[hero.ID].virtualLevel >= 12 &&
+          config.HEROES[hero.ID].currentLevel == 11;
+        if (isReadyForSecondBoss) {
+          if (hero.client)
+            await hero.client.sendState(hero, "ready for 2nd boss");
+          logger.log("ready for 2nd boss!", {
+            messageModifiers: ["greenBright"],
+          });
+          await telegram.sendMessage(
+            `${hero.prefix} is ready for the 2nd boss fight!`
+          );
+          // await pause(MINUTE * 60);
+          return;
+        }
+
+        if (
+          hero.currentLevel == 7 &&
+          !config.HEROES[hero.ID].firstBossKilled &&
+          !hero.isDressedForBoss1
+        ) {
+          hero.isDressedForBoss1 = await checkEquipedItemsOnMainPage(hero);
+        }
+
+        if (
+          hero.currentLevel >= 7 &&
+          config.HEROES[hero.ID].firstBossKilled &&
+          hero.isDressedForBoss1
+        ) {
+          await takeOffItems(hero);
+        }
+
+        break;
+      case "adventureCongratulations":
+        const timestamp = config.HEROES[hero.ID].lastCompletedDungeonTimestamp;
+        const isAdventureFinished = Date.now() - timestamp > 120 * 1000;
+
+        if (isAdventureFinished) {
+          logger.log(`adventure is finished`);
+          config.HEROES[hero.ID].dungeonsCompleted++;
+          config.HEROES[hero.ID].lastCompletedDungeonTimestamp = Date.now();
+          config = await updateJson(configPath, config);
+        }
+
+        if (hero.client) await hero.client.sendState(hero, "adv is finished");
+        break;
+      case "delegationPopupLowBalance":
+        //todo:
+        // 1. send nofication to manager
+        // 2. auto withdraw from binance - add config for binance API, and flags to
+        // ***.json ("REFRESH_DELEGATION": true, "AMOUNT": 2), create delegators.json
+        // with browser ids and delegator addresses, create func to use binance API
+        // 3. confirm at manager
+        await telegram.sendMessage(
+          `*__${hero.prefix}__* LOW BALANCE ON DELEGATION!`
+        );
+        if (hero.client) await hero.client.sendState(hero, "low deleg balance");
+        await pause(SECOND * 120);
+        return;
+      case "attacking":
+      case "transactionProcessing":
+      case "loading":
+      case "questWaitingForTransacrion":
+      case "questLoading":
+        return;
+      case "delegation":
+        await checkDelegationBalance();
+        if (hero.client) await hero.client.sendState(hero, "checking deleg");
+        break;
+      case "fight":
+        if (hero.client) await hero.client.sendState(hero, "fighting");
+        await checkHealth(hero);
+        break;
+      case "quest":
+        if (hero.client) await hero.client.sendState(hero, "questing");
+        await answerQuest(hero);
+        return;
+      case "victory_With_PopupWindow":
+      case "victory_Without_PopupWindow":
+        const monsterName = await getText(hero.page, xpath.MONSTER_NAME);
+        if (monsterName === "Infected Spirit of the Forest") {
+          config.HEROES[hero.ID].firstBossKilled = true;
+          await updateJson(configPath, config);
+        }
+        break;
+      case "biomeSelection":
+        if (
+          hero.currentLevel >= 7 &&
+          !hero.isDressedForBoss1 &&
+          (await getElem(hero.page, xpath.BOSS_1_IS_POSSIBLE))
+        ) {
+          await dressUpForBoss(hero, "1");
+          await puppeteer.clickElement(hero.page, xpath.BACK);
+          return;
+        }
+
+        if (
+          hero.currentLevel >= 7 &&
+          !(await getElem(hero.page, xpath.BOSS_1_IS_POSSIBLE))
+        ) {
+          config.HEROES[hero.ID].firstBossKilled = true;
+          await updateJson(configPath, config);
+        }
         break;
     }
-    break;
+
+    let targets = currentScene.obj.actionTargets
+      ? currentScene.obj.actionTargets
+      : false;
+
+    if (!targets) {
+      logger.log(`no action targets for ${currentScene.name} scene!`, {
+        importance: 1,
+      });
+      await pause(MINUTE * 2);
+      return;
+    }
+    logger.log(`found ${Object.keys(targets).length} targets for action`);
+
+    for (let target in targets) {
+      let targetElement = await puppeteer.xPathExist(
+        hero.page,
+        targets[target].xpath
+      );
+
+      if (!targetElement) {
+        logger.log(`target is not there!`);
+        continue;
+      }
+
+      const elapsedTime = Date.now() - hero.lastActionTime;
+      if (elapsedTime < config.MIN_TIME_GAP_BETWEEN_ACTIONS) {
+        logger.log(
+          `Too fast! ${elapsedTime}/${config.MIN_TIME_GAP_BETWEEN_ACTIONS} ms passed since last action`
+        );
+        const waitTime = parseFloat(
+          config.MIN_TIME_GAP_BETWEEN_ACTIONS - elapsedTime
+        );
+        logger.log(`pausing for ${waitTime} miliseconds...`);
+        await pause(waitTime);
+        logger.log(`end pause`);
+      }
+
+      logger.log(`clicking on [${target}] target`);
+      await puppeteer.clickElement(hero.page, targets[target].xpath, {
+        logError: true,
+      });
+      hero.lastActionTime = Date.now();
+      await pause(SECOND * 1.5);
+
+      switch (currentScene.name) {
+        case "delegationPopupActivate":
+          await pause(10 * SECOND);
+          break;
+      }
+      break;
+    }
   }
 }
 
@@ -1057,7 +1061,7 @@ async function play(currentHeroes) {
             }
         }
 
-        let currentScene = await getCurrentScene(hero);
+        const currentScene = await getCurrentScene(hero);
         await takeAction(hero, currentScene);
       } catch (error) {
         logger.error(`MAJOR ERROR OCCURED!`);
