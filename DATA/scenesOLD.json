@@ -1,0 +1,320 @@
+{
+  "transactionProcessing": {
+    "indicator": {
+      "xpath": "//div[contains(text(), 'Blockchain Transaction Processing')]",
+      "description": "'Blockchain Transaction Processing' text"
+    }
+  },
+
+  "emptySreen": {
+    "indicator": {
+      "xpath": "/html/body/app-root[not(*)]",
+      "description": "Empty screen, hard refresh helps"
+    }
+  },
+
+  "error": {
+    "indicator": {
+      "xpath": "//app-info-dialog//*[contains(text(), 'Info ') or contains(text(), 'Error')]",
+      "description": "Element with 'Error' text"
+    }
+  },
+
+  "loading": {
+    "indicator": {
+      "xpath": "/html/body/app-root/div[2]/main/ng-component/app-loading-small/div[contains(text(), 'Loading') and not(//div[@class='cdk-overlay-container'])]",
+      "description": "'Loading' text in the center of the screen"
+    }
+  },
+
+  "questWaitingForTransacrion": {
+    "indicator": {
+      "urlIndicator": "/story/",
+      "xpath": "//app-animation-papyrus",
+      "description": "Anscestor element of papyrus animation"
+    }
+  },
+
+  "questLoading": {
+    "indicator": {
+      "xpath": "//div[contains(@class, 'title')]//img[contains(@alt, 'loading') and not(//app-animation-papyrus)]",
+      "description": "Element with for dots and amination to the right of the quest title"
+    }
+  },
+
+  "wrongNetworkPopup": {
+    "indicator": {
+      "xpath": "//div[@class='cdk-overlay-container']//div[.=' Wrong blockchain network ']",
+      "description": "'Wrong blockchain network' title on a pop-up window"
+    }
+  },
+
+  "delegationPopupLowBalance": {
+    "indicator": {
+      "xpath": "//app-delegate-dialog[(//div[contains(@class, 'title-a') and text() = ' Delegate transactions ']) and (//div[text() = 'Delegator balance is low!'])]",
+      "description": "A pop-up window with 'Delegate transactions' text"
+    },
+    "actionTargets": {
+      "close": {
+        "xpath": "//app-delegate-dialog//button[contains(@class, 'btn-close')]",
+        "description": "Close button"
+      }
+    }
+  },
+
+  "delegationPopupActivate": {
+    "indicator": {
+      "xpath": "//app-delegate-dialog[(//div[contains(@class, 'title-a') and text() = ' Delegate transactions ']) and not(//div[text() = 'Delegator balance is low!'])]",
+      "description": "A pop-up window with 'Delegate transactions' text"
+    },
+    "actionTargets": {
+      "activate": {
+        "xpath": "//app-delegate-dialog//button[text() = ' Activate delegation ']",
+        "description": "'Activate delegation' button"
+      }
+    }
+  },
+
+  "attacking": {
+    "indicator": {
+      "url": "/fight/",
+      "xpath": "//button[@id='btn-attack' and contains(text(), 'Attacking...') and not(//div[@class='cdk-overlay-container']/*) and not (//div[text()=' Victory '])]",
+      "description": "'Attacking...' button"
+    }
+  },
+
+  "quest": {
+    "indicator": {
+      "urlIndicator": "/story/",
+      "xpath": "//div[@id='story-name' and not(//app-animation-papyrus) and not(//img[contains(@alt, 'loading')]) and not(//div[@class='cdk-overlay-container']/*) and not(//button[contains(@class, 'btn-exit') and text()=' Continue '])]",
+      "description": "Element with the unique id"
+    }
+  },
+
+  "delegation": {
+    "indicator": {
+      "xpath": "//app-delegate//div[text() = 'Delegate transactions' and (//div[contains(text(), 'Session settings')])]",
+      "description": "'Delegate transactions' text and presense of div element with 'Session settings' text"
+    },
+    "actionTargets": {
+      "activateDelegation": {
+        "xpath": "//button[text() = ' Activate delegation ' and not(//img[@alt='loading'])]",
+        "description": "'Activate delegation' button"
+      },
+      "play": {
+        "xpath": "//button[text() = ' Play ' and not(@disabled)]",
+        "description": "'Play' button without 'disabled' attribute"
+      }
+    }
+  },
+
+  "levelUp": {
+    "indicator": {
+      "xpath": "//div[contains(@class, 'cdk-overlay-container')]//div[text() = ' Level up ' and (//button[text() = ' Level Up '])]",
+      "description": "'Level up' text and presence of 'Level Up' button"
+    },
+    "actionTargets": {
+      "close": {
+        "xpath": "//div[contains(@class, 'cdk-overlay-container')]//button[contains(@class, 'btn-close')]",
+        "description": "Close button"
+      }
+    }
+  },
+
+  "home": {
+    "indicator": {
+      "xpath": "//div[contains(@class, 'hero-stat')]/button[@id='show-all-stats' and not(//cdk-dialog-container)]",
+      "description": "'Show All Hero Stats' button"
+    },
+    "actionTargets": {
+      "goToMap": {
+        "xpath": "//button[@id='go-to-map-button']",
+        "description": "'Go to map' button"
+      },
+      "continue": {
+        "xpath": "//button[@id='continue-button']",
+        "description": "'Continue' button"
+      }
+    }
+  },
+
+  "biomeEnter": {
+    "indicator": {
+      "xpath": "//app-biome-dialog//div[contains(@class, 'title-a') and text()=' Grimlarn Passage ' and (//button[contains(text(), 'Enter')])]",
+      "description": "Header of window with biome name that appears when you click the biome icon and presence of the 'Enter' button"
+    },
+    "actionTargets": {
+      "enter": {
+        "xpath": "//div[contains(@class, 'container')]/button[contains(text(), 'Enter')]",
+        "description": "'Enter' button"
+      }
+    }
+  },
+
+  "biomeSelection": {
+    "indicator": {
+      "xpath": "//app-map[//app-biome[@id='biome_0' and not(//app-biome-dialog)]]",
+      "description": "first biome element and absence of the 'app-biome-dialog' element which is an ancestor of dialog window"
+    },
+    "actionTargets": {
+      "firstBiomeButton": {
+        "xpath": "//app-map//app-biome[@id='biome_0']",
+        "description": "'1 biome' element"
+      }
+    }
+  },
+
+  "adventureSelection": {
+    "indicator": {
+      "xpath": "//app-title/div/div[contains(text(), 'Adventures') and not(//app-dialog-title)]",
+      "description": "'Adventures' header to the left of 'New Adventure' button and absence of the 'app-dialog-title' element which is an ancestor of dialog window"
+    },
+    "actionTargets": {
+      "newAdventure": {
+        "xpath": "//button[contains(text(), 'New Adventure')]",
+        "description": "'New Adventure' button"
+      }
+    }
+  },
+
+  "adventureMuchExperienceDialog": {
+    "indicator": {
+      "xpath": "//app-dialog-title//div[contains(text(), 'Much experience')]",
+      "description": "'Adventures' header to the left of 'New Adventure' button and presenth of the <div> element with 'Much experience' text"
+    },
+    "actionTargets": {
+      "yes": {
+        "xpath": "//button[contains(text(), 'Yes')]",
+        "description": "'New Adventure' button"
+      }
+    }
+  },
+
+  "adventureDetails": {
+    "indicator": {
+      "urlIndicator": "/details/",
+      "xpath": "/html/body/app-root/div[2]/main/ng-component/div/div[2]/div[3]/button[contains(text(), 'Continue adventure')]",
+      "description": "'Continue adventure' button"
+    },
+    "actionTargets": {
+      "continueAdventure": {
+        "xpath": "//button[contains(text(), 'Continue adventure')]",
+        "description": "'Continue adventure' button"
+      }
+    }
+  },
+
+  "adventureFinish": {
+    "indicator": {
+      "xpath": "//button[contains(@class, 'app-btn-red-3') and text()=' Finish this adventure ']",
+      "description": "'Finish this adventure' button"
+    },
+    "actionTargets": {
+      "finishAdventure": {
+        "xpath": "//button[contains(@class, 'app-btn-red-3') and text()=' Finish this adventure ']",
+        "description": "'Finish this adventure' button"
+      }
+    }
+  },
+
+  "adventureCongratulations": {
+    "indicator": {
+      "xpath": "//div[contains(@class, 'reward-title') and text()='Biomes rewards progression' and (//img[contains(@class, 'ribbon')])]",
+      "description": "'Biomes rewards progression' text and presenth of img elem with 'ribbon' class"
+    },
+    "actionTargets": {
+      "continue": {
+        "xpath": "//button[contains(text(), 'Continue')]",
+        "description": "'Continue' button"
+      }
+    }
+  },
+
+  "fight": {
+    "indicator": {
+      "urlIndicator": "/fight/",
+      "xpath": "//button[@id='btn-attack' and contains(text(), 'Attack! ')]",
+      "description": "'Attack' button"
+    },
+    "actionTargets": {
+      "attack": {
+        "xpath": "//button[@id='btn-attack' and contains(text(), 'Attack! ')]",
+        "description": "'Attack' button"
+      }
+    }
+  },
+
+  "victory_With_PopupWindow": {
+    "indicator": {
+      "urlIndicator": "/fight/",
+      "xpath": "//div[text()=' Victory! ' and (//div[@class='cdk-overlay-container']/*)]",
+      "description": "'Victory!' header of the popup window and presence of the popup window (excessive but why not)"
+    },
+    "actionTargets": {
+      "continueAddventure": {
+        "xpath": "//div[@class='cdk-overlay-container']//button[contains(text(), ' Continue adventure ')]",
+        "description": "'Continue adventure' button in the middle of the screen"
+      }
+    }
+  },
+
+  "victory_Without_PopupWindow": {
+    "indicator": {
+      "urlIndicator": "/fight/",
+      "xpath": "//div[text()=' Victory ' and not(//div[text()=' Victory! '])]",
+      "description": "'Victory' text under the flag image in the center of the screen and without the popup window"
+    },
+    "actionTargets": {
+      "continueAddventure": {
+        "xpath": "//button[contains(text(), ' Continue adventure ')]",
+        "description": "'Continue adventure' on the bottom right side of the screen"
+      }
+    }
+  },
+
+  "questEnd": {
+    "indicator": {
+      "urlIndicator": "/story/",
+      "xpath": "//div[contains(@class, 'image-container')]//button[contains(@class, 'btn-exit') and text()=' Continue ']",
+      "description": "'Continue' button at the bottom right of the image"
+    },
+    "actionTargets": {
+      "continue": {
+        "xpath": "//div[contains(@class, 'image-container')]//button[contains(@class, 'btn-exit') and text()=' Continue ']",
+        "description": "'Continue' button at the bottom right of the image"
+      }
+    }
+  },
+
+  "questContinue": {
+    "indicator": {
+      "urlIndicator": "/story/",
+      "xpath": "//div[contains(@class, 'image-container') and not(//app-animation-papyrus)]//button[contains(@class, 'btn-continue') and text()=' Continue ' and (//div[contains(text(), 'Overall results')])]",
+      "description": "'Continue' button at the bottom right of the image ('Overall reults' text must be present)"
+    },
+    "actionTargets": {
+      "continue": {
+        "xpath": "//div[contains(@class, 'image-container')]//button[contains(@class, 'btn-continue') and text()=' Continue ']",
+        "description": "'Continue' button at the bottom right of the image"
+      }
+    }
+  },
+
+  "shrine": {
+    "indicator": {
+      "urlIndicator": "/event/",
+      "xpath": "//div[@id='div-shrine' and contains(text(), 'Shrine')]",
+      "description": "'Shrine' text at the bottom of the image"
+    },
+    "actionTargets": {
+      "explore": {
+        "xpath": "//button[contains(text(), 'Explore')]",
+        "description": "'Explore' button"
+      },
+      "continue": {
+        "xpath": "//main//button[contains(text(), 'Continue')]",
+        "description": "'Continue' button"
+      }
+    }
+  }
+}

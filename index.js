@@ -11,7 +11,6 @@ const RABBY = require("./configs/rabby_config.json");
 const fs = require("fs");
 const path = require("path");
 const DateFormat = require("date-format");
-const { BrowserLauncher } = require("puppeteer");
 const specifiedMode = process.argv[3];
 const INSTANCE = process.argv[2];
 const serverMode = !INSTANCE;
@@ -308,28 +307,38 @@ async function getCurrentScene(hero, iterationsLeft = 4) {
   logger.log("getting scene...");
   let result = [];
 
-  for (let scene in scenes) {
-    const sceneIndicatorXpath = scenes[scene].indicator.xpath;
-    const IndicatorXpathDescription = scenes[scene].indicator.description;
-    const sceneExists = await puppeteer.xPathExist(
-      hero.page,
-      sceneIndicatorXpath
-    );
+  let allowBreak = false;
+  for (const category in scenes) {
+    if (allowBreak) break;
+    for (const sceneName in scenes[category]) {
+      const sceneObj = scenes[category][sceneName];
+      const sceneIndicatorXpath = sceneObj.indicator.xpath;
+      // const IndicatorXpathDescription =
+      //   scenes[category][scene].indicator.description;
+      const sceneExists = await puppeteer.xPathExist(
+        hero.page,
+        sceneIndicatorXpath
+      );
 
-    if (sceneExists) {
-      result.push(scene);
+      if (sceneExists) {
+        result.push({ name: sceneName, obj: sceneObj });
 
-      if (
-        scene === "transactionProcessing" ||
-        scene === "emptySreen" ||
-        scene === "error" ||
-        scene === "loading" ||
-        scene === "questWaitingForTransacrion" ||
-        scene === "questLoading" ||
-        scene === "delegationPopupLowBalance" ||
-        scene === "delegationPopupActivate"
-      )
-        break;
+        if (category === "ErrorOrWait" || category === "PopUp") {
+          allowBreak = true;
+          break;
+        }
+        // if (
+        //   scene === "transactionProcessing" ||
+        //   scene === "emptySreen" ||
+        //   scene === "error" ||
+        //   scene === "loading" ||
+        //   scene === "questWaitingForTransacrion" ||
+        //   scene === "questLoading" ||
+        //   scene === "delegationPopupLowBalance" ||
+        //   scene === "delegationPopupActivate"
+        // )
+        //   break;
+      }
     }
   }
 
@@ -342,12 +351,15 @@ async function getCurrentScene(hero, iterationsLeft = 4) {
       await pause(SECOND * 2);
       return await getCurrentScene(hero, --iterationsLeft);
     case 1:
-      logger.log(`current scene: ${result[0]}`);
+      logger.log(`current scene: ${result[0].name}`);
       return result[0];
     default:
-      logger.log(`${result.length} scenes found! [${result}]`, {
-        messageModifiers: ["yellow"],
-      });
+      logger.log(
+        `${result.length} scenes found! [${result.map((scene) => scene.name)}]`,
+        {
+          messageModifiers: ["yellow"],
+        }
+      );
       logger.log(`retrying... iterations left: [${iterationsLeft}]`, {
         messageModifiers: ["yellow"],
       });
@@ -762,10 +774,10 @@ async function throwQuestsError(
 //else wait for second.
 async function takeAction(hero, currentScene) {
   if (!currentScene) return;
-  if (hero.lastScene !== currentScene) {
+  if (hero.lastScene !== currentScene.name) {
     hero.lastSceneChangeTime = Date.now();
-    hero.lastScene = currentScene;
-  } else if (Date.now() - hero.lastSceneChangeTime > MINUTE * 5) {
+    hero.lastScene = currentScene.name;
+  } else if (Date.now() - hero.lastSceneChangeTime > MINUTE * 2) {
     // await telegram.sendMessage(
     //   `${hero.prefix} is stuck on [${hero.lastScene}] scene! Going home...`
     // );
@@ -775,11 +787,13 @@ async function takeAction(hero, currentScene) {
     await hero.page.waitForNetworkIdle({ idleTime: 10000 });
   }
 
-  switch (currentScene) {
+  switch (currentScene.name) {
     case "wrongNetworkPopup":
     case "emptySreen":
     case "error":
       if (hero.client) await hero.client.sendState(hero, "error");
+      process.stdout.write("\u0007");
+      await pause(10000000);
       await goToHomePage(hero);
       return;
     case "home":
@@ -942,12 +956,12 @@ async function takeAction(hero, currentScene) {
       break;
   }
 
-  let targets = scenes[currentScene].actionTargets
-    ? scenes[currentScene].actionTargets
+  let targets = currentScene.obj.actionTargets
+    ? currentScene.obj.actionTargets
     : false;
 
   if (!targets) {
-    logger.log(`no action targets for ${currentScene} scene!`, {
+    logger.log(`no action targets for ${currentScene.name} scene!`, {
       importance: 1,
     });
     await pause(MINUTE * 2);
@@ -966,21 +980,29 @@ async function takeAction(hero, currentScene) {
       continue;
     }
 
-    let elapsedTime = Date.now() - hero.lastActionTime;
+    const elapsedTime = Date.now() - hero.lastActionTime;
     if (elapsedTime < config.MIN_TIME_GAP_BETWEEN_ACTIONS) {
       logger.log(
-        `Too fast! ${elapsedTime}/${config.MIN_TIME_GAP_BETWEEN_ACTIONS} ms passed since last action, pausing...`
+        `Too fast! ${elapsedTime}/${config.MIN_TIME_GAP_BETWEEN_ACTIONS} ms passed since last action`
       );
-      await pause(config.MIN_TIME_GAP_BETWEEN_ACTIONS - elapsedTime);
+      const waitTime = parseFloat(
+        config.MIN_TIME_GAP_BETWEEN_ACTIONS - elapsedTime
+      );
+      logger.log(`pausing for ${waitTime} miliseconds...`);
+      await pause(waitTime);
+      logger.log(`end pause`);
     }
 
     logger.log(`clicking on [${target}] target`);
-    await puppeteer.clickElement(hero.page, targets[target].xpath);
+    await puppeteer.clickElement(hero.page, targets[target].xpath, {
+      logError: true,
+    });
     hero.lastActionTime = Date.now();
+    await pause(SECOND * 1.5);
 
-    switch (currentScene) {
+    switch (currentScene.name) {
       case "delegationPopupActivate":
-        await pause(15 * SECOND);
+        await pause(10 * SECOND);
         break;
     }
     break;
