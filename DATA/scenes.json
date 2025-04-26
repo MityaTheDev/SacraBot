@@ -53,6 +53,19 @@
   },
 
   "PopUp": {
+    "v196": {
+      "indicator": {
+        "xpath": "//app-info-dialog//div[contains(text(), 'v196')]",
+        "description": "'v196' text in header of pop-up window"
+      },
+      "actionTargets": {
+        "close": {
+          "xpath": "//app-info-dialog//button",
+          "description": "Close button"
+        }
+      }
+    },
+
     "wrongNetworkPopup": {
       "indicator": {
         "xpath": "//div[@class='cdk-overlay-container']//div[.=' Wrong blockchain network ']",
